@@ -15,3 +15,16 @@ Have an android virtual device session running. Then, while in the root `PlanIt/
 react-native run-android
 ```
 The client will now start up in your android virtual device session.
+
+
+### Local React Native Testing:
+```
+npm run test
+```
+*** Please run this & resolve failures before creating a PR or merging
+
+### Local JS / JSX Linting:
+```
+npm run jslint
+```
+*** Please run this & resolve errors before creating a PR or merging
