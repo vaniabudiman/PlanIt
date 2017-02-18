@@ -22,6 +22,11 @@ class PlanIt extends Component {
                 <Text>Welcome to the app!</Text>
                 <Text>Count of Dogs in Realm: {realm.objects('Dog').length}</Text>
             </View>
+            <View style={styles.container}>
+                <Text style={styles.welcome}>
+                    Count of Dogs in Realm: {realm.objects('Dog').length}
+                </Text>
+            </View>
         );
     }
 }
