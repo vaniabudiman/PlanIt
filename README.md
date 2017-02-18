@@ -28,3 +28,10 @@ npm run test
 npm run jslint
 ```
 *** Please run this & resolve errors before creating a PR or merging
+
+### Realm DB Testing:
+
+You can count the number of objects initialized in the Realm DB. For example:
+```
+{realm.objects('Dog').length}
+```
