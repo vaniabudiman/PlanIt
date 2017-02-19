@@ -1,7 +1,7 @@
 ###
 ### Flask & SQLAlchemy
 ###
-FlaskSQLAlchemyServer/user.db
+FlaskSQLAlchemyServer/*.db
 FlaskSQLAlchemyServer/__pycache__/
 
 
