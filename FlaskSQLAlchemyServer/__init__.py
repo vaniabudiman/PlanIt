@@ -19,9 +19,16 @@ app.secret_key = os.urandom(12)
 # Session key variables.
 LOGGED_IN_KEY = 'logged_in'
 
+
+"""
+Return a new SQLAlchemy database session.
+"""
 def create_session():
     return scoped_session(sessionmaker(bind=engine))
 
+""" /:{version}/
+Route for local testing. For graphical HTML view at hosted address.
+"""
 @app.route(VER_PATH + '/')
 def index():
     if flask.session.get(LOGGED_IN_KEY):
@@ -29,6 +36,9 @@ def index():
     else:
         return flask.render_template('login.html')
 
+""" /:{version}/login
+Route for login. On success, sets the session logged in flag to True.
+"""
 @app.route(VER_PATH + '/login', methods=['POST'])
 def login():
     print("LOGGING IN")
@@ -47,11 +57,17 @@ def login():
         flask.flash('Login failed!')
     return index()
 
+""" /:{version}/login
+Route for logout. Sets the session logged in flag to False.
+"""
 @app.route(VER_PATH + '/logout', methods=['POST'])
 def logout():
     flask.session[LOGGED_IN_KEY] = False
     return index()
 
+""" /:{version}/view_database
+Route for testing. Returns the entire database as a string.
+"""
 @app.route(VER_PATH + '/view_database')
 def view_database():
     from sqlalchemy import inspect, MetaData, Table
