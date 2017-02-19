@@ -5,6 +5,7 @@
 import React, { Component } from "react";
 import { AppRegistry, View, Text } from "react-native";
 import Realm from "realm";
+import BasicListView from "./BasicListView.js";
 
 
 class PlanIt extends Component {
@@ -21,6 +22,7 @@ class PlanIt extends Component {
         return (
             <View>
                 <Text>Welcome to the app!</Text>
+                <BasicListView />
                 <Text>Count of Dogs in Realm: {realm.objects("Dog").length}</Text>
             </View>
         );
