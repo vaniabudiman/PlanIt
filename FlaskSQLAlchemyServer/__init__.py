@@ -78,16 +78,15 @@ Route for testing. Returns the entire database as a string.
 """
 @app.route(VER_PATH + '/view_database')
 def view_database():
-    from sqlalchemy import inspect, MetaData, Table
+    from sqlalchemy import MetaData
     return_string = ''
-    db_metadata = MetaData(engine)
-    table_names = inspect(engine).get_table_names()
-    for table in table_names:
-        return_string += "<br/>=====" + table
-        table_object = Table(table, db_metadata, autoload=True)
-        table_fetchall = table_object.select().execute().fetchall()
-        return_string += "<br/>   " + "<br/>   ".join(
-            ["|".join([str(col) for col in entry]) for entry in table_fetchall])
+    # Load all tables.
+    metaData = MetaData()
+    metaData.reflect(engine)
+    for table in metaData.tables.values():
+        return_string += '<br/>TABLE: ' + table.name
+        for row in db.query(table).all():
+            return_string += '<br/>   ' + ' | '.join(str(i) for i in row)
     return return_string
 
 if __name__ == '__main__':

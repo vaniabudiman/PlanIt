@@ -25,11 +25,6 @@ class User(base):
         self.name = name
         self.phoneNumber = phoneNumber
 
-    def __repr__(self):
-        return '<User(userName="%s", password="%s", ' + \
-               'name="%s", phoneNumber="%s")>' % \
-               (self.userName, self.password, self.name, self.phoneNumber)
-
 class Trip(base):
     __tablename__ = 'trip'
 
@@ -52,8 +47,3 @@ class Trip(base):
         self.endDate = endDate
         self.userName = userName
 
-    def __repr__(self):
-        return '<User(tripID="%s", tripName="%s", active="%s", ' + \
-               'startDate="%s", endDate="%s", userName="%s")>' % \
-               (self.tripID, self.tripName, self.active,
-                self.startDate, self.endDate, self.userName)
