@@ -2,6 +2,7 @@
 """ This file contains all the PlanIt models.
 """
 from sqlalchemy import Column, Integer, String, Boolean, DateTime, ForeignKey
+from sqlalchemy.orm import relationship
 from base import base
 
 VARCHAR_LEN = 40
@@ -13,6 +14,10 @@ class User(base):
     password = Column(String(VARCHAR_LEN), nullable=False)
     name = Column(String(VARCHAR_LEN), nullable=False)
     phoneNumber = Column(Integer, nullable=False)
+
+    # Relationships:
+    trips = relationship('Trip', cascade='all,delete-orphan',
+                         backref='user', passive_updates=False)
 
     def __init__(self, userName, password, name, phoneNumber):
         self.userName = userName
@@ -34,7 +39,9 @@ class Trip(base):
     startDate = Column(DateTime)
     endDate = Column(DateTime)
     userName = Column(String(VARCHAR_LEN),
-                      ForeignKey('user.userName', ondelete="CASCADE"),
+                      ForeignKey('user.userName',
+                                 ondelete='CASCADE',
+                                 onupdate='CASCADE'),
                       nullable=False)
 
     def __init__(self, tripID, tripName, active, startDate, endDate, userName):
