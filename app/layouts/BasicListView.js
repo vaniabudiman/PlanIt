@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import { ListView, Text, View } from "react-native";
 import { GlobalStyles } from "../styles/GlobalStyles.js";
 import ListViewStyles from "../styles/ListViewStyles.js";
+import Icon from "react-native-vector-icons/FontAwesome";
 
 
 export default class BasicListView extends Component {
@@ -28,7 +29,15 @@ export default class BasicListView extends Component {
                 <ListView
                     dataSource={this.state.dataSource}
                     renderRow={(rowData) =>
-                        <Text style={ListViewStyles.text, ListViewStyles.rowSeparator}>{rowData}</Text>}
+                        <View style={ListViewStyles.rowContainer}>
+                            <Text style={ListViewStyles.text, ListViewStyles.rowSeparator}>{rowData}</Text>
+                            <View style={ListViewStyles.actionIconsContainer}>
+                                <Icon name="plus" style={ListViewStyles.optionIcons} />
+                                <Icon name="info-circle" style={ListViewStyles.optionIcons} />
+                                <Icon name="share-alt" style={ListViewStyles.optionIcons} />
+                            </View>
+                        </View>
+                        }
                     renderSeparator={this.renderSeparator}
                 />
             </View>
