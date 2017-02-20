@@ -1,100 +1,108 @@
 #!/usr/bin/env python
+from base import base, engine
 import flask
 import os
+import datetime
 from socket import gethostname
+from models import User, Trip
+from sqlalchemy.orm import sessionmaker, scoped_session
 
-import sqlalchemy
-import dummy_def
-from user_def import *
+# Versioning.
+VERSION = 'v1'
+VER_PATH = '/' + VERSION
 
-# User database engine
-engine = create_engine(USER_DATABASE, echo=True)
-
-# App initialization
-# __name__ handles this being a main program vs an imported module
+# App initialization.
 app = flask.Flask(__name__)
-# Set random secret key used for signing sessions.
+# Secret key for signing sessions.
 app.secret_key = os.urandom(12)
 
+# Session key variables.
+LOGGED_IN_KEY = 'logged_in'
 
-@app.route('/')
+
+"""
+Return a new SQLAlchemy database session.
+"""
+def create_session():
+    return scoped_session(sessionmaker(bind=engine))
+
+""" /:{version}/
+Route for local testing. For graphical HTML view at hosted address.
+"""
+@app.route(VER_PATH + '/')
 def index():
-    if not flask.session.get('logged_in'):
-        return flask.render_template('login.html')
+    if flask.session.get(LOGGED_IN_KEY):
+        return 'Logged in. <a href="' + VER_PATH + '/logout">Logout</a>'
     else:
-        return 'Logged in. <a href="/logout">Logout</a>'
+        return flask.render_template('login.html')
 
-@app.route('/add')
-def add_page():
-    return flask.render_template('add.html')
+""" /:{version}/login
+Route for login. On success, sets the session logged in flag to True.
+"""
+@app.route(VER_PATH + '/login', methods=['POST'])
+def login():
+    print("LOGGING IN")
+    post_userName = str(flask.request.form['userName'])
+    post_password = str(flask.request.form['password'])
+    print(post_userName, post_password)
 
-@app.route('/next')
-def index_next():
-    return 'Hi again!'
-
-@app.route('/login', methods=['POST'])
-def do_admin_login():
-    POST_USERNAME = str(flask.request.form['username'])
-    POST_PASSWORD = str(flask.request.form['password'])
- 
-    
-    s = sqlalchemy.orm.sessionmaker(bind=engine)()
-    query = s.query(User).filter(User.username.in_([POST_USERNAME]), User.password.in_([POST_PASSWORD]) )
+    db_session = create_session()
+    query = db_session.query(User).filter(
+        User.userName.in_([post_userName]),
+        User.password.in_([post_password]))
     result = query.first()
     if result:
-        flask.session['logged_in'] = True
+        flask.session[LOGGED_IN_KEY] = True
     else:
-        flask.flash('wrong password!')
+        flask.flash('Login failed!')
     return index()
 
-@app.route('/add', methods=['POST'])
-def test_add():
-    POST_ADD = str(flask.request.form['toadd'])
-    print(POST_ADD)
-    s = sqlalchemy.orm.sessionmaker(bind=engine)()
-    user = User(POST_ADD,"test")
-    s.add(user)
-     
-    # commit the record the database
-    s.commit()
-     
-    s.commit()
-
-    inspector = sqlalchemy.inspect(engine)
-    for table_name in inspector.get_table_names():
-       for column in inspector.get_columns(table_name):
-           print("Column: %s" % column['name'])
-    return " ".join(inspector.get_columns(inspector.get_table_names()[0]))
-
-@app.route("/logout")
+""" /:{version}/login
+Route for logout. Sets the session logged in flag to False.
+"""
+@app.route(VER_PATH + '/logout', methods=['POST'])
 def logout():
-    flask.session['logged_in'] = False
+    flask.session[LOGGED_IN_KEY] = False
     return index()
 
-@app.route("/view_database")
+""" /:{version}/view_database
+Route for testing. Returns the entire database as a string.
+"""
+@app.route(VER_PATH + '/view_database')
 def view_database():
-    if not flask.session.get('logged_in'):
-        return flask.render_template('login.html')
-    else:
-        table_name = sqlalchemy.inspect(engine).get_table_names()[0]
-        db_metadata = sqlalchemy.MetaData(engine)
-        table_object = sqlalchemy.Table(table_name, db_metadata, autoload=True)
+    from sqlalchemy import inspect, MetaData, Table
+    return_string = ''
+    db_metadata = MetaData(engine)
+    table_names = inspect(engine).get_table_names()
+    for table in table_names:
+        table_object = Table(table, db_metadata, autoload=True)
         table_fetchall = table_object.select().execute().fetchall()
-        return "<br/>x".join([" ".join([str(col) for col in entry]) for entry in table_fetchall])
-
+        return_string += "<br/>" + "<br/>".join(
+            [" ".join([str(col) for col in entry]) for entry in table_fetchall])
+    return return_string
 
 if __name__ == '__main__':
-    # Don't run the app if not running locally eg. if running on PythonAnywhere
+    # Local server hosting.
     if 'liveconsole' not in gethostname():
         print(gethostname())
-        dummy_def.addDummyData()
-        app.run(debug=True,host='0.0.0.0', port=4000)
+        # Remove all entries.
+        base.metadata.drop_all(bind=engine)
+        # Create tables.
+        base.metadata.create_all(bind=engine)
 
+        # Adding dummy data.
+        local_db_session = create_session()
+        user1 = User('admin', 'admin', 'Ad Min', 6046046004)
+        local_db_session.add(user1)
+        trip1 = Trip(1, 'admin_trip', True,
+                     datetime.datetime.now(), datetime.datetime.now(),
+                     'admin')
+        local_db_session.add(trip1)
+        local_db_session.commit()
 
+        print("=============")
+        print(view_database().replace('<br/>', '\n'))
+        print("=============")
 
-
-
-
-
-
-
+        # Host at 'http://localhost:4000/'.
+        app.run(debug=True, host='0.0.0.0', port=4000)
