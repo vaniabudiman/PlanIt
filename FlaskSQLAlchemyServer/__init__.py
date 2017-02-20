@@ -26,6 +26,14 @@ Return a new SQLAlchemy database session.
 def create_session():
     return scoped_session(sessionmaker(bind=engine))
 
+"""
+Print out the entire database.
+"""
+def print_database():
+    print("VVVVVVVVVVVVV")
+    print(view_database().replace('<br/>', '\n'))
+    print("^^^^^^^^^^^^^")
+
 """ /:{version}/
 Route for local testing. For graphical HTML view at hosted address.
 """
@@ -48,8 +56,8 @@ def login():
 
     db_session = create_session()
     query = db_session.query(User).filter(
-        User.userName.in_([post_userName]),
-        User.password.in_([post_password]))
+        User.userName==post_userName,
+        User.password==post_password)
     result = query.first()
     if result:
         flask.session[LOGGED_IN_KEY] = True
@@ -75,10 +83,11 @@ def view_database():
     db_metadata = MetaData(engine)
     table_names = inspect(engine).get_table_names()
     for table in table_names:
+        return_string += "<br/>=====" + table
         table_object = Table(table, db_metadata, autoload=True)
         table_fetchall = table_object.select().execute().fetchall()
-        return_string += "<br/>" + "<br/>".join(
-            [" ".join([str(col) for col in entry]) for entry in table_fetchall])
+        return_string += "<br/>   " + "<br/>   ".join(
+            ["|".join([str(col) for col in entry]) for entry in table_fetchall])
     return return_string
 
 if __name__ == '__main__':
@@ -90,19 +99,37 @@ if __name__ == '__main__':
         # Create tables.
         base.metadata.create_all(bind=engine)
 
-        # Adding dummy data.
-        local_db_session = create_session()
+        """
+        Example database operations.
+        """
+        # ADDING:
+        db = create_session()
         user1 = User('admin', 'admin', 'Ad Min', 6046046004)
-        local_db_session.add(user1)
+        user2 = User('user2', 'user2', 'Us Er2', 6042222222)
+        db.add_all([user1, user2])
         trip1 = Trip(1, 'admin_trip', True,
                      datetime.datetime.now(), datetime.datetime.now(),
                      'admin')
-        local_db_session.add(trip1)
-        local_db_session.commit()
+        trip2 = Trip(2, 'user2_trip', True,
+                     datetime.datetime.now(), datetime.datetime.now(),
+                     'user2')
+        db.add_all([trip1, trip2])
+        db.commit()
+        print_database()
 
-        print("=============")
-        print(view_database().replace('<br/>', '\n'))
-        print("=============")
+        """
+        # DELETING:
+        query = db.query(User).filter(User.userName=='admin').first()
+        db.delete(query)
+        db.commit()
 
-        # Host at 'http://localhost:4000/'.
-        app.run(debug=True, host='0.0.0.0', port=4000)
+        # UPDATING:
+        query = db.query(User).filter(User.userName=='user2').first()
+        query.userName = 'changeTEST'
+        db.commit()
+
+        print_database()
+        """
+
+        # Host at 'http://localhost:4000/' and allow reloading on code changes.
+        app.run(debug=True, host='0.0.0.0', port=4000, use_reloader=True)
