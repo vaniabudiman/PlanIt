@@ -1,35 +1,37 @@
 /**
  * PlanIt app entry point
  */
-
 import React, { Component } from "react";
-import { AppRegistry, View, Text } from "react-native";
-import Realm from "realm";
-import BasicListView from "./BasicListView.js";
+import { Provider, connect } from "react-redux";
+import { Router, Scene } from "react-native-router-flux";
+import { AppRegistry } from "react-native";
+import store from "./core/store.js";
+import HomeView from "./layouts/HomeView.js";
+import GrayView from "./layouts/GrayView.js";
+import ScarletView from "./layouts/ScarletView.js";
+import BasicListView from "./layouts/BasicListView.js";
 
 
-class PlanIt extends Component {
+// Connect the router to the Redux store
+const RouterWithRedux = connect()(Router);
+
+export default class PlanIt extends Component {
+
     render () {
-
-        let realm = new Realm({
-            schema: [{ name: "Dog", properties: { name: "string" } }]
-        });
-
-        realm.write(() => {
-            realm.create("Dog", { name: "Rex" });
-        });
-
         return (
-            <View>
-                <Text>Welcome to the app!</Text>
-                <BasicListView />
-                <Text>Count of Dogs in Realm: {realm.objects("Dog").length}</Text>
-            </View>
+            // Wrap routes with Redux Provider
+            <Provider store={store}>
+                <RouterWithRedux>
+                    <Scene key="root">
+                        <Scene key="home" component={HomeView} title="Home View" inital={true} />
+                        <Scene key="scarlet" component={ScarletView} title="Scarlet View" />
+                        <Scene key="gray" component={GrayView} title="Gray View" />
+                        <Scene key="basicList" component={BasicListView} title="Basic List View" />
+                    </Scene>
+                </RouterWithRedux>
+            </Provider>
         );
     }
 }
 
 AppRegistry.registerComponent("PlanIt", () => PlanIt);
-
-
-export default PlanIt;
