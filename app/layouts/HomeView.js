@@ -2,8 +2,9 @@ import React, { Component } from "react";
 import { View, Text } from "react-native";
 import { Actions } from "react-native-router-flux";
 import { connect } from "react-redux";
+import Icon from "react-native-vector-icons/FontAwesome";
 import realm from "../../Realm/realm.js";
-import { GlobalStyles, $blue } from "../styles/GlobalStyles.js";
+import { GlobalStyles, $blue, $gray } from "../styles/GlobalStyles.js";
 import { inc } from "../core/Actions.js";
 
 
@@ -31,9 +32,10 @@ class HomeView extends Component {
                 <Text style={GlobalStyles.text} onPress={Actions.scarlet}>Go to Scarlet View</Text>
                 <Text style={GlobalStyles.text} onPress={Actions.gray}>Go to Gray View</Text>
                 <Text style={GlobalStyles.text} onPress={Actions.basicList}>Go to Basic List View</Text>
-                <Text style={GlobalStyles.text} onPress={this._handleInc}>
-                    {"Click me to increment count: " + this.props.count}
-                </Text>
+                <Text style={GlobalStyles.text}>{"Count: " + this.props.count}</Text>
+                <Icon.Button name="plus" backgroundColor={$gray} onPress={this._handleInc}>
+                    Click me to Increment count
+                </Icon.Button>
                 {
                     /*
                      * TODO:
