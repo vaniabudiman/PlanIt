@@ -30,9 +30,9 @@ def create_session():
 Print out the entire database.
 """
 def print_database():
-    print("VVVVVVVVVVVVV")
+    print('VVVVVVVVVVVVV')
     print(view_database().replace('<br/>', '\n'))
-    print("^^^^^^^^^^^^^")
+    print('^^^^^^^^^^^^^')
 
 """ /:{version}/
 Route for local testing. For graphical HTML view at hosted address.
@@ -49,7 +49,7 @@ Route for login. On success, sets the session logged in flag to True.
 """
 @app.route(VER_PATH + '/login', methods=['POST'])
 def login():
-    print("LOGGING IN")
+    print('LOGGING IN')
     post_userName = str(flask.request.form['userName'])
     post_password = str(flask.request.form['password'])
     print(post_userName, post_password)
