@@ -21,6 +21,14 @@ The client will now start up in your android virtual device session.
 ```
 npm run test
 ```
+
+### New Dependency:
+If a new dependency is added, run the following command:
+```
+npm install
+```
+Or else the app won't start up properly.
+
 *** Please run this & resolve failures before creating a PR or merging
 
 ### Local JS / JSX Linting:
