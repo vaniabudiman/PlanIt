@@ -1,6 +1,7 @@
 import React, { Component } from "react";
-import { View, Text } from "react-native";
+import { View } from "react-native";
 import { GlobalStyles, $gray } from "../styles/GlobalStyles.js";
+import { Examples } from "@shoutem/ui";
 
 
 export default class GrayView extends Component {
@@ -12,7 +13,7 @@ export default class GrayView extends Component {
     render () {
         return (
             <View style={[GlobalStyles.container, { backgroundColor: $gray }]}>
-                <Text style={GlobalStyles.text}>Gray view</Text>
+                <Examples />
             </View>
         );
     }
