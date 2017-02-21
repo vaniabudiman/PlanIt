@@ -68,7 +68,7 @@ def login():
 """ /:{version}/login
 Route for logout. Sets the session logged in flag to False.
 """
-@app.route(VER_PATH + '/logout', methods=['POST'])
+@app.route(VER_PATH + '/logout', methods=['POST', 'GET'])
 def logout():
     flask.session[LOGGED_IN_KEY] = False
     return index()
@@ -83,52 +83,52 @@ def view_database():
     # Load all tables.
     metaData = MetaData()
     metaData.reflect(engine)
+    db = create_session()
     for table in metaData.tables.values():
         return_string += '<br/>TABLE: ' + table.name
         for row in db.query(table).all():
             return_string += '<br/>   ' + ' | '.join(str(i) for i in row)
     return return_string
 
-if __name__ == '__main__':
-    # Local server hosting.
-    if 'liveconsole' not in gethostname():
-        print(gethostname())
-        # Remove all entries.
-        base.metadata.drop_all(bind=engine)
-        # Create tables.
-        base.metadata.create_all(bind=engine)
+if __name__ == '__main__' or __name__ == '__init__':
+    print(gethostname())
+    # Remove all entries.
+    base.metadata.drop_all(bind=engine)
+    # Create tables.
+    base.metadata.create_all(bind=engine)
 
-        """
-        Example database operations.
-        """
-        # ADDING:
-        db = create_session()
-        user1 = User('admin', 'admin', 'Ad Min', 6046046004)
-        user2 = User('user2', 'user2', 'Us Er2', 6042222222)
-        db.add_all([user1, user2])
-        trip1 = Trip(1, 'admin_trip', True,
-                     datetime.datetime.now(), datetime.datetime.now(),
-                     'admin')
-        trip2 = Trip(2, 'user2_trip', True,
-                     datetime.datetime.now(), datetime.datetime.now(),
-                     'user2')
-        db.add_all([trip1, trip2])
-        db.commit()
-        print_database()
+    """
+    Example database operations.
+    """
+    # ADDING:
+    db = create_session()
+    user1 = User('admin', 'admin', 'Ad Min', 6046046004)
+    user2 = User('user2', 'user2', 'Us Er2', 6042222222)
+    db.add_all([user1, user2])
+    trip1 = Trip(1, 'admin_trip', True,
+                 datetime.datetime.now(), datetime.datetime.now(),
+                 'admin')
+    trip2 = Trip(2, 'user2_trip', True,
+                 datetime.datetime.now(), datetime.datetime.now(),
+                 'user2')
+    db.add_all([trip1, trip2])
+    db.commit()
+    print_database()
 
-        """
-        # DELETING:
-        query = db.query(User).filter(User.userName=='admin').first()
-        db.delete(query)
-        db.commit()
+    """
+    # DELETING:
+    query = db.query(User).filter(User.userName=='admin').first()
+    db.delete(query)
+    db.commit()
 
-        # UPDATING:
-        query = db.query(User).filter(User.userName=='user2').first()
-        query.userName = 'changeTEST'
-        db.commit()
+    # UPDATING:
+    query = db.query(User).filter(User.userName=='user2').first()
+    query.userName = 'changeTEST'
+    db.commit()
 
-        print_database()
-        """
-
+    print_database()
+    """
+    if 'liveweb' not in gethostname():
+        # Local hosting.
         # Host at 'http://localhost:4000/' and allow reloading on code changes.
         app.run(debug=True, host='0.0.0.0', port=4000, use_reloader=True)
