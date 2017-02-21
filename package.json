@@ -8,6 +8,7 @@
 		"jslint": "eslint . --ext .js,.jsx"
 	},
 	"dependencies": {
+		"@shoutem/ui": "^0.10.9",
 		"fbjs": "0.8.9",
 		"react": "15.4.2",
 		"react-native": "0.41.2",
