@@ -26,6 +26,14 @@ Return a new SQLAlchemy database session.
 def create_session():
     return scoped_session(sessionmaker(bind=engine))
 
+"""
+Print out the entire database.
+"""
+def print_database():
+    print('VVVVVVVVVVVVV')
+    print(view_database().replace('<br/>', '\n'))
+    print('^^^^^^^^^^^^^')
+
 """ /:{version}/
 Route for local testing. For graphical HTML view at hosted address.
 """
@@ -41,15 +49,15 @@ Route for login. On success, sets the session logged in flag to True.
 """
 @app.route(VER_PATH + '/login', methods=['POST'])
 def login():
-    print("LOGGING IN")
+    print('LOGGING IN')
     post_userName = str(flask.request.form['userName'])
     post_password = str(flask.request.form['password'])
     print(post_userName, post_password)
 
     db_session = create_session()
     query = db_session.query(User).filter(
-        User.userName.in_([post_userName]),
-        User.password.in_([post_password]))
+        User.userName==post_userName,
+        User.password==post_password)
     result = query.first()
     if result:
         flask.session[LOGGED_IN_KEY] = True
@@ -60,7 +68,7 @@ def login():
 """ /:{version}/login
 Route for logout. Sets the session logged in flag to False.
 """
-@app.route(VER_PATH + '/logout', methods=['POST'])
+@app.route(VER_PATH + '/logout', methods=['POST', 'GET'])
 def logout():
     flask.session[LOGGED_IN_KEY] = False
     return index()
@@ -70,39 +78,57 @@ Route for testing. Returns the entire database as a string.
 """
 @app.route(VER_PATH + '/view_database')
 def view_database():
-    from sqlalchemy import inspect, MetaData, Table
+    from sqlalchemy import MetaData
     return_string = ''
-    db_metadata = MetaData(engine)
-    table_names = inspect(engine).get_table_names()
-    for table in table_names:
-        table_object = Table(table, db_metadata, autoload=True)
-        table_fetchall = table_object.select().execute().fetchall()
-        return_string += "<br/>" + "<br/>".join(
-            [" ".join([str(col) for col in entry]) for entry in table_fetchall])
+    # Load all tables.
+    metaData = MetaData()
+    metaData.reflect(engine)
+    db = create_session()
+    for table in metaData.tables.values():
+        return_string += '<br/>TABLE: ' + table.name
+        for row in db.query(table).all():
+            return_string += '<br/>   ' + ' | '.join(str(i) for i in row)
     return return_string
 
-if __name__ == '__main__':
-    # Local server hosting.
-    if 'liveconsole' not in gethostname():
-        print(gethostname())
-        # Remove all entries.
-        base.metadata.drop_all(bind=engine)
-        # Create tables.
-        base.metadata.create_all(bind=engine)
+if __name__ == '__main__' or __name__ == '__init__':
+    print(gethostname())
+    # Remove all entries.
+    base.metadata.drop_all(bind=engine)
+    # Create tables.
+    base.metadata.create_all(bind=engine)
 
-        # Adding dummy data.
-        local_db_session = create_session()
-        user1 = User('admin', 'admin', 'Ad Min', 6046046004)
-        local_db_session.add(user1)
-        trip1 = Trip(1, 'admin_trip', True,
-                     datetime.datetime.now(), datetime.datetime.now(),
-                     'admin')
-        local_db_session.add(trip1)
-        local_db_session.commit()
+    """
+    Example database operations.
+    """
+    # ADDING:
+    db = create_session()
+    user1 = User('admin', 'admin', 'Ad Min', 6046046004)
+    user2 = User('user2', 'user2', 'Us Er2', 6042222222)
+    db.add_all([user1, user2])
+    trip1 = Trip(1, 'admin_trip', True,
+                 datetime.datetime.now(), datetime.datetime.now(),
+                 'admin')
+    trip2 = Trip(2, 'user2_trip', True,
+                 datetime.datetime.now(), datetime.datetime.now(),
+                 'user2')
+    db.add_all([trip1, trip2])
+    db.commit()
+    print_database()
 
-        print("=============")
-        print(view_database().replace('<br/>', '\n'))
-        print("=============")
+    """
+    # DELETING:
+    query = db.query(User).filter(User.userName=='admin').first()
+    db.delete(query)
+    db.commit()
 
-        # Host at 'http://localhost:4000/'.
-        app.run(debug=True, host='0.0.0.0', port=4000)
+    # UPDATING:
+    query = db.query(User).filter(User.userName=='user2').first()
+    query.userName = 'changeTEST'
+    db.commit()
+
+    print_database()
+    """
+    if 'liveweb' not in gethostname():
+        # Local hosting.
+        # Host at 'http://localhost:4000/' and allow reloading on code changes.
+        app.run(debug=True, host='0.0.0.0', port=4000, use_reloader=True)
