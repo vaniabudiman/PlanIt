@@ -18,7 +18,7 @@ var realm = new Realm({
 });
 
 realm.write(() => {
-    realm.create("Dog", { name: "Rex" });
+    // realm.create("Dog", { name: "Rex" }); //Commenting this out to avoid filling memory while developing
 });
 
 export default realm;
