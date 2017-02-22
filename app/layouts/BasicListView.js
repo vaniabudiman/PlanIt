@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import ListViewStyles from "../styles/ListViewStyles.js";
 import Icon from "react-native-vector-icons/FontAwesome";
-import { ListView, Title, Subtitle, Screen, Divider, View, Row } from "@shoutem/ui";
+import { ListView, Title, Subtitle, Divider, View, Row } from "@shoutem/ui";
 
 
 export default class BasicListView extends Component {
@@ -34,7 +34,7 @@ export default class BasicListView extends Component {
 
     render () {
         return (
-            <Screen styleName="full-screen" style={ListViewStyles.screen}>
+            <View>
                 <ListView
                     data={this.state.items}
                     renderRow={item => this.renderRow(item)}
@@ -46,8 +46,8 @@ export default class BasicListView extends Component {
                             });
                         }, 300);
                     }}
-            />
-            </Screen>
+                />
+            </View>
         );
     }
 

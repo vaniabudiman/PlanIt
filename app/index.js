@@ -10,6 +10,7 @@ import HomeView from "./layouts/HomeView.js";
 import GrayView from "./layouts/GrayView.js";
 import ScarletView from "./layouts/ScarletView.js";
 import BasicListView from "./layouts/BasicListView.js";
+import { NavigationStyles } from "./styles/NavigationStyles.js";
 
 
 // Connect the router to the Redux store
@@ -26,7 +27,8 @@ export default class PlanIt extends Component {
                         <Scene key="home" component={HomeView} title="Home View" inital={true} />
                         <Scene key="scarlet" component={ScarletView} title="Scarlet View" />
                         <Scene key="gray" component={GrayView} title="Gray View" />
-                        <Scene key="basicList" component={BasicListView} title="Basic List View" />
+                        <Scene key="basicList" component={BasicListView}
+                        sceneStyle={ NavigationStyles.listViewScene } title="Basic List View" />
                     </Scene>
                 </RouterWithRedux>
             </Provider>
