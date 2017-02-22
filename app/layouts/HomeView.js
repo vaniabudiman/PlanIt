@@ -29,7 +29,7 @@ class HomeView extends Component {
         return (
             <View style={[GlobalStyles.container, { backgroundColor: $blue }]}>
                 <Text style={GlobalStyles.text}>Welcome to our App!</Text>
-                <Text style={GlobalStyles.text} onPress={Actions.scarlet}>Go to Scarlet View</Text>
+                <Text style={GlobalStyles.text} onPress={Actions.formView}>Go to Form View</Text>
                 <Text style={GlobalStyles.text} onPress={Actions.gray}>Go to Gray View</Text>
                 <Text style={GlobalStyles.text} onPress={Actions.basicList}>Go to Basic List View</Text>
                 <Text style={GlobalStyles.text}>{"Count: " + this.props.count}</Text>
