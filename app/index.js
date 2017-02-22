@@ -11,6 +11,8 @@ import GrayView from "./layouts/GrayView.js";
 import FormView from "./layouts/FormView.js";
 import BasicListView from "./layouts/BasicListView.js";
 import { NavigationStyles } from "./styles/NavigationStyles.js";
+import UserSettings from "./components/UserSettings.js";
+import UserProfileView from "./layouts/UserProfileView.js";
 
 
 // Connect the router to the Redux store
@@ -18,17 +20,26 @@ const RouterWithRedux = connect()(Router);
 
 export default class PlanIt extends Component {
 
+    constructor (props) {
+        super(props);
+    }
+
     render () {
+        let navBarProps = {
+            renderRightButton: UserSettings
+        };
+
         return (
             // Wrap routes with Redux Provider
             <Provider store={store}>
                 <RouterWithRedux>
                     <Scene key="root">
-                        <Scene key="home" component={HomeView} title="Home View" inital={true} />
-                        <Scene key="formView" component={FormView} title="Form View" />
-                        <Scene key="gray" component={GrayView} title="Gray View" />
+                        <Scene key="home" component={HomeView} title="Home View" inital={true} {...navBarProps} />
+                        <Scene key="formView" component={FormView} title="Form View" {...navBarProps} />
+                        <Scene key="gray" component={GrayView} title="Gray View" {...navBarProps} />
                         <Scene key="basicList" component={BasicListView}
-                        sceneStyle={ NavigationStyles.listViewScene } title="Basic List View" />
+                            sceneStyle={ NavigationStyles.listViewScene } title="Basic List View" {...navBarProps} />
+                        <Scene key="userProfile" component={UserProfileView} title="User Profile" />
                     </Scene>
                 </RouterWithRedux>
             </Provider>
