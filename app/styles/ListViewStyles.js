@@ -23,11 +23,7 @@ export default StyleSheet.create({
     optionIcons: {
         marginRight: 10,
     },
-    rowContainer: {
-        flexDirection: "row",
-        justifyContent: "space-between",
-    },
-    actionIconsContainer: {
-        flexDirection: "row",
+    screen: {
+        marginTop: 50,
     }
 });
