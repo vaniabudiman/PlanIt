@@ -31,6 +31,7 @@ class HomeView extends Component {
                 <Text style={GlobalStyles.text}>Welcome to our App!</Text>
                 <Text style={GlobalStyles.text} onPress={Actions.formView}>Go to Form View</Text>
                 <Text style={GlobalStyles.text} onPress={Actions.basicMapView}>Go to Map View</Text>
+                <Text style={GlobalStyles.text} onPress={Actions.continents}>Go to Continents View</Text>
                 <Text style={GlobalStyles.text} onPress={Actions.basicList}>Go to Basic List View</Text>
                 <Text style={GlobalStyles.text} onPress={Actions.descriptionView}>Go to Description View</Text>
                 <Text style={GlobalStyles.text}>{"Count: " + this.props.count}</Text>

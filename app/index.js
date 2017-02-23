@@ -14,6 +14,7 @@ import { NavigationStyles } from "./styles/NavigationStyles.js";
 import UserSettings from "./components/UserSettings.js";
 import UserProfileView from "./layouts/UserProfileView.js";
 import DescriptionView from "./layouts/DescriptionView.js";
+import ContinentsView from "./layouts/ContinentsView.js";
 
 
 // Connect the router to the Redux store
@@ -36,6 +37,8 @@ export default class PlanIt extends Component {
                 <RouterWithRedux>
                     <Scene key="root">
                         <Scene key="home" component={HomeView} title="Home View" inital={true} {...navBarProps} />
+                        <Scene key="continents" component={ContinentsView} title="Continents"
+                            sceneStyle={NavigationStyles.continentsViewScene} {...navBarProps} />
                         <Scene key="formView" component={FormView} title="Form View" {...navBarProps} />
                         <Scene key="basicMapView" component={BasicMapView} title="Basic Map View" {...navBarProps} />
                         <Scene key="basicList" component={BasicListView}
