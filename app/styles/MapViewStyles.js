@@ -1,7 +1,7 @@
 import { StyleSheet } from "react-native";
 
 
-export default StyleSheet.create({
+export const MapViewStyles = StyleSheet.create({
     container: {
         ...StyleSheet.absoluteFillObject,
         height: 400,

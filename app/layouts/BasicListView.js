@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import ListViewStyles from "../styles/ListViewStyles.js";
+import { ListViewStyles } from "../styles/ListViewStyles.js";
 import Icon from "react-native-vector-icons/FontAwesome";
 import { ListView, Title, Subtitle, Divider, View, Row } from "@shoutem/ui";
 import realm from "../../Realm/realm.js";

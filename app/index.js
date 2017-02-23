@@ -13,6 +13,7 @@ import BasicListView from "./layouts/BasicListView.js";
 import { NavigationStyles } from "./styles/NavigationStyles.js";
 import UserSettings from "./components/UserSettings.js";
 import UserProfileView from "./layouts/UserProfileView.js";
+import DescriptionView from "./layouts/DescriptionView.js";
 
 
 // Connect the router to the Redux store
@@ -40,6 +41,8 @@ export default class PlanIt extends Component {
                         <Scene key="basicList" component={BasicListView}
                             sceneStyle={ NavigationStyles.listViewScene } title="Basic List View" {...navBarProps} />
                         <Scene key="userProfile" component={UserProfileView} title="User Profile" />
+                        <Scene key="descriptionView" component={DescriptionView}
+                            sceneStyle={ NavigationStyles.listViewScene } title="Description View" />
                     </Scene>
                 </RouterWithRedux>
             </Provider>
