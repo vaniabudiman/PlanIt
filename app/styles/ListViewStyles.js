@@ -1,7 +1,7 @@
 import { StyleSheet } from "react-native";
 
 
-export default StyleSheet.create({
+export const ListViewStyles = StyleSheet.create({
     optionIcons: {
         marginRight: 10
     },
