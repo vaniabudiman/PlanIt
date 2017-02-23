@@ -2,14 +2,22 @@ import React, { Component } from "react";
 import ListViewStyles from "../styles/ListViewStyles.js";
 import Icon from "react-native-vector-icons/FontAwesome";
 import { ListView, Title, Subtitle, Divider, View, Row } from "@shoutem/ui";
+import realm from "../../Realm/realm.js";
 
 
 export default class BasicListView extends Component {
 
     constructor (props) {
         super(props);
+
+        let trips = realm.objects('Trip');
+        let items = [];
+        Object.keys(trips).map(function(key) {
+            items.push(trips[key].tripName);
+        });
+
         this.state = {
-            items: ["Data1", "Data2", "Data3", "Data4", "Data5", "Data6", "Data7", "Data8"]
+            items: items
         };
     }
 

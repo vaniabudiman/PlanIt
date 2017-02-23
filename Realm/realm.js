@@ -90,12 +90,97 @@ const CurrencySchema = {
 	}
 }
 
+//Realm.clearTestState() // deletes all existing realm files
+
 var realm = new Realm({
     schema: [TripSchema, BookmarkSchema, EventSchema, TransportationSchema, UserSchema, CurrencySchema]
 });
 
-realm.write(() => {
-    realm.create("Trip", { tripID: 1, tripName: 'Test Trip', active: false }, true); // 3rd arg (true) updates existing DB record w/ pk
-});
+
+// Populating Realm w/ fake data - remove when finished using
+	realm.write(() => {
+		// Creating 4 users
+		let users = [];
+		for (var i = 0; i < 4; i++) {
+			let userNames = ['sguo', 'nkwok', 'vbudiman', 'nmartin'];
+			let names = ['Sisi', 'Nixon', 'Vania', 'Nikki'];
+	    	let user = realm.create("User", { 
+	    		userName: userNames[i], 
+	    		name: names[i]
+	    	}, true); // 3rd arg (true) updates existing DB record w/ pk
+	    	users.push(user);
+	    }
+
+		// Creating 10 trips
+		let trips = [];
+		for (var i = 1; i <=10; i++) {
+	    	let trip = realm.create("Trip", { 
+	    		tripID: i, 
+	    		tripName: 'Test Trip' + i, 
+	    		active: false
+	    	}, true);
+	    	trips.push(trip);
+	    }
+
+		// Creating 10 custom (no bookmark, no transportation) events
+		for (var i = 1; i <=10; i++) {
+			let event = realm.create("Event", { 
+				eventID: i, 
+				eventName: 'Custom Event ' + i, 
+				startDateTime: new Date(), 
+				endDateTime: new Date(), 
+				reminderFlag: false,
+				sharedFrom: users[0],
+				sharedWith: [users[1], users[2], users[3]]
+			}, true);
+
+			trips[i-1].events.push(event);
+		}
+
+		// Creating 10 bookmarks (w/ corresponding event)
+		for (var i = 1; i <=10; i++) {
+			let bookmark = realm.create("Bookmark", { 
+				bookmarkID: i, 
+				locationID: 12345, 
+				active: false, 
+				event: {
+					eventID: i + 10,
+					eventName: 'Bookmark Event ' + i,
+					startDateTime: new Date(),
+					endDateTime: new Date(),
+					reminderFlag: false
+				} 
+			}, true);
+
+			trips[i-1].bookmarks.push(bookmark);
+			trips[i-1].events.push(bookmark.event);
+		}
+
+		// Creating 10 transportation (w/ corresponding event)
+		for (var i = 1; i <=10; i++) {
+			let transportation = realm.create("Transportation", { 
+				transportationID: i, 
+				type: 'plane', 
+				event: {
+					eventID: i + 20,
+					eventName: 'Transportation Event ' + i,
+					startDateTime: new Date(),
+					endDateTime: new Date(),
+					reminderFlag: false
+				} 
+			}, true);
+
+			trips[i-1].events.push(transportation.event);
+		}
+
+		// printing out tables to console - uncomment for example of organization/structure
+		//console.log(realm.objects('Trip'));
+		//console.log(realm.objects('Bookmark'));
+		//console.log(realm.objects('Event'));
+		//console.log(realm.objects('Transportation'));
+		//console.log(realm.objects('User'));
+	});
+
+
 
 export default realm;
