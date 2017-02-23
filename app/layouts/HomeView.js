@@ -47,7 +47,7 @@ class HomeView extends Component {
                      *  We'll need to look into Realm more & really figure out how it all works...
                     */
                 }
-                <Text style={GlobalStyles.text}>Count of Dogs in Realm: {realm.objects("Dog").length}</Text>
+                <Text style={GlobalStyles.text}>Count of Trips in Realm: {realm.objects("Trip").length}</Text>
             </View>
         );
     }

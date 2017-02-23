@@ -2,20 +2,22 @@ import React, { Component } from "react";
 import { ListViewStyles } from "../styles/ListViewStyles.js";
 import Icon from "react-native-vector-icons/FontAwesome";
 import { ListView, Title, Subtitle, Divider, View, Row } from "@shoutem/ui";
+import realm from "../../Realm/realm.js";
 
 
 export default class BasicListView extends Component {
 
     constructor (props) {
         super(props);
+
+        let trips = realm.objects("Trip");
+        let items = [];
+        Object.keys(trips).map(function (key) {
+            items.push(trips[key].tripName);
+        });
+
         this.state = {
-            items: [
-            { field: "field name", description: "field description goes here" },
-            { field: "field name2", description: "field description2 goes here" },
-            { field: "field name3", description: "field description3 goes here" },
-            { field: "field name4", description: "field description4 goes here" },
-            { field: "field name5", description: "field description5 goes here" }
-            ]
+            items: items
         };
     }
 
@@ -24,8 +26,8 @@ export default class BasicListView extends Component {
             <Row>
                 <View styleName="horizontal space-between">
                     <View styleName="vertical">
-                        <Title>{item.field}</Title>
-                        <Subtitle>{item.description}</Subtitle>
+                        <Title>{item}</Title>
+                        <Subtitle>subtitle to {item}</Subtitle>
                     </View>
                     <View styleName="horizontal">
                         <Icon styleName="disclosure" name="plus" style={ListViewStyles.optionIcons} size={16} />
