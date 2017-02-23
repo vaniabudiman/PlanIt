@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 """ This file contains all the PlanIt models.
 """
-from sqlalchemy import ForeignKey, Column, Integer, String, Boolean, DateTime, Enum
+from sqlalchemy import ForeignKey, Column
+from sqlalchemy import Integer, String, Boolean, DateTime, Enum
 from sqlalchemy.orm import relationship
 from base import base
 import enum
@@ -35,10 +36,11 @@ class User(base):
         self.name = name
         self.phoneNumber = phoneNumber
 
+
 class Trip(base):
     __tablename__ = 'trip'
 
-    tripID   = Column(Integer, primary_key=True)#, unique=True)
+    tripID   = Column(Integer, primary_key=True)  # , unique=True)
     tripName = Column(String(VARCHAR_LEN), nullable=False)
     active   = Column(Boolean, nullable=False)
     startDate = Column(DateTime)
@@ -65,12 +67,14 @@ class Trip(base):
         self.endDate = endDate
         self.userName = userName
 
+
 class TransportEnum(enum.Enum):
     CAR    = 'car'
     BUS    = 'bus'
     TRAIN  = 'train'
     SEA    = 'sea'
     FLIGHT = 'flight'
+
 
 class Transportation(base):
     __tablename__ = 'transportation'
@@ -87,19 +91,20 @@ class Transportation(base):
     departureLocationID = Column(Integer)
     arrivalLocationID   = Column(Integer)
 
-    def __init__(self, eventID, type, operator,
+    def __init__(self, eventID, transportType, operator,
                  number, depLocID, arrLocID):
         self.eventID = eventID
-        self.type = type
+        self.type = transportType
         self.operator = operator
         self.number = number
         self.departureLocationID = depLocID
         self.arrivalLocationID = arrLocID
 
+
 class Bookmark(base):
     __tablename__ = 'bookmark'
 
-    bookmarkID = Column(Integer, primary_key=True)#, unique=True)
+    bookmarkID = Column(Integer, primary_key=True)  # , unique=True)
     locationID = Column(Integer, nullable=False)
     tripID = Column(Integer,
                     ForeignKey('trip.tripID',
@@ -123,10 +128,11 @@ class Bookmark(base):
         self.tripID = tripID
         self.eventID = eventID
 
+
 class Event(base):
     __tablename__ = 'event'
 
-    eventID   = Column(Integer, primary_key=True)#, unique=True)
+    eventID   = Column(Integer, primary_key=True)  # , unique=True)
     eventName = Column(String(VARCHAR_LEN), nullable=False)
     startDateTime = Column(DateTime, nullable=False)
     endDateTime   = Column(DateTime, nullable=False)
@@ -160,14 +166,16 @@ class Event(base):
         self.reminderTime = reminderTime
         self.tripID = tripID
 
+
 class NoteEnum(enum.Enum):
     TEXT  = 'text'
     PHOTO = 'photo'
 
+
 class Note(base):
     __tablename__ = 'note'
 
-    noteID   = Column(Integer, primary_key=True)#, unique=True)
+    noteID   = Column(Integer, primary_key=True)  # , unique=True)
     noteType = Column(Enum(NoteEnum), nullable=False)
     noteContext = Column(String, nullable=False)
 
@@ -181,6 +189,7 @@ class Note(base):
         self.noteID = noteID
         self.noteType = noteType
         self.noteContext = noteContext
+
 
 class BookmarkNote(base):
     __tablename__ = 'bookmarknote'
@@ -202,6 +211,7 @@ class BookmarkNote(base):
         self.noteID = noteID
         self.bookmarkID = bookmarkID
 
+
 class EventNote(base):
     __tablename__ = 'eventnote'
 
@@ -222,10 +232,11 @@ class EventNote(base):
         self.noteID = noteID
         self.eventID = eventID
 
+
 class SharedObject(base):
     __tablename__ = 'sharedobject'
 
-    sharedObjectID = Column(Integer, primary_key=True)#, unique=True)
+    sharedObjectID = Column(Integer, primary_key=True)  # , unique=True)
     fromUserID = Column(Integer,
                         ForeignKey('user.userName',
                                    ondelete=CASCADE,
@@ -242,16 +253,17 @@ class SharedObject(base):
                                  onupdate=CASCADE))
 
     # Relationships:
-    sharedBookmarks = relationship('SharedBookmark', cascade=CASCADE_OPTIONS,
-                                   backref='sharedobject', passive_updates=False)
-    sharedEvents = relationship('SharedEvent', cascade=CASCADE_OPTIONS,
-                                backref='sharedobject', passive_updates=False)
+    sharedBookmark = relationship('SharedBookmark', cascade=CASCADE_OPTIONS,
+                                  backref='sharedobject', passive_updates=False)
+    sharedEvent = relationship('SharedEvent', cascade=CASCADE_OPTIONS,
+                               backref='sharedobject', passive_updates=False)
 
     def __init__(self, sharedObjectID, fromUserID, toUserID, toTripID):
         self.sharedObjectID = sharedObjectID
         self.fromUserID = fromUserID
         self.toUserID = toUserID
         self.toTripID = toTripID
+
 
 class SharedBookmark(base):
     __tablename__ = 'sharedbookmark'
@@ -272,6 +284,7 @@ class SharedBookmark(base):
     def __init__(self, bookmarkID, sharedObjectID):
         self.bookmarkID = bookmarkID
         self.sharedObjectID = sharedObjectID
+
 
 class SharedEvent(base):
     __tablename__ = 'sharedevent'
