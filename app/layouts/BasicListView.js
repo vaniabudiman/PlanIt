@@ -10,9 +10,9 @@ export default class BasicListView extends Component {
     constructor (props) {
         super(props);
 
-        let trips = realm.objects('Trip');
+        let trips = realm.objects("Trip");
         let items = [];
-        Object.keys(trips).map(function(key) {
+        Object.keys(trips).map(function (key) {
             items.push(trips[key].tripName);
         });
 
