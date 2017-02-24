@@ -7,5 +7,8 @@ export const NavigationStyles = StyleSheet.create({
     },
     continentsViewScene: {
         paddingTop: 60
+    },
+    tripHomeViewScene: {
+        paddingTop: 60
     }
 });
