@@ -11,7 +11,6 @@ from sqlalchemy.orm import sessionmaker, scoped_session
 from base import base, engine
 from models import User, Trip
 
-
 # Versioning.
 VERSION = 'v1'
 VER_PATH = '/' + VERSION
@@ -28,8 +27,8 @@ PUT = 'PUT'
 DELETE = 'DELETE'
 
 # Session key variables.
-LOGGED_IN_KEY = 'logged_in'
-USERNAME_KEY = 'user_name'
+KEY__LOGGED_IN = 'logged_in'
+KEY__USERNAME = 'user_name'
 
 
 # Generic responses. Function instead of a var because requires app context.
@@ -44,6 +43,12 @@ def create_db_session():
     return database_session
 
 
+def close_session(cur_session):
+    """Commit and close the given scoped session."""
+    cur_session.commit()
+    cur_session.close()
+
+
 def print_database():
     """Print out the entire database."""
     print('VVVVVVVVVVVVV')
@@ -56,16 +61,89 @@ def index():
     """ /:{version}/
     Route for local testing. For graphical HTML view at hosted address.
     """
-    if session.get(LOGGED_IN_KEY):
+    if session.get(KEY__LOGGED_IN):
         return 'Logged in. <a href="' + VER_PATH + '/logout">Logout</a>'
     else:
         return render_template('login.html')
 
 
+@app.route(VER_PATH + '/users', methods=[POST, GET], strict_slashes=False)
+@app.route(VER_PATH + '/users/<string:userName>', methods=[PUT, DELETE])
+def users(userName=None):
+    if request.method == POST:
+        try:
+            post_userName = str(request.form['userName'])
+            post_password = str(request.form['password'])
+            post_name = str(request.form['name'])
+            post_phoneNumber = int(request.form['phoneNumber'])
+        except KeyError:
+            return bad_request()
+
+        db = create_db_session()
+        if db.query(User).filter(User.userName == post_userName).first():
+            close_session(db)
+            return make_response('Conflict - Username taken.', 409)
+        db.add(User(post_userName, post_password, post_name, post_phoneNumber))
+        close_session(db)
+        return make_response('User "%s" POST success.' % post_userName, 201)
+    elif request.method == GET:
+        db = create_db_session()
+        cur_userName = session.get(KEY__USERNAME)
+        query = db.query(User).filter(User.userName == cur_userName).first()
+        if not query:
+            close_session(db)
+            return make_response('User not found.', 404)
+        ret_dict = query.toDict()
+        close_session(db)
+        return make_response(jsonify(ret_dict), 200)
+    elif userName:
+        cur_userName = session.get(KEY__USERNAME)
+        if request.method == PUT:
+            if userName != cur_userName:
+                return make_response('User not authorized to edit account.',
+                                     401)
+            db = create_db_session()
+            query = db.query(User).filter(User.userName == userName).first()
+            if not query:
+                close_session(db)
+                return make_response('User not found.', 404)
+            try:
+                post_password = str(request.form['password'])
+                query.password = post_password
+            except KeyError:
+                pass
+            try:
+                post_name = str(request.form['name'])
+                query.name = post_name
+            except KeyError:
+                pass
+            try:
+                post_phoneNumber = int(request.form['phoneNumber'])
+                query.phoneNumber = post_phoneNumber
+            except KeyError:
+                pass
+            ret_dict = query.toDict()
+            close_session(db)
+            return make_response(jsonify(ret_dict), 200)
+        elif request.method == DELETE:
+            if userName != cur_userName:
+                return make_response('User not authorized to delete account.',
+                                     401)
+            db = create_db_session()
+            query = db.query(User).filter(User.userName == userName).first()
+            if not query:
+                close_session(db)
+                return make_response('User not found.', 404)
+            db.delete(query)
+            close_session(db)
+            return make_response('User deleted successfully', 200)
+    return bad_request()
+
+
 @app.route(VER_PATH + '/login', methods=[POST], strict_slashes=False)
 def login():
     """ /:{version}/login
-    Route for login. On success, sets the session LOGGED_IN_KEY flag to True.
+    Route for login. On success, sets the session KEY__LOGGED_IN flag to True.
     """
     try:
         post_userName = str(request.form['userName'])
@@ -75,16 +153,16 @@ def login():
 
     print('Trying login for userName="%s", password="%s"' % (
         post_userName, post_password))
-    db_session = create_db_session()
-    result = db_session.query(User).filter(
+    db = create_db_session()
+    result = db.query(User).filter(
         User.userName == post_userName,
         User.password == post_password).first()
 
     if not result:
         return make_response('Incorrect login details.', 401)
 
-    session[LOGGED_IN_KEY] = True
-    session[USERNAME_KEY] = post_userName
+    session[KEY__LOGGED_IN] = True
+    session[KEY__USERNAME] = post_userName
     return make_response('Login success.', 201)
 
 
@@ -114,6 +192,7 @@ def view_database():
             return_string += '<br/>   ' + ' | '.join(str(i) for i in row)
     return return_string
 
+
 if __name__ == '__main__' or __name__ == '__init__':
     print(gethostname())
     # Remove all entries.
@@ -125,18 +204,18 @@ if __name__ == '__main__' or __name__ == '__init__':
     Example database operations.
     """
     # ADDING:
-    db = create_db_session()
+    db_session = create_db_session()
     user1 = User('admin', 'admin', 'Ad Min', 6046046004)
     user2 = User('user2', 'user2', 'Us Er2', 6042222222)
-    db.add_all([user1, user2])
+    db_session.add_all([user1, user2])
     trip1 = Trip(1, 'admin_trip', True,
                  datetime.now(), datetime.now(),
                  'admin')
     trip2 = Trip(2, 'user2_trip', True,
                  datetime.now(), datetime.now(),
                  'user2')
-    db.add_all([trip1, trip2])
-    db.commit()
+    db_session.add_all([trip1, trip2])
+    db_session.commit()
     print_database()
 
     """
