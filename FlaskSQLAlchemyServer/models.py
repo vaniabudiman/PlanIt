@@ -45,7 +45,7 @@ class User(base):
 class Trip(base):
     __tablename__ = 'trip'
 
-    tripID   = Column(Integer, primary_key=True)  # , unique=True)
+    tripID   = Column(Integer, primary_key=True, unique=True)
     tripName = Column(String(VARCHAR_LEN), nullable=False)
     active   = Column(Boolean, nullable=False)
     startDate = Column(DateTime)
@@ -123,7 +123,7 @@ class Transportation(base):
 class Bookmark(base):
     __tablename__ = 'bookmark'
 
-    bookmarkID = Column(Integer, primary_key=True)  # , unique=True)
+    bookmarkID = Column(Integer, primary_key=True, unique=True)
     locationID = Column(Integer, nullable=False)
     tripID = Column(Integer,
                     ForeignKey('trip.tripID',
@@ -157,7 +157,7 @@ class Bookmark(base):
 class Event(base):
     __tablename__ = 'event'
 
-    eventID   = Column(Integer, primary_key=True)  # , unique=True)
+    eventID   = Column(Integer, primary_key=True, unique=True)
     eventName = Column(String(VARCHAR_LEN), nullable=False)
     startDateTime = Column(DateTime, nullable=False)
     endDateTime   = Column(DateTime, nullable=False)
@@ -210,7 +210,7 @@ class NoteEnum(enum.Enum):
 class Note(base):
     __tablename__ = 'note'
 
-    noteID   = Column(Integer, primary_key=True)  # , unique=True)
+    noteID   = Column(Integer, primary_key=True, unique=True)
     noteType = Column(Enum(NoteEnum), nullable=False)
     noteContext = Column(String, nullable=False)
 
@@ -284,7 +284,7 @@ class EventNote(base):
 class SharedObject(base):
     __tablename__ = 'sharedobject'
 
-    sharedObjectID = Column(Integer, primary_key=True)  # , unique=True)
+    sharedObjectID = Column(Integer, primary_key=True, unique=True)
     fromUserID = Column(Integer,
                         ForeignKey('user.userName',
                                    ondelete=CASCADE,

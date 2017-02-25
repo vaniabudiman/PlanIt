@@ -67,7 +67,7 @@ export function login (userData) {
                 password: userData.password,
             }),
         })
-        .then(response => {
+        .then(response => { // Header response.
             // console.log(response);
             if (response.status >= 200 && response.status < 300) {
                 dispatch(loginSuccess(response));
@@ -77,9 +77,9 @@ export function login (userData) {
                 dispatch(loginFailed(error));
                 throw error;
             }
-        }) // Use another then if you want response.Json()
+        }) // Use another then if you want the body json response.
         .catch(error => {
             // console.log("Request Failed", error);
-            alert(error.message); // TODO: remove this and do something with the fetch error
+            alert(error.response.status); // TODO: remove this and do something with the fetch error
         });};
 }
