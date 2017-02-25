@@ -4,7 +4,8 @@ import { Types } from "./Actions.js";
 
 const initialState = {
     // default initial state
-    count: 0 // TODO: testing demonstration only, remove later on
+    count: 0, // TODO: testing demonstration only, remove later on
+    TEST: "standby", // TODO: testing rest api call status, remove later on
 };
 
 export default function (state = initialState, action) {
@@ -17,6 +18,14 @@ export default function (state = initialState, action) {
         // TODO: testing demonstration only, remove later on
         case Types.INC:
             nextState = { ...state, count: state.count += 1 };
+            break;
+        case Types.LOGIN_SUCCESS:
+            // TODO: do something with login success:
+            nextState = { ...state, TEST: state.TEST = String(action.response.status) };
+            break;
+        case Types.LOGIN_FAILED:
+            // TODO: do something with login failed:
+            nextState = { ...state, TEST: state.TEST = "FAILED" };
             break;
         default:
             return state;
