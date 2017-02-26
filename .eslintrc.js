@@ -13,7 +13,8 @@ module.exports = {
     },
     "env": {
         "node": true,
-        "jest": true
+        "jest": true,
+        "browser": true
     },
     "extends": [
         "eslint:recommended",

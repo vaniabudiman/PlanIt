@@ -12,12 +12,36 @@ import {
 import { Actions } from "react-native-router-flux";
 import Icon from "react-native-vector-icons/FontAwesome";
 import LoginStyles from "../styles/LoginStyles.js";
+import { login } from "../core/Actions.js";
+import { connect } from "react-redux";
 
 
-export default class LoginView extends Component {
+class LoginView extends Component {
+
+    static propTypes = {
+        dispatch: React.PropTypes.func,
+        TEST: React.PropTypes.string, // TODO: testing rest api call status, remove later on
+    }
+
+    constructor (props) {
+        super(props);
+        this.state = {
+            userName: "",
+            password: "",
+        };
+    }
+
+    componentWillMount () {
+        // Bind Redux action creators
+        this._login = () => this.props.dispatch(login(this.state));
+    }
+
     render () {
+        const limit = 40;
         return (
             <View style={LoginStyles.container}>
+                {/*TODO: testing rest api call status, remove later on*/}
+                <Text>{"Login Status: " + this.props.TEST}</Text>
                 <Image source={{ uri: "login" }} style={LoginStyles.background} resizeMode="cover">
                     <View style={LoginStyles.markWrap}>
                         <Icon name="check" style={LoginStyles.mark} resizeMode="contain" />
@@ -29,6 +53,9 @@ export default class LoginView extends Component {
                             </View>
                             <TextInput placeholder="Username"
                                     placeholderTextColor="#FFF"
+                                    multiline={false}
+                                    maxLength={limit}
+                                    onChangeText={userName => this.setState({ userName })}
                                     style={LoginStyles.input} />
                         </View>
                         <View style={LoginStyles.inputWrap}>
@@ -37,7 +64,10 @@ export default class LoginView extends Component {
                             </View>
                             <TextInput placeholderTextColor="#FFF"
                                     placeholder="Password"
+                                    multiline={false}
+                                    maxLength={limit}
                                     style={LoginStyles.input}
+                                    onChangeText={password => this.setState({ password })}
                                     secureTextEntry={true} />
                         </View>
                         <TouchableOpacity activeOpacity={.5}>
@@ -45,7 +75,7 @@ export default class LoginView extends Component {
                                 <Text style={LoginStyles.forgotPasswordText}>Forgot Password?</Text>
                             </View>
                         </TouchableOpacity>
-                        <TouchableOpacity activeOpacity={.5}>
+                        <TouchableOpacity activeOpacity={.5} onPress={this._login}>
                             <View style={LoginStyles.button}>
                                 <Text style={LoginStyles.buttonText}>Sign In</Text>
                             </View>
@@ -66,3 +96,10 @@ export default class LoginView extends Component {
         );
     }
 }
+
+export default connect((state) => {
+    // mapStateToProps
+    return {
+        TEST: state.app.TEST, // TODO: testing rest api call status, remove later on
+    };
+})(LoginView);
