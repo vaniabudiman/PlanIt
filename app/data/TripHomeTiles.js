@@ -2,26 +2,31 @@ export default [
     {
         id: "Itinerary",
         icon: "calendar",
-        color: "aliceblue" //TODO: update this & add other color
+        color: "#FF3366"
     },
     {
         id: "Bookmarks",
-        icon: "bookmark"
+        icon: "bookmark",
+        color: "tomato"
     },
     {
         id: "Currency Conversion",
-        icon: "money"
+        icon: "money",
+        color: "forestgreen"
     },
     {
         id: "Browse",
-        icon: "globe"
+        icon: "globe",
+        color: "lightskyblue"
     },
     {
         id: "Transit",
-        icon: "plane"
+        icon: "plane",
+        color: "gold"
     },
     {
         id: "Map",
-        icon: "location-arrow"
+        icon: "location-arrow",
+        color: "mediumturquoise"
     }
 ];
