@@ -80,12 +80,15 @@ def users(userName=None):
             return bad_request()
 
         db = create_db_session()
-        if db.query(User).filter(User.userName == post_userName).first():
-            close_session(db)
-            return make_response('Conflict - Username taken.', 409)
         db.add(User(post_userName, post_password, post_name, post_phoneNumber))
-        close_session(db)
-        return make_response('User "%s" POST success.' % post_userName, 201)
+        try:
+            db.commit()
+            return make_response('User "%s" POST success.' % post_userName, 201)
+        except IntegrityError:
+            db.rollback()
+            return make_response('Conflict - Username taken.', 409)
+        finally:
+            close_session(db)
     elif request.method == GET:
         db = create_db_session()
         cur_userName = session.get(KEY__USERNAME)
@@ -93,7 +96,7 @@ def users(userName=None):
         if not query:
             close_session(db)
             return make_response('User not found.', 404)
-        ret_dict = query.toDict()
+        ret_dict = query.to_dict()
         close_session(db)
         return make_response(jsonify(ret_dict), 200)
     elif userName:
@@ -107,22 +110,29 @@ def users(userName=None):
             if not query:
                 close_session(db)
                 return make_response('User not found.', 404)
+
             try:
+                # Optional password parameter.
                 post_password = str(request.form['password'])
                 query.password = post_password
             except KeyError:
                 pass
+
             try:
+                # Optional name parameter.
                 post_name = str(request.form['name'])
                 query.name = post_name
             except KeyError:
                 pass
+
             try:
+                # Optional phoneNumber parameter.
                 post_phoneNumber = int(request.form['phoneNumber'])
                 query.phoneNumber = post_phoneNumber
             except KeyError:
                 pass
-            ret_dict = query.toDict()
+
+            ret_dict = query.to_dict()
             close_session(db)
             return make_response(jsonify(ret_dict), 200)
         elif request.method == DELETE:
@@ -218,6 +228,7 @@ if __name__ == '__main__' or __name__ == '__init__':
     db_session.commit()
     print_database()
 
+    # TODO: All of the following should go into a testing file.
     """
     # DELETING:
     query = db.query(User).filter(User.userName=='admin').first()
@@ -231,6 +242,7 @@ if __name__ == '__main__' or __name__ == '__init__':
 
     print_database()
     """
+
     if 'liveweb' not in gethostname():
         # Local hosting.
         # Host at 'http://localhost:4000/' and allow reloading on code changes.

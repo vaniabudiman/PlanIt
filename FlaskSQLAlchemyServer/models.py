@@ -36,11 +36,12 @@ class User(base):
         self.name = name
         self.phoneNumber = phoneNumber
 
-    def toDict(self):
+    def to_dict(self):
         return {"userName": self.userName,
                 "password": self.password,
                 "name": self.name,
                 "phoneNumber": self.phoneNumber}
+
 
 class Trip(base):
     __tablename__ = 'trip'
@@ -72,13 +73,14 @@ class Trip(base):
         self.endDate = endDate
         self.userName = userName
 
-    def toDict(self):
+    def to_dict(self):
         return {"tripID": self.tripID,
                 "tripName": self.tripName,
                 "active": self.active,
                 "startDate": self.startDate,
                 "endDate": self.endDate,
                 "userName": self.userName}
+
 
 class TransportEnum(enum.Enum):
     CAR    = 'car'
@@ -112,13 +114,14 @@ class Transportation(base):
         self.departureLocationID = depLocID
         self.arrivalLocationID = arrLocID
 
-    def toDict(self):
+    def to_dict(self):
         return {"eventID": self.eventID,
                 "type": self.type,
                 "operator": self.operator,
                 "number": self.number,
                 "departureLocationID": self.departureLocationID,
                 "arrivalLocationID": self.arrivalLocationID}
+
 
 class Bookmark(base):
     __tablename__ = 'bookmark'
@@ -147,7 +150,7 @@ class Bookmark(base):
         self.tripID = tripID
         self.eventID = eventID
 
-    def toDict(self):
+    def to_dict(self):
         return {"bookmarkID": self.bookmarkID,
                 "locationID": self.locationID,
                 "tripID": self.tripID,
@@ -191,7 +194,7 @@ class Event(base):
         self.reminderTime = reminderTime
         self.tripID = tripID
 
-    def toDict(self):
+    def to_dict(self):
         return {"eventID": self.eventID,
                 "eventName": self.eventName,
                 "startDateTime": self.startDateTime,
@@ -225,7 +228,7 @@ class Note(base):
         self.noteType = noteType
         self.noteContext = noteContext
 
-    def toDict(self):
+    def to_dict(self):
         return {"noteID": self.noteID,
                 "noteType": self.noteType,
                 "noteContext": self.noteContext}
@@ -251,7 +254,7 @@ class BookmarkNote(base):
         self.noteID = noteID
         self.bookmarkID = bookmarkID
 
-    def toDict(self):
+    def to_dict(self):
         return {"noteID": self.noteID,
                 "bookmarkID": self.bookmarkID}
 
@@ -276,7 +279,7 @@ class EventNote(base):
         self.noteID = noteID
         self.eventID = eventID
 
-    def toDict(self):
+    def to_dict(self):
         return {"noteID": self.noteID,
                 "eventID": self.eventID}
 
@@ -312,7 +315,7 @@ class SharedObject(base):
         self.toUserID = toUserID
         self.toTripID = toTripID
 
-    def toDict(self):
+    def to_dict(self):
         return {"sharedObjectID": self.sharedObjectID,
                 "fromUserID": self.fromUserID,
                 "toUserID": self.toUserID,
@@ -339,7 +342,7 @@ class SharedBookmark(base):
         self.bookmarkID = bookmarkID
         self.sharedObjectID = sharedObjectID
 
-    def toDict(self):
+    def to_dict(self):
         return {"bookmarkID": self.bookmarkID,
                 "sharedObjectID": self.sharedObjectID}
 
@@ -364,6 +367,6 @@ class SharedEvent(base):
         self.eventID = eventID
         self.sharedObjectID = sharedObjectID
 
-    def toDict(self):
+    def to_dict(self):
         return {"eventID": self.eventID,
                 "sharedObjectID": self.sharedObjectID}
