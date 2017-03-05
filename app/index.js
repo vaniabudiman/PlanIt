@@ -9,7 +9,7 @@ import store from "./core/store.js";
 import HomeView from "./layouts/HomeView.js";
 import BasicMapView from "./layouts/BasicMapView.js";
 import FormView from "./layouts/FormView.js";
-import BasicListView from "./layouts/BasicListView.js";
+import TripsView from "./layouts/TripsView.js";
 import { NavigationStyles } from "./styles/NavigationStyles.js";
 import UserSettings from "./components/UserSettings.js";
 import UserProfileView from "./layouts/UserProfileView.js";
@@ -48,8 +48,10 @@ export default class PlanIt extends Component {
                         <Scene key="signUp" component={SignUpView} title="Sign Up" hideNavBar={true} />
                         <Scene key="formView" component={FormView} title="Form View" {...navBarProps} />
                         <Scene key="basicMapView" component={BasicMapView} title="Basic Map View" {...navBarProps} />
-                        <Scene key="basicList" component={BasicListView}
-                            sceneStyle={ NavigationStyles.listViewScene } title="Basic List View" {...navBarProps} />
+                       
+                        <Scene key="trips" component={TripsView}
+                            sceneStyle={ NavigationStyles.listViewScene } title="Trips" {...navBarProps} />
+
                         <Scene key="userProfile" component={UserProfileView} title="User Profile" />
                         <Scene key="descriptionView" component={DescriptionView}
                             sceneStyle={ NavigationStyles.listViewScene } title="Description View" />
