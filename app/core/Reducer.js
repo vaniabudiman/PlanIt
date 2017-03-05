@@ -19,6 +19,10 @@ export default function (state = initialState, action) {
         case Types.INC:
             nextState = { ...state, count: state.count += 1 };
             break;
+        case Types.LOGIN_ATTEMPT:
+            // TODO: do something with login attempt:
+            nextState = { ...state, TEST: state.TEST = "ATTEMPTING..." };
+            break;
         case Types.LOGIN_SUCCESS:
             // TODO: do something with login success:
             nextState = { ...state, TEST: state.TEST = String(action.response.status) };

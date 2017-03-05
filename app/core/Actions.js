@@ -28,14 +28,11 @@ export function inc () {
     };
 }
 
-function dictToFormString (dict) {
-    let arr = [];
-    for (let key in dict) {
-        if (dict.hasOwnProperty(key)) {
-            arr.push(key + "=" + dict[key]);
-        }
-    }
-    return arr.join("&");
+function loginAttempt (userData) {
+    return {
+        userData,
+        type: Types.LOGIN_ATTEMPT,
+    };
 }
 
 function loginSuccess (response) {
@@ -56,13 +53,14 @@ function loginFailed (error) {
 
 export function login (userData) {
     return dispatch => {
+        dispatch(loginAttempt(userData));
         fetch(apiURL + "login", {
             method: "POST",
             headers: {
                 Accept: "application/json",
-                "Content-Type": "application/x-www-form-urlencoded",
+                "Content-Type": "application/json",
             },
-            body: dictToFormString({
+            body: JSON.stringify({
                 userName: userData.userName,
                 password: userData.password,
             }),
