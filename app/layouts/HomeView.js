@@ -37,8 +37,8 @@ class HomeView extends Component {
                 <Text style={GlobalStyles.text} onPress={Actions.signUp}>Go to Sign Up View</Text>
 
                 <Text style={GlobalStyles.text} onPress={Actions.trips}>Trips View</Text>
-                
-                <Text style={GlobalStyles.text} onPress={Actions.descriptionView}>Go to Description View</Text>
+                <Text style={GlobalStyles.text} onPress={Actions.itemDetails}>Item / Details View</Text>
+
                 <Text style={GlobalStyles.text}>{"Count: " + this.props.count}</Text>
                 <Icon.Button name="plus" backgroundColor={$gray} onPress={this._handleInc}>
                     Click me to Increment count

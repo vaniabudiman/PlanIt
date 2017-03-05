@@ -13,7 +13,7 @@ import TripsView from "./layouts/TripsView.js";
 import { NavigationStyles } from "./styles/NavigationStyles.js";
 import UserSettings from "./components/UserSettings.js";
 import UserProfileView from "./layouts/UserProfileView.js";
-import DescriptionView from "./layouts/DescriptionView.js";
+import ItemDetailsView from "./layouts/ItemDetailsView.js";
 import ContinentsView from "./layouts/ContinentsView.js";
 import TripHomeView from "./layouts/TripHomeView.js";
 import LoginView from "./layouts/LoginView.js";
@@ -51,10 +51,10 @@ export default class PlanIt extends Component {
                        
                         <Scene key="trips" component={TripsView}
                             sceneStyle={ NavigationStyles.listViewScene } title="Trips" {...navBarProps} />
+                        <Scene key="itemDetails" component={ItemDetailsView}
+                            sceneStyle={ NavigationStyles.listViewScene } title="Item / Details" />
 
                         <Scene key="userProfile" component={UserProfileView} title="User Profile" />
-                        <Scene key="descriptionView" component={DescriptionView}
-                            sceneStyle={ NavigationStyles.listViewScene } title="Description View" />
                     </Scene>
                 </RouterWithRedux>
             </Provider>
