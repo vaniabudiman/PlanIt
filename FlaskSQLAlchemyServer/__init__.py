@@ -72,10 +72,10 @@ def index():
 def users(userName=None):
     if request.method == POST:
         try:
-            post_userName = str(request.form['userName'])
-            post_password = str(request.form['password'])
-            post_name = str(request.form['name'])
-            post_phoneNumber = int(request.form['phoneNumber'])
+            post_userName = str(request.json['userName'])
+            post_password = str(request.json['password'])
+            post_name = str(request.json['name'])
+            post_phoneNumber = int(request.json['phoneNumber'])
         except KeyError:
             return bad_request()
 
@@ -113,21 +113,21 @@ def users(userName=None):
 
             try:
                 # Optional password parameter.
-                post_password = str(request.form['password'])
+                post_password = str(request.json['password'])
                 query.password = post_password
             except KeyError:
                 pass
 
             try:
                 # Optional name parameter.
-                post_name = str(request.form['name'])
+                post_name = str(request.json['name'])
                 query.name = post_name
             except KeyError:
                 pass
 
             try:
                 # Optional phoneNumber parameter.
-                post_phoneNumber = int(request.form['phoneNumber'])
+                post_phoneNumber = int(request.json['phoneNumber'])
                 query.phoneNumber = post_phoneNumber
             except KeyError:
                 pass
@@ -156,8 +156,8 @@ def login():
     Route for login. On success, sets the session KEY__LOGGED_IN flag to True.
     """
     try:
-        post_userName = str(request.form['userName'])
-        post_password = str(request.form['password'])
+        post_userName = str(request.json['userName'])
+        post_password = str(request.json['password'])
     except KeyError:
         return bad_request()
 

@@ -190,7 +190,10 @@ class Event(base):
         self.startDateTime = startDateTime
         self.endDateTime = endDateTime
         self.locationID = locationID
-        self.reminderFlag = reminderFlag
+        if reminderFlag is None:
+            self.reminderFlag = False
+        else:
+            self.reminderFlag = reminderFlag
         self.reminderTime = reminderTime
         self.tripID = tripID
 
