@@ -7,9 +7,10 @@ from socket import gethostname
 from flask import Flask, session, request, make_response, jsonify
 from flask import render_template  # TODO: remove along with index()
 from sqlalchemy.orm import sessionmaker, scoped_session
+from sqlalchemy.sql import func
 # Our defined modules.
 from base import base, engine
-from models import User, Trip
+from models import User, Trip, Event, Bookmark
 
 # Versioning.
 VERSION = 'v1'
@@ -30,10 +31,22 @@ DELETE = 'DELETE'
 KEY__LOGGED_IN = 'logged_in'
 KEY__USERNAME = 'user_name'
 
+# DateTime string format.
+# https://docs.python.org/2/library/datetime.html#strftime-strptime-behavior
+#  %Y: Year with century as a decimal number. 1970, 1988, 2001, 2013
+#  %b: Month as locale’s abbreviated name. Jan, Feb, ..., Dec
+#  %d: Day of the month as a zero-padded decimal number. 01, 02, ..., 31
+#  %H: Hour (24-hour clock) as a zero-padded decimal number. 00, 01, ..., 23
+#  %M: Minute as a zero-padded decimal number. 00, 01, ..., 59
+DT_FORMAT = '%Y%b%d%H%M'
+
 
 # Generic responses. Function instead of a var because requires app context.
-def bad_request():
-    return make_response('Bad request.', 400)
+def bad_request(msg=None):
+    if msg:
+        return make_response('Bad request; %s' % msg, 400)
+    else:
+        return make_response('Bad request.', 400)
 
 
 def create_db_session():
@@ -47,6 +60,14 @@ def close_session(cur_session):
     """Commit and close the given scoped session."""
     cur_session.commit()
     cur_session.close()
+
+
+def to_datetime(datetime_string):
+    """Convert a string to DateTime according to DT_FORMAT formatting."""
+    try:
+        return datetime.strptime(datetime_string, DT_FORMAT)
+    except ValueError as ve:
+        raise ve
 
 
 def print_database():
@@ -91,18 +112,18 @@ def users(userName=None):
             close_session(db)
     elif request.method == GET:
         db = create_db_session()
-        cur_userName = session.get(KEY__USERNAME)
-        query = db.query(User).filter(User.userName == cur_userName).first()
+        curr_userName = session.get(KEY__USERNAME)
+        query = db.query(User).filter(User.userName == curr_userName).first()
         if not query:
             close_session(db)
             return make_response('User not found.', 404)
-        ret_dict = query.to_dict()
+        ret_dict = {'user': query.to_dict()}
         close_session(db)
         return make_response(jsonify(ret_dict), 200)
     elif userName:
-        cur_userName = session.get(KEY__USERNAME)
+        curr_userName = session.get(KEY__USERNAME)
         if request.method == PUT:
-            if userName != cur_userName:
+            if userName != curr_userName:
                 return make_response('User not authorized to edit account.',
                                      401)
             db = create_db_session()
@@ -132,11 +153,11 @@ def users(userName=None):
             except KeyError:
                 pass
 
-            ret_dict = query.to_dict()
+            ret_dict = {'user': query.to_dict()}
             close_session(db)
             return make_response(jsonify(ret_dict), 200)
         elif request.method == DELETE:
-            if userName != cur_userName:
+            if userName != curr_userName:
                 return make_response('User not authorized to delete account.',
                                      401)
             db = create_db_session()
@@ -230,15 +251,29 @@ if __name__ == '__main__' or __name__ == '__init__':
 
     # TODO: All of the following should go into a testing file.
     """
+    db_session = create_db_session()
+
     # DELETING:
-    query = db.query(User).filter(User.userName=='admin').first()
-    db.delete(query)
-    db.commit()
+    query = db_session.query(User).filter(User.userName=='admin').first()
+    db_session.delete(query)
+    db_session.commit()
 
     # UPDATING:
-    query = db.query(User).filter(User.userName=='user2').first()
+    query = db_session.query(User).filter(User.userName=='user2').first()
     query.userName = 'changeTEST'
-    db.commit()
+    db_session.commit()
+
+    # GET ALL:
+    # This will return a list of Trip objects that satisfy active == True.
+    # If None are found, this will be [].
+    query = db_session.query(Trip).filter(Trip.active == True).all()
+
+    # GET MAX/MIN:
+    query = db_session.query(func.max(Trip.tripID).label('max_id'),
+                             func.min(Trip.tripID).label('min_id'))
+    # The following will be None if no entries are found.
+    print(query.first().max_id)
+    print(query.first().min_id)
 
     print_database()
     """
