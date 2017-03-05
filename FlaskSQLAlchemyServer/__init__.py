@@ -7,6 +7,7 @@ from socket import gethostname
 from flask import Flask, session, request, make_response, jsonify
 from flask import render_template  # TODO: remove along with index()
 from sqlalchemy.orm import sessionmaker, scoped_session
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.sql import func
 # Our defined modules.
 from base import base, engine
@@ -33,8 +34,14 @@ KEY__USERNAME = 'user_name'
 
 # DateTime string format.
 # https://docs.python.org/2/library/datetime.html#strftime-strptime-behavior
+# TODO: Consider http://stackoverflow.com/a/8154033/5608215
+#       Server request would take a string of UTC format and parse with
+#       datetime.strptime("..."); any retrieval of DateTime would then use
+#       datetime.strftime("%a, %d %b %Y %H:%M:%S %Z") to convert back.
+#       Mobile side javascript will use dateObj.toUTCString() to convert to this
+#       formatted string and convert back with Date(dateString)
 #  %Y: Year with century as a decimal number. 1970, 1988, 2001, 2013
-#  %b: Month as locale’s abbreviated name. Jan, Feb, ..., Dec
+#  %m: Month as a zero-padded decimal number. 01, 02, ..., 12
 #  %d: Day of the month as a zero-padded decimal number. 01, 02, ..., 31
 #  %H: Hour (24-hour clock) as a zero-padded decimal number. 00, 01, ..., 23
 #  %M: Minute as a zero-padded decimal number. 00, 01, ..., 59
