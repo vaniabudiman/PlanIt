@@ -18,7 +18,8 @@ class User(base):
     userName = Column(String(VARCHAR_LEN), primary_key=True, unique=True)
     password = Column(String(VARCHAR_LEN), nullable=False)
     name = Column(String(VARCHAR_LEN), nullable=False)
-    phoneNumber = Column(Integer, nullable=False)
+    email = Column(String(VARCHAR_LEN), nullable=False)
+    homeCurrency = Column(String(VARCHAR_LEN), nullable=False)
 
     # Relationships:
     trips = relationship('Trip', cascade=CASCADE_OPTIONS,
@@ -30,17 +31,19 @@ class User(base):
                                    backref='user_to', passive_updates=False,
                                    foreign_keys='[SharedObject.toUserID]')
 
-    def __init__(self, userName, password, name, phoneNumber):
+    def __init__(self, userName, password, name, email, homeCurrency):
         self.userName = userName
         self.password = password
         self.name = name
-        self.phoneNumber = phoneNumber
+        self.email = email
+        self.homeCurrency = homeCurrency
 
     def to_dict(self):
         return {"userName": self.userName,
                 "password": self.password,
                 "name": self.name,
-                "phoneNumber": self.phoneNumber}
+                "email": self.email,
+                "homeCurrency": self.homeCurrency}
 
 
 class Trip(base):
@@ -127,7 +130,8 @@ class Bookmark(base):
     __tablename__ = 'bookmark'
 
     bookmarkID = Column(Integer, primary_key=True, unique=True)
-    locationID = Column(Integer, nullable=False)
+    lat = Column(Integer, nullable=False)
+    lon = Column(Integer, nullable=False)
     tripID = Column(Integer,
                     ForeignKey('trip.tripID',
                                ondelete=CASCADE,
@@ -144,15 +148,17 @@ class Bookmark(base):
     sharedBookmarks = relationship('SharedBookmark', cascade=CASCADE_OPTIONS,
                                    backref='bookmark', passive_updates=False)
 
-    def __init__(self, bookmarkID, locationID, tripID, eventID):
+    def __init__(self, bookmarkID, lat, lon, tripID, eventID):
         self.bookmarkID = bookmarkID
-        self.locationID = locationID
+        self.lat = lat
+        self.lon = lon
         self.tripID = tripID
         self.eventID = eventID
 
     def to_dict(self):
         return {"bookmarkID": self.bookmarkID,
-                "locationID": self.locationID,
+                "lat": self.lat,
+                "lon": self.lon,
                 "tripID": self.tripID,
                 "eventID": self.eventID}
 
@@ -164,7 +170,8 @@ class Event(base):
     eventName = Column(String(VARCHAR_LEN), nullable=False)
     startDateTime = Column(DateTime, nullable=False)
     endDateTime   = Column(DateTime, nullable=False)
-    locationID   = Column(Integer)
+    lat = Column(Integer)
+    lon = Column(Integer)
     reminderFlag = Column(Boolean, nullable=False)
     reminderTime = Column(DateTime)
     tripID = Column(Integer,
@@ -184,12 +191,13 @@ class Event(base):
                                 backref='event', passive_updates=False)
 
     def __init__(self, eventID, eventName, startDateTime, endDateTime,
-                 locationID, reminderFlag, reminderTime, tripID):
+                 lat, lon, reminderFlag, reminderTime, tripID):
         self.eventID = eventID
         self.eventName = eventName
         self.startDateTime = startDateTime
         self.endDateTime = endDateTime
-        self.locationID = locationID
+        self.lat = lat
+        self.lon = lon
         if reminderFlag is None:
             self.reminderFlag = False
         else:
@@ -202,7 +210,8 @@ class Event(base):
                 "eventName": self.eventName,
                 "startDateTime": self.startDateTime,
                 "endDateTime": self.endDateTime,
-                "locationID": self.locationID,
+                "lat": self.lat,
+                "lon": self.lon,
                 "reminderFlag": self.reminderFlag,
                 "reminderTime": self.reminderTime,
                 "tripID": self.tripID}

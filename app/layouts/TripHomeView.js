@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import { Actions } from "react-native-router-flux";
 import Icon from "react-native-vector-icons/FontAwesome";
 import { ListView, GridRow, Tile, Title, TouchableOpacity } from "@shoutem/ui";
+import { $white } from "../styles/GlobalStyles.js";
 import TripHomeTiles from "../data/TripHomeTiles.js";
 
 
@@ -20,7 +21,7 @@ export default class TripHomeView extends Component {
         return (
             <TouchableOpacity key={cell.id} onPress={Actions.basicList}>
                 <Tile styleName="text-centric" style={{ backgroundColor: cell.color }}>
-                    <Title styleName="multiline">{cell.id}</Title>
+                    <Title styleName="multiline" style={{ color: $white }}>{cell.id}</Title>
                     <Icon name={cell.icon} size={100} />
                 </Tile>
             </TouchableOpacity>
