@@ -5,7 +5,8 @@ import { Types } from "./Actions.js";
 const initialState = {
     // default initial state
     count: 0, // TODO: testing demonstration only, remove later on
-    statusCode: "000",
+    loginStatusCode: "000",
+    signupStatusCode: "000",
 };
 
 export default function (state = initialState, action) {
@@ -22,12 +23,17 @@ export default function (state = initialState, action) {
         case Types.FETCH_ATTEMPT:
             nextState = { ...state, statusCode: state.statusCode = "100" };
             break;
-        case Types.FETCH_SUCCESS:
-            nextState = { ...state, statusCode: state.statusCode = String(action.response.status) };
+        case Types.LOGIN_SUCCESS:
+            nextState = { ...state, loginStatusCode: state.loginStatusCode = String(action.response.status) };
             break;
-        case Types.FETCH_FAILED:
-            console.log(action);
-            nextState = { ...state, statusCode: state.statusCode = "FAILED" };
+        case Types.LOGIN_FAILED:
+            nextState = { ...state, loginStatusCode: state.loginStatusCode = "FAILED" };
+            break;
+        case Types.SIGNUP_SUCCESS:
+            nextState = { ...state, signupStatusCode: state.signupStatusCode = String(action.response.status) };
+            break;
+        case Types.SIGNUP_FAILED:
+            nextState = { ...state, signupStatusCode: state.signupStatusCode = "FAILED" };
             break;
         default:
             return state;

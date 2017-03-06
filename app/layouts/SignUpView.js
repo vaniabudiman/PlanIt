@@ -9,12 +9,50 @@ import {
   TextInput,
   TouchableOpacity
 } from "react-native";
-import { Actions } from "react-native-router-flux";
+import { Actions, ActionConst } from "react-native-router-flux";
 import Icon from "react-native-vector-icons/FontAwesome";
 import SignUpStyles from "../styles/SignUpStyles.js";
+import { signup } from "../core/Actions.js";
+import { connect } from "react-redux";
 
 
-export default class SignUpView extends Component {
+class SignUpView extends Component {
+
+    static propTypes = {
+        dispatch: React.PropTypes.func,
+        signupStatusCode: React.PropTypes.string,
+    }
+
+    constructor (props) {
+        super(props);
+        this.state = {
+            // TODO: view textinputs need to set these states; see LoginView.js for onChangeText usage
+            userName: "",
+            password: "",
+            name: "",
+            email: "",
+            homeCurrency: "",
+        };
+    }
+
+    componentWillMount () {
+        this.requireAuthentication(this.props.signupStatusCode);
+
+        // Bind Redux action creators
+        this._signup = () => this.props.dispatch(signup(this.state));
+    }
+
+    componentWillReceiveProps (nextProps) {
+        this.requireAuthentication(nextProps.signupStatusCode);
+    }
+
+    requireAuthentication (loginStatus) {
+        if (loginStatus === "201") {
+            Actions.login({ type: ActionConst.RESET });
+        }
+        // Other statuses as necessary
+    }
+
     render () {
         return (
             <View style={SignUpStyles.container}>
@@ -60,7 +98,7 @@ export default class SignUpView extends Component {
                         </View>
                     </View>
                     <View style={SignUpStyles.footerContainer}>
-                        <TouchableOpacity>
+                        <TouchableOpacity onPress={this._signup}>
                             <View style={SignUpStyles.signup}>
                                 <Text style={SignUpStyles.whiteFont}>Join</Text>
                             </View>
@@ -79,3 +117,10 @@ export default class SignUpView extends Component {
         );
     }
 }
+
+export default connect((state) => {
+    // mapStateToProps
+    return {
+        signupStatusCode: state.app.signupStatusCode,
+    };
+})(SignUpView);

@@ -20,7 +20,7 @@ class LoginView extends Component {
 
     static propTypes = {
         dispatch: React.PropTypes.func,
-        statusCode: React.PropTypes.string,
+        loginStatusCode: React.PropTypes.string,
     }
 
     constructor (props) {
@@ -32,14 +32,14 @@ class LoginView extends Component {
     }
 
     componentWillMount () {
-        this.requireAuthentication(this.props.statusCode);
+        this.requireAuthentication(this.props.loginStatusCode);
 
         // Bind Redux action creators
         this._login = () => this.props.dispatch(login(this.state));
     }
 
     componentWillReceiveProps (nextProps) {
-        this.requireAuthentication(nextProps.statusCode);
+        this.requireAuthentication(nextProps.loginStatusCode);
     }
 
     requireAuthentication (loginStatus) {
@@ -54,7 +54,6 @@ class LoginView extends Component {
         return (
             <View style={LoginStyles.container}>
                 {/*TODO: testing rest api call status, remove later on*/}
-                <Text>{"Login Status: " + this.props.statusCode}</Text>
                 <Image source={{ uri: "login" }} style={LoginStyles.background} resizeMode="cover">
                     <View style={LoginStyles.markWrap}>
                         <Icon name="check" style={LoginStyles.mark} resizeMode="contain" />
@@ -113,6 +112,6 @@ class LoginView extends Component {
 export default connect((state) => {
     // mapStateToProps
     return {
-        statusCode: state.app.statusCode, // TODO: testing rest api call status, remove later on
+        loginStatusCode: state.app.loginStatusCode,
     };
 })(LoginView);

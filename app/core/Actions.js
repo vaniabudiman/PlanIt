@@ -9,8 +9,10 @@ export const Types = {
     INC: "INC",
 
     FETCH_ATTEMPT: "FETCH_ATTEMPT",
-    FETCH_SUCCESS: "FETCH_SUCCESS",
-    FETCH_FAILED: "FETCH_FAILED"
+    LOGIN_SUCCESS: "LOGIN_SUCCESS",
+    LOGIN_FAILED: "LOGIN_FAILED",
+    SIGNUP_SUCCESS: "SIGNUP_SUCCESS",
+    SIGNUP_FAILED: "SIGNUP_FAILED",
 };
 
 export function set (path, value) {
@@ -34,19 +36,35 @@ function fetchAttempt () {
     };
 }
 
-function fetchSuccess (response) {
+function loginSuccess (response) {
     return dispatch => {
         dispatch({
             response,
-            type: Types.FETCH_SUCCESS,
+            type: Types.LOGIN_SUCCESS,
         });
     };
 }
 
-function fetchFailed (error) {
+function loginFailed (error) {
     return {
         error,
-        type: Types.FETCH_FAILED,
+        type: Types.LOGIN_FAILED,
+    };
+}
+
+function signupSuccess (response) {
+    return dispatch => {
+        dispatch({
+            response,
+            type: Types.SIGNUP_SUCCESS,
+        });
+    };
+}
+
+function signupFailed (error) {
+    return {
+        error,
+        type: Types.SIGNUP_FAILED,
     };
 }
 
@@ -67,17 +85,55 @@ export function login (loginData) {
         .then(response => { // Header response.
             // console.log(response);
             if (response.status >= 200 && response.status < 300) {
-                dispatch(fetchSuccess(response));
-                alert("Login Success. Hello " + loginData.userName + "!")
+                dispatch(loginSuccess(response));
+                alert("Login Success. Hello " + loginData.userName + "!");
             } else {
                 const error = new Error();
                 error.response = response;
-                dispatch(fetchFailed(error));
+                dispatch(loginFailed(error));
                 throw error;
             }
-        }) // Use another then if you want the body json response.
+        })
         .catch(error => {
             // console.log("Request Failed", error);
             alert("Login Failed: " + error.response.status); // TODO: remove this and do something with the fetch error
+        });};
+}
+
+export function signup (signupData) {
+    return dispatch => {
+        dispatch(fetchAttempt());
+        fetch(apiURL + "users", {
+            method: "POST",
+            headers: {
+                Accept: "application/json",
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                userName: signupData.userName,
+                password: signupData.password,
+                name: signupData.name,
+                email: signupData.email,
+                homeCurrency: signupData.homeCurrency,
+            }),
+        })
+        .then(response => {
+            if (response.status >= 200 && response.status < 300) {
+                dispatch(signupSuccess(response));
+                alert("Signup Success. Try logging in now " + signupData.userName + "!");
+                return response.json();
+            } else {
+                const error = new Error();
+                error.response = response;
+                dispatch(signupFailed(error));
+                throw error;
+            }
+        }) // return response.json() and use another .then if you want the body json response.
+        // .then(response => {
+        //     // json response of newly created User object is here
+        // })
+        .catch(error => {
+            // console.log("Request Failed", error);
+            alert("Signup Failed: " + error.response.status);
         });};
 }
