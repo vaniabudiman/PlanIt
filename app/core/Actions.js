@@ -8,9 +8,9 @@ export const Types = {
     // TODO: testing demonstration only, remove later on
     INC: "INC",
 
-    LOGIN_ATTEMPT: "LOGIN_ATTEMPT",
-    LOGIN_SUCCESS: "LOGIN_SUCCESS",
-    LOGIN_FAILED: "LOGIN_FAILED"
+    FETCH_ATTEMPT: "FETCH_ATTEMPT",
+    FETCH_SUCCESS: "FETCH_SUCCESS",
+    FETCH_FAILED: "FETCH_FAILED"
 };
 
 export function set (path, value) {
@@ -28,32 +28,31 @@ export function inc () {
     };
 }
 
-function loginAttempt (userData) {
+function fetchAttempt () {
     return {
-        userData,
-        type: Types.LOGIN_ATTEMPT,
+        type: Types.FETCH_ATTEMPT,
     };
 }
 
-function loginSuccess (response) {
+function fetchSuccess (response) {
     return dispatch => {
         dispatch({
             response,
-            type: Types.LOGIN_SUCCESS,
+            type: Types.FETCH_SUCCESS,
         });
     };
 }
 
-function loginFailed (error) {
+function fetchFailed (error) {
     return {
         error,
-        type: Types.LOGIN_FAILED,
+        type: Types.FETCH_FAILED,
     };
 }
 
-export function login (userData) {
+export function login (loginData) {
     return dispatch => {
-        dispatch(loginAttempt(userData));
+        dispatch(fetchAttempt());
         fetch(apiURL + "login", {
             method: "POST",
             headers: {
@@ -61,23 +60,24 @@ export function login (userData) {
                 "Content-Type": "application/json",
             },
             body: JSON.stringify({
-                userName: userData.userName,
-                password: userData.password,
+                userName: loginData.userName,
+                password: loginData.password,
             }),
         })
         .then(response => { // Header response.
             // console.log(response);
             if (response.status >= 200 && response.status < 300) {
-                dispatch(loginSuccess(response));
+                dispatch(fetchSuccess(response));
+                alert("Login Success. Hello " + loginData.userName + "!")
             } else {
-                const error = new Error(response.statusText);
+                const error = new Error();
                 error.response = response;
-                dispatch(loginFailed(error));
+                dispatch(fetchFailed(error));
                 throw error;
             }
         }) // Use another then if you want the body json response.
         .catch(error => {
             // console.log("Request Failed", error);
-            alert(error.response.status); // TODO: remove this and do something with the fetch error
+            alert("Login Failed: " + error.response.status); // TODO: remove this and do something with the fetch error
         });};
 }
