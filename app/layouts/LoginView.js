@@ -44,7 +44,11 @@ class LoginView extends Component {
                 <Text>{"Login Status: " + this.props.TEST}</Text>
                 <Image source={{ uri: "login" }} style={LoginStyles.background} resizeMode="cover">
                     <View style={LoginStyles.markWrap}>
-                        <Icon name="check" style={LoginStyles.mark} resizeMode="contain" />
+                        <Text style={LoginStyles.brandWrap}>
+                            <Text style={LoginStyles.planText}>Plan</Text>
+                            <Text style={LoginStyles.itText}>It</Text>&nbsp;
+                            <Icon name="plane" style={LoginStyles.brandIcon} resizeMode="contain" />
+                        </Text>
                     </View>
                     <View style={LoginStyles.wrapper}>
                         <View style={LoginStyles.inputWrap}>
@@ -56,7 +60,8 @@ class LoginView extends Component {
                                     multiline={false}
                                     maxLength={limit}
                                     onChangeText={userName => this.setState({ userName })}
-                                    style={LoginStyles.input} />
+                                    style={LoginStyles.input}
+                                    underlineColorAndroid="rgba(250, 250, 250, 0.8)" />
                         </View>
                         <View style={LoginStyles.inputWrap}>
                             <View style={LoginStyles.iconWrap}>
@@ -68,7 +73,8 @@ class LoginView extends Component {
                                     maxLength={limit}
                                     style={LoginStyles.input}
                                     onChangeText={password => this.setState({ password })}
-                                    secureTextEntry={true} />
+                                    secureTextEntry={true}
+                                    underlineColorAndroid="rgba(250, 250, 250, 0.8)" />
                         </View>
                         <TouchableOpacity activeOpacity={.5}>
                             <View>
@@ -83,7 +89,7 @@ class LoginView extends Component {
                     </View>
                     <View style={LoginStyles.container}>
                         <View style={LoginStyles.signupWrap}>
-                            <Text style={LoginStyles.accountText}>Don"t have an account?</Text>
+                            <Text style={LoginStyles.accountText}>Don't have an account?</Text>
                             <TouchableOpacity activeOpacity={.5}>
                                 <View>
                                     <Text style={LoginStyles.signupLinkText} onPress={Actions.signUp}>Sign Up</Text>

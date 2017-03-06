@@ -9,71 +9,101 @@ const { width, height } = Dimensions.get("window");
 export default StyleSheet.create({
     container: {
         flex: 1,
+        backgroundColor: "rgba(0,0,0,.5)"
     },
     markWrap: {
         flex: 1,
-        paddingVertical: 30,
+        paddingTop: 50,
+        backgroundColor: "rgba(0,0,0,.5)"
     },
-    mark: {
-        width: null,
-        height: null,
-        flex: 1,
+    brandWrap: {
+        textAlign: "center",
+        fontSize: 80,
+        fontFamily: "serif",
+        fontWeight: "bold",
+        color: "white",
+    },
+    planText: {
+        color: "#39a7a3",
+    },
+    itText: {
+        color: "white",
+    },
+    brandIcon: {
+        fontSize: 70,
+        color: "#39a7a3",
+        height: 40,
+        width: 40,
+        marginHorizontal: 50
     },
     background: {
         width,
         height,
     },
     wrapper: {
-        paddingVertical: 30,
+        paddingVertical: 10,
+        backgroundColor: "rgba(0,0,0,.5)"
     },
     inputWrap: {
         flexDirection: "row",
-        marginVertical: 10,
+        marginTop: 20,
         height: 40,
-        borderBottomWidth: 1,
-        borderBottomColor: "#CCC"
+        paddingRight: 20
     },
     iconWrap: {
-        paddingHorizontal: 7,
+        paddingLeft: 20,
         alignItems: "center",
         justifyContent: "center",
     },
     icon: {
-        height: 20,
-        width: 20,
+        height: 22,
+        width: 22,
+        fontSize: 22,
+        color: "white"
     },
     input: {
         flex: 1,
         paddingHorizontal: 10,
+        fontWeight: "bold",
+        fontSize: 18
     },
     button: {
-        backgroundColor: "#FF3366",
+        backgroundColor: "#39a7a3",
         paddingVertical: 20,
         alignItems: "center",
         justifyContent: "center",
         marginTop: 30,
     },
     buttonText: {
-        color: "#FFF",
-        fontSize: 18,
+        color: "white",
+        fontSize: 20,
+        fontWeight: "bold",
     },
     forgotPasswordText: {
-        color: "#D8D8D8",
+        color: "#39a7a3",
         backgroundColor: "transparent",
         textAlign: "right",
-        paddingRight: 15,
+        paddingRight: 20,
+        fontWeight: "bold",
+        fontSize: 18,
+        marginBottom: 10
     },
     signupWrap: {
         backgroundColor: "transparent",
         flexDirection: "row",
-        alignItems: "center",
-        justifyContent: "center",
+        alignItems: "flex-end",
+        justifyContent: "flex-end",
+        paddingRight: 20,
     },
     accountText: {
-        color: "#D8D8D8"
+        fontWeight: "bold",
+        color: "white",
+        fontSize: 18
     },
     signupLinkText: {
-        color: "#FFF",
+        fontWeight: "bold",
+        color: "#39a7a3",
         marginLeft: 5,
-    }
+        fontSize: 18
+    },
 });
