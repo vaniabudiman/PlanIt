@@ -47,7 +47,7 @@ export default class TripView extends Component {
         //      - the items will probs be coming from server (or Realm) if offline
         //      - how we do the loading state may be different / vary depending on how data is loaded in from server/Realm
         this.state = {
-            items: items,
+            items: items,   // TODO: change this to an empty list to see an example of the empty message
             loadingTrips: false
         };
 
@@ -126,6 +126,7 @@ export default class TripView extends Component {
     render () {
         return (
             <ListMapTemplate data={this.state.items}
+                emptyListMessage={"Create a trip to begin!"}
                 loadingData={this.state.loadingTrips}
                 enableSearch={true}
                 onSearch={this._handleSearch}
