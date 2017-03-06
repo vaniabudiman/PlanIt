@@ -6,6 +6,8 @@ from datetime import datetime
 from socket import gethostname
 from flask import Flask, session, request, make_response, jsonify
 from flask import render_template  # TODO: remove along with index()
+from flask_mail import Mail, Message
+from smtplib import SMTPException
 from sqlalchemy.orm import sessionmaker, scoped_session
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.sql import func
@@ -17,10 +19,24 @@ from models import User, Trip, Event, Bookmark
 VERSION = 'v1'
 VER_PATH = '/' + VERSION
 
+# Server email.
+PLANIT_EMAIL = 'planit410@gmail.com'
+
 # App initialization.
 app = Flask(__name__)
 # Secret key for signing sessions.
 app.secret_key = urandom(12)
+# Mail instance.
+app.config.update(
+    # Email settings.
+    MAIL_SERVER='smtp.gmail.com',
+    MAIL_PORT=465,
+    MAIL_USE_SSL=True,
+    MAIL_DEFAULT_SENDER=PLANIT_EMAIL,
+    MAIL_USERNAME=PLANIT_EMAIL,
+    MAIL_PASSWORD='410software'
+)
+mail = Mail(app)
 
 # HTTP call methods.
 POST = 'POST'
@@ -75,6 +91,22 @@ def to_datetime(datetime_string):
         return datetime.strptime(datetime_string, DT_FORMAT)
     except ValueError as ve:
         raise ve
+
+
+def notify_user(user_name, user_email):
+    """Notify the user of changed password.
+    @throws SMTPException
+    """
+    subject = 'Planit password changed!'
+    body = 'Hi %s!' % user_name
+    body += '\n\n'
+    body += 'Your account password was recently changed. '
+    body += 'Just wanted to let you know!'
+    msg = Message(subject=subject,
+                  body=body,
+                  recipients=[user_email])
+    mail.send(msg)
+    return msg.as_string()
 
 
 def print_database():
@@ -146,6 +178,10 @@ def users(userName=None):
                 # Optional password parameter.
                 post_password = str(request.json['password'])
                 query.password = post_password
+                try:
+                    notify_user(userName, query.email)
+                except SMTPException as se:
+                    return bad_request(se)
             except KeyError:
                 pass
 
