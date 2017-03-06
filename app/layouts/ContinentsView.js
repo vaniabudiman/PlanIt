@@ -5,7 +5,6 @@ import { ListView, GridRow, Tile, Image, Title, TouchableOpacity } from "@shoute
 import Continents from "../data/Continents.js";
 import ContinentStyles from "../styles/ContinentStyles.js";
 
-
 export default class ContinentsView extends Component {
 
     constructor (props) {
@@ -17,15 +16,17 @@ export default class ContinentsView extends Component {
     }
 
     _getCell (cell) {
+        const goToCountriesView = () => Actions.countries({ continent: cell.id });
+
         //TODO: route to appropriate countries list view "onPress" of image
         return (
-            <TouchableOpacity key={cell.id} onPress={Actions.basicList}
+            <TouchableOpacity key={cell.id} onPress={goToCountriesView}
                     style={StyleSheet.flatten(ContinentStyles.touchOpacitySizing)}>
                 <Image styleName="large"
                         style={StyleSheet.flatten(ContinentStyles.tileSpacing)}
                         source={{ uri: cell.images[Math.floor(Math.random()*cell.images.length)] }}>
                     <Tile>
-                        <Title>{cell.id}</Title>
+                        <Title>{cell.name}</Title>
                     </Tile>
                 </Image>
             </TouchableOpacity>
