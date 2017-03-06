@@ -14,6 +14,7 @@ import UserSettings from "./components/UserSettings.js";
 import UserProfileView from "./layouts/UserProfileView.js";
 import ItemDetailsView from "./layouts/ItemDetailsView.js";
 import ContinentsView from "./layouts/ContinentsView.js";
+import CountriesView from "./layouts/CountriesView.js";
 import TripHomeView from "./layouts/TripHomeView.js";
 import LoginView from "./layouts/LoginView.js";
 import SignUpView from "./layouts/SignUpView.js";
@@ -41,6 +42,8 @@ export default class PlanIt extends Component {
                         <Scene key="home" component={HomeView} title="Home View" inital={true} {...navBarProps} />
                         <Scene key="continents" component={ContinentsView} title="Continents"
                             sceneStyle={NavigationStyles.continentsViewScene} {...navBarProps} />
+                        <Scene key="countries" component={CountriesView} title="Countries"
+                            sceneStyle={NavigationStyles.countriesViewScene} {...navBarProps} />
                         <Scene key="tripHome" component={TripHomeView} title="Trip Homepage"
                             sceneStyle={NavigationStyles.tripHomeViewScene} {...navBarProps} />
                         <Scene key="login" component={LoginView} title="Login" hideNavBar={true} />

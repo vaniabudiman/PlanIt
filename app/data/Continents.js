@@ -1,6 +1,7 @@
 export default [
     {
-        id: "Asia",
+        id: "AS",
+        name: "Asia",
         images: [
             "asia_1",
             "asia_2",
@@ -10,7 +11,8 @@ export default [
         ]
     },
     {
-        id: "Africa",
+        id: "AF",
+        name: "Africa",
         images: [
             "africa_1",
             "africa_2",
@@ -20,7 +22,8 @@ export default [
         ]
     },
     {
-        id: "Australia",
+        id: "OC",
+        name: "Australia",
         images: [
             "australia_1",
             "australia_2",
@@ -30,7 +33,8 @@ export default [
         ]
     },
     {
-        id: "Europe",
+        id: "EU",
+        name: "Europe",
         images: [
             "europe_1",
             "europe_2",
@@ -40,7 +44,8 @@ export default [
         ]
     },
     {
-        id: "North America",
+        id: "NA",
+        name: "North America",
         images: [
             "north_america_1",
             "north_america_2",
@@ -50,7 +55,8 @@ export default [
         ]
     },
     {
-        id: "South America",
+        id: "SA",
+        name: "South America",
         images: [
             "south_america_1",
             "south_america_2",
