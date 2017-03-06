@@ -103,15 +103,18 @@ def users(userName=None):
             post_userName = str(request.json['userName'])
             post_password = str(request.json['password'])
             post_name = str(request.json['name'])
-            post_phoneNumber = int(request.json['phoneNumber'])
+            post_email = str(request.json['email'])
+            post_homeCurrency = str(request.json['homeCurrency'])
         except KeyError:
             return bad_request()
 
         db = create_db_session()
-        db.add(User(post_userName, post_password, post_name, post_phoneNumber))
         try:
+            user = User(post_userName, post_password, post_name,
+                        post_email, post_homeCurrency)
+            db.add(user)
             db.commit()
-            return make_response('User "%s" POST success.' % post_userName, 201)
+            return make_response(jsonify({'user': user.to_dict()}), 201)
         except IntegrityError:
             db.rollback()
             return make_response('Conflict - Username taken.', 409)
@@ -154,9 +157,16 @@ def users(userName=None):
                 pass
 
             try:
-                # Optional phoneNumber parameter.
-                post_phoneNumber = int(request.json['phoneNumber'])
-                query.phoneNumber = post_phoneNumber
+                # Optional email parameter.
+                post_email = str(request.json['email'])
+                query.email = post_email
+            except KeyError:
+                pass
+
+            try:
+                # Optional homeCurrency parameter.
+                post_homeCurrency = str(request.json['homeCurrency'])
+                query.homeCurrency = post_homeCurrency
             except KeyError:
                 pass
 
@@ -615,8 +625,8 @@ if __name__ == '__main__' or __name__ == '__init__':
     """
     # ADDING:
     db_session = create_db_session()
-    user1 = User('admin', 'admin', 'Ad Min', 6046046004)
-    user2 = User('user2', 'user2', 'Us Er2', 6042222222)
+    user1 = User('admin', 'admin', 'Ad Min', "admin@admin.com", "CAD")
+    user2 = User('user2', 'user2', 'Us Er2', "admin@admin.com", "USD")
     db_session.add_all([user1, user2])
     trip1 = Trip(1, 'admin_trip', True,
                  datetime.now(), datetime.now(),
