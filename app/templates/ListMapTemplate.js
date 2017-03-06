@@ -246,6 +246,16 @@ export default class ListMapTemplate extends Component {
         }
     }
 
+    renderCreateButton () {
+        if (this.props.onCreateItem) {
+            return (
+                <Button onPress={this.props.onCreateItem}>
+                    <Text>CREATE NEW</Text>
+                </Button>
+            );
+        }
+    }
+
     renderRowIcons (item) {
         let icons = [];
 
@@ -275,13 +285,16 @@ export default class ListMapTemplate extends Component {
     }
 
     renderRow (item) {
+        const itemTitle = item.id ? item.id
+                        : item.name ? item.name
+                        : null;
         return (
             <View>
                 <TouchableOpacity onPress={this.props.onClickItem.bind(null, item.id)}>
                     <Row>
                         <View styleName="horizontal space-between">
                             <View styleName="vertical">
-                                <Title>{item.title}</Title>
+                                <Title>{itemTitle}</Title>
                                 <Subtitle>{item.subtitle}</Subtitle>
                             </View>
                             {this.renderRowIcons(item)}
@@ -305,9 +318,7 @@ export default class ListMapTemplate extends Component {
                     renderRow={item => this.renderRow(item)}
                     onRefresh={this.props.onRefresh}
                 />
-                <Button onPress={this.props.onCreateItem}>
-                    <Text>CREATE NEW</Text>
-                </Button>
+                {this.renderCreateButton()}
             </View>
         );
     }

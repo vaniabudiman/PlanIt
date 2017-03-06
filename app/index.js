@@ -43,7 +43,7 @@ export default class PlanIt extends Component {
                         <Scene key="continents" component={ContinentsView} title="Continents"
                             sceneStyle={NavigationStyles.continentsViewScene} {...navBarProps} />
                         <Scene key="countries" component={CountriesView} title="Countries"
-                            sceneStyle={NavigationStyles.countriesViewScene} {...navBarProps} />
+                            sceneStyle={NavigationStyles.listViewScene} {...navBarProps} />
                         <Scene key="tripHome" component={TripHomeView} title="Trip Homepage"
                             sceneStyle={NavigationStyles.tripHomeViewScene} {...navBarProps} />
                         <Scene key="login" component={LoginView} title="Login" hideNavBar={true} />

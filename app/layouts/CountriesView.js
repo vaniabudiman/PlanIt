@@ -1,8 +1,7 @@
 import React, { Component } from "react";
-import { Text } from "react-native";
 import Countries from "../data/countries.json";
 import { filter } from "underscore";
-import { ListView, View, Row } from "@shoutem/ui";
+import ListMapTemplate from "../templates/ListMapTemplate.js";
 
 
 export default class CountriesView extends Component {
@@ -15,14 +14,9 @@ export default class CountriesView extends Component {
         continent: React.PropTypes.string
     }
 
-    renderRow (country) {
-        return (
-            <Row>
-                <View styleName="vertical">
-                    <Text>{country.name}</Text>
-                </View>
-            </Row>
-        );
+    _handleClickItem (name) {
+        // Make necessary calls to do w/e you want when clicking on item identified by name
+        alert("clicked on country: " + name);
     }
 
     render () {
@@ -30,12 +24,8 @@ export default class CountriesView extends Component {
         const countriesFilteredByContinent = filter(Countries.countries,
             function (country) { return country.continent === selectedContinent; });
         return (
-            <View>
-                <ListView
-                    data={countriesFilteredByContinent}
-                    renderRow={country => this.renderRow(country)}
-                />
-            </View>
+            <ListMapTemplate data={countriesFilteredByContinent}
+                onClickItem={this._handleClickItem} />
         );
     }
 }
