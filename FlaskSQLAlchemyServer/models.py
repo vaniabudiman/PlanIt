@@ -18,7 +18,8 @@ class User(base):
     userName = Column(String(VARCHAR_LEN), primary_key=True, unique=True)
     password = Column(String(VARCHAR_LEN), nullable=False)
     name = Column(String(VARCHAR_LEN), nullable=False)
-    phoneNumber = Column(Integer, nullable=False)
+    email = Column(String(VARCHAR_LEN), nullable=False)
+    homeCurrency = Column(String(VARCHAR_LEN), nullable=False)
 
     # Relationships:
     trips = relationship('Trip', cascade=CASCADE_OPTIONS,
@@ -30,17 +31,19 @@ class User(base):
                                    backref='user_to', passive_updates=False,
                                    foreign_keys='[SharedObject.toUserID]')
 
-    def __init__(self, userName, password, name, phoneNumber):
+    def __init__(self, userName, password, name, email, homeCurrency):
         self.userName = userName
         self.password = password
         self.name = name
-        self.phoneNumber = phoneNumber
+        self.email = email
+        self.homeCurrency = homeCurrency
 
     def to_dict(self):
         return {"userName": self.userName,
                 "password": self.password,
                 "name": self.name,
-                "phoneNumber": self.phoneNumber}
+                "email": self.email,
+                "homeCurrency": self.homeCurrency}
 
 
 class Trip(base):
