@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import Countries from "../data/countries.json";
-import { filter } from "underscore";
+import { filter, extend } from "underscore";
 import ListMapTemplate from "../templates/ListMapTemplate.js";
 
 
@@ -14,15 +14,19 @@ export default class CountriesView extends Component {
         continent: React.PropTypes.string
     }
 
-    _handleClickItem (name) {
+    _handleClickItem (item) {
         // Make necessary calls to do w/e you want when clicking on item identified by name
-        alert("clicked on country: " + name);
+        alert("clicked on country: " + item.name);
     }
 
     render () {
         const selectedContinent = this.props.continent;
-        const countriesFilteredByContinent = filter(Countries.countries,
-            function (country) { return country.continent === selectedContinent; });
+        const countriesFilteredByContinent = filter(Countries.countries, (country) => {
+            if (country.continent === selectedContinent) {
+                return extend(country, { title: country.name });    // add title needed by template
+            }
+        });
+
         return (
             <ListMapTemplate data={countriesFilteredByContinent}
                 onClickItem={this._handleClickItem} />
