@@ -7,7 +7,6 @@ import { Router, Scene } from "react-native-router-flux";
 import { AppRegistry } from "react-native";
 import store from "./core/store.js";
 import HomeView from "./layouts/HomeView.js";
-import BasicMapView from "./layouts/BasicMapView.js";
 import FormView from "./layouts/FormView.js";
 import TripsView from "./layouts/TripsView.js";
 import { NavigationStyles } from "./styles/NavigationStyles.js";
@@ -46,7 +45,6 @@ export default class PlanIt extends Component {
                             sceneStyle={NavigationStyles.tripHomeViewScene} {...navBarProps} />
                         <Scene key="login" component={LoginView} title="Login" hideNavBar={true} />
                         <Scene key="signUp" component={SignUpView} title="Sign Up" hideNavBar={true} />
-                        <Scene key="basicMapView" component={BasicMapView} title="Basic Map View" {...navBarProps} />
                        
                         <Scene key="trips" component={TripsView}
                             sceneStyle={ NavigationStyles.listViewScene } title="Trips" {...navBarProps} />

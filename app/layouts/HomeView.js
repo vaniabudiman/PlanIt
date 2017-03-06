@@ -29,7 +29,6 @@ class HomeView extends Component {
         return (
             <View style={[GlobalStyles.container, { backgroundColor: $blue }]}>
                 <Text style={GlobalStyles.text}>Welcome to our App!</Text>
-                <Text style={GlobalStyles.text} onPress={Actions.basicMapView}>Go to Map View</Text>
                 <Text style={GlobalStyles.text} onPress={Actions.continents}>Go to Continents View</Text>
                 <Text style={GlobalStyles.text} onPress={Actions.tripHome}>Go to Trip Home View</Text>
                 <Text style={GlobalStyles.text} onPress={Actions.login}>Go to Login View</Text>
