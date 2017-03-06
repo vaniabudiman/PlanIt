@@ -60,8 +60,8 @@ import { ListView, Text, TextInput, Title, Subtitle, Divider, View, Row, Button,
 /**
  * @callback ListMapTemplate~onClickItem
  *
- * @param {number} id
- *    Unique id for the item clicked.
+ * @param {ListMapTemplate~ListObject} item
+ *    The complete list item object.
 */
 
 /**
@@ -249,6 +249,16 @@ export default class ListMapTemplate extends Component {
         }
     }
 
+    renderCreateButton () {
+        if (this.props.onCreateItem) {
+            return (
+                <Button onPress={this.props.onCreateItem}>
+                    <Text>CREATE NEW</Text>
+                </Button>
+            );
+        }
+    }
+
     renderRowIcons (item) {
         let icons = [];
 
@@ -280,7 +290,7 @@ export default class ListMapTemplate extends Component {
     renderRow (item) {
         return (
             <View>
-                <TouchableOpacity onPress={this.props.onClickItem.bind(null, item.id)}>
+                <TouchableOpacity onPress={this.props.onClickItem.bind(null, item)}>
                     <Row>
                         <View styleName="horizontal space-between">
                             <View styleName="vertical">
@@ -313,9 +323,7 @@ export default class ListMapTemplate extends Component {
                     renderRow={item => this.renderRow(item)}
                     onRefresh={this.props.onRefresh}
                 />
-                <Button onPress={this.props.onCreateItem}>
-                    <Text>CREATE NEW</Text>
-                </Button>
+                {this.renderCreateButton()}
             </View>
         );
     }
