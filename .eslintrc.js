@@ -144,6 +144,7 @@ module.exports = {
         "react/no-multi-comp": [0],
         "react/no-unknown-property": [2],
         "react/react-in-jsx-scope": [2],
-        "react/self-closing-comp": [1]
+        "react/self-closing-comp": [1],
+        "react-native/no-inline-styles": 1
     }
 };
