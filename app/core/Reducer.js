@@ -5,7 +5,8 @@ import { Types } from "./Actions.js";
 const initialState = {
     // default initial state
     count: 0, // TODO: testing demonstration only, remove later on
-    TEST: "standby", // TODO: testing rest api call status, remove later on
+    loginStatusCode: "000",
+    signupStatusCode: "000",
 };
 
 export default function (state = initialState, action) {
@@ -19,17 +20,20 @@ export default function (state = initialState, action) {
         case Types.INC:
             nextState = { ...state, count: state.count += 1 };
             break;
-        case Types.LOGIN_ATTEMPT:
-            // TODO: do something with login attempt:
-            nextState = { ...state, TEST: state.TEST = "ATTEMPTING..." };
+        case Types.FETCH_ATTEMPT:
+            nextState = { ...state, statusCode: state.statusCode = "100" };
             break;
         case Types.LOGIN_SUCCESS:
-            // TODO: do something with login success:
-            nextState = { ...state, TEST: state.TEST = String(action.response.status) };
+            nextState = { ...state, loginStatusCode: state.loginStatusCode = String(action.response.status) };
             break;
         case Types.LOGIN_FAILED:
-            // TODO: do something with login failed:
-            nextState = { ...state, TEST: state.TEST = "FAILED" };
+            nextState = { ...state, loginStatusCode: state.loginStatusCode = "FAILED" };
+            break;
+        case Types.SIGNUP_SUCCESS:
+            nextState = { ...state, signupStatusCode: state.signupStatusCode = String(action.response.status) };
+            break;
+        case Types.SIGNUP_FAILED:
+            nextState = { ...state, signupStatusCode: state.signupStatusCode = "FAILED" };
             break;
         default:
             return state;
