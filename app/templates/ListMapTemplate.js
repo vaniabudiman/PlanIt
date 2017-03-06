@@ -60,8 +60,8 @@ import { ListView, Text, TextInput, Title, Subtitle, Divider, View, Row, Button,
 /**
  * @callback ListMapTemplate~onClickItem
  *
- * @param {number} id
- *    Unique id for the item clicked.
+ * @param {ListMapTemplate~ListObject} item
+ *    The complete list item object.
 */
 
 /**
@@ -288,16 +288,13 @@ export default class ListMapTemplate extends Component {
     }
 
     renderRow (item) {
-        const itemTitle = item.id ? item.id
-                        : item.name ? item.name
-                        : null;
         return (
             <View>
-                <TouchableOpacity onPress={this.props.onClickItem.bind(null, item.id)}>
+                <TouchableOpacity onPress={this.props.onClickItem.bind(null, item)}>
                     <Row>
                         <View styleName="horizontal space-between">
                             <View styleName="vertical">
-                                <Title>{itemTitle}</Title>
+                                <Title>{item.title}</Title>
                                 <Subtitle>{item.subtitle}</Subtitle>
                             </View>
                             {this.renderRowIcons(item)}
