@@ -29,7 +29,6 @@ class HomeView extends Component {
         return (
             <View style={[GlobalStyles.container, { backgroundColor: $blue }]}>
                 <Text style={GlobalStyles.text}>Welcome to our App!</Text>
-                <Text style={GlobalStyles.text} onPress={Actions.formView}>Go to Form View</Text>
                 <Text style={GlobalStyles.text} onPress={Actions.basicMapView}>Go to Map View</Text>
                 <Text style={GlobalStyles.text} onPress={Actions.continents}>Go to Continents View</Text>
                 <Text style={GlobalStyles.text} onPress={Actions.tripHome}>Go to Trip Home View</Text>
@@ -38,6 +37,7 @@ class HomeView extends Component {
 
                 <Text style={GlobalStyles.text} onPress={Actions.trips}>Trips View</Text>
                 <Text style={GlobalStyles.text} onPress={Actions.itemDetails}>Item / Details View</Text>
+                <Text style={GlobalStyles.text} onPress={Actions.formView}>Form View</Text>
 
                 <Text style={GlobalStyles.text}>{"Count: " + this.props.count}</Text>
                 <Icon.Button name="plus" backgroundColor={$gray} onPress={this._handleInc}>
