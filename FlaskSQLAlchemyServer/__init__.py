@@ -384,7 +384,8 @@ def events(eventID=None):
                                         event['eventName'],
                                         to_datetime(event['startDateTime']),
                                         to_datetime(event['endDateTime']),
-                                        event.get('locationID'),
+                                        event.get('lat'),
+                                        event.get('lon'),
                                         None,
                                         None,
                                         post_tripID))
@@ -472,9 +473,16 @@ def events(eventID=None):
                 pass
 
             try:
-                # Optional locationID parameter.
-                post_locationID = int(request.json['locationID'])
-                event.locationID = post_locationID
+                # Optional lat parameter.
+                post_lat = int(request.json['lat'])
+                event.lat = post_lat
+            except KeyError:
+                pass
+
+            try:
+                # Optional lon parameter.
+                post_lon = int(request.json['lon'])
+                event.lon = post_lon
             except KeyError:
                 pass
 
@@ -529,7 +537,8 @@ def bookmarks(bookmarkID=None):
                 max_id += 1
                 bookmark_list.append(
                     Bookmark(max_id,
-                             bookmark['locationID'],
+                             bookmark['lat'],
+                             bookmark['lon'],
                              post_tripID,
                              bookmark.get('eventID', None)))
         except KeyError as ke:
@@ -671,6 +680,16 @@ if __name__ == '__main__' or __name__ == '__init__':
                  datetime.now(), datetime.now(),
                  'user2')
     db_session.add_all([trip1, trip2])
+    event1 = Event(1, 'test', datetime.now(), datetime.now(),
+                   None, None, True, None, 1)
+    event2 = Event(2, 'testVancouver', datetime.now(), datetime.now(),
+                   49.267132, -122.968941, True, None, 1)
+    db_session.add_all([event1, event2])
+    # Burnaby bookmark.
+    bookmark1 = Bookmark(1, 49.246292, -123.116226, 1, None)
+    # Burnaby bookmark with eventID 2.
+    bookmark2 = Bookmark(2, 49.246292, -123.116226, 1, 2)
+    db_session.add_all([bookmark1, bookmark2])
     db_session.commit()
     print_database()
 
