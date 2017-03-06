@@ -105,6 +105,8 @@ import { ListView, Text, TextInput, Title, Subtitle, Divider, View, Row, Button,
  *
  * @property {Array<ListMapTemplate~ListObject>} data
  *    An array of data items representing the list.
+ * @property {string} [emptyListMessage]
+ *    The message to be displayed if there are no data items to be rendered.
  * @property {ListMapTemplate~onClickItem} [onClickItem]
  *    Callback to be triggered when a list item is clicked.
  * @property {ListMapTemplate~onCreateItem} [onCreateItem]
@@ -158,6 +160,7 @@ export default class ListMapTemplate extends Component {
             title: React.PropTypes.string,
             subtitle: React.PropTypes.string
         })).isRequired,
+        emptyListMessage: React.PropTypes.string,
         onRefresh: React.PropTypes.func,
         onLoadMore: React.PropTypes.func,
         enableMap: React.PropTypes.bool,
@@ -296,9 +299,14 @@ export default class ListMapTemplate extends Component {
     render () {
         return (
             <View style={{ flex: 1, flexDirection: "column" }}>
-                {this.renderMapToggle()}
-                {this.renderMap()}
-                {this.renderSearchBar()}
+                {(this.props.data.length !== 0) && this.renderMapToggle()}
+                {(this.props.data.length !== 0) && this.renderMap()}
+                {(this.props.data.length !== 0) && this.renderSearchBar()}
+                {
+                    this.props.data.length === 0
+                        ? <Text style={{ alignSelf: "center", paddingTop: 50 }}>{this.props.emptyListMessage}</Text>
+                        : null
+                }
                 <ListView
                     style={{ flex: 2 }}
                     data={this.props.data}
