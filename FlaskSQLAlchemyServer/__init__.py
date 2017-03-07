@@ -656,8 +656,8 @@ if __name__ == '__main__' or __name__ == '__init__':
     """
     # ADDING:
     db_session = create_db_session()
-    user1 = User('admin', 'admin', 'Ad Min', "admin@admin.com", "CAD")
-    user2 = User('user2', 'user2', 'Us Er2', "admin@admin.com", "USD")
+    user1 = User('admin', 'admin', 'Ad Min', 'admin@admin.com', 'CAD')
+    user2 = User('user2', 'user2', 'Us Er2', 'admin@admin.com', 'USD')
     db_session.add_all([user1, user2])
     trip1 = Trip(1, 'admin_trip', True,
                  to_datetime('Sat, 10 Aug 2013 07:00:00 GMT'),
@@ -686,7 +686,7 @@ if __name__ == '__main__' or __name__ == '__init__':
     bookmark1 = Bookmark(1, -33.866891, 151.200814,
                          '45a27fd8d56c56dc62afc9b49e1d850440d5c403', 1, None)
     bookmark2 = Bookmark(2, -33.870943, 151.190311,
-                         "30bee58f819b6c47bd24151802f25ecf11df8943", 1, 3)
+                         '30bee58f819b6c47bd24151802f25ecf11df8943', 1, 3)
     db_session.add_all([bookmark1, bookmark2])
     db_session.commit()
     print_database()
