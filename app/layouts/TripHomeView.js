@@ -34,7 +34,7 @@ export default class TripHomeView extends Component {
                 route = () => Actions.login(defaultProps);   // TODO: change to bookmark view when implemented
                 break;
             case "Bookmarks":
-                route = () => Actions.login(defaultProps);   // TODO: change to bookmark view when implemented
+                route = () => Actions.bookmarks(defaultProps);   // TODO: change to bookmark view when implemented
                 break;
             case "Currency Conversion":
                 route = () => Actions.login(defaultProps);   // TODO: change to bookmark view when implemented

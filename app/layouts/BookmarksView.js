@@ -24,6 +24,10 @@ var mapProps = {
 
 export default class BookmarksView extends Component {
 
+    static propTypes = {
+        trip: React.PropTypes.number
+    }
+
     constructor (props) {
         super(props);
 
@@ -44,6 +48,11 @@ export default class BookmarksView extends Component {
         this._handleToggleMap = this._handleToggleMap.bind(this);
         this._handleClickItem = this._handleClickItem.bind(this);
         this._handleCreateItem = this._handleCreateItem.bind(this);
+    }
+
+    componentDidMount () {
+        // TODO: remove this... just testing for now
+        alert("bookmarks for trip id: " + this.props.trip);
     }
 
     // TODO: remove/edit... this is just an example on how the callback would work

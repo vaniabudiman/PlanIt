@@ -53,11 +53,12 @@ export default class PlanIt extends Component {
                         <Scene key="countries" component={CountriesView} title="Countries"
                             sceneStyle={NavigationStyles.listViewScene} {...navBarProps} />
 
-
-                        <Scene key="home" component={HomeView} title="Home View" inital={true} {...navBarProps} />
-
                         <Scene key="bookmarks" component={BookmarksView}
                             sceneStyle={ NavigationStyles.listViewScene } title="Bookmarks" {...navBarProps} />
+
+
+                        { /* TODO: remove these... testing / examples for now */ }
+                        <Scene key="home" component={HomeView} title="Home View" inital={true} {...navBarProps} />
 
                         <Scene key="itemDetails" component={ItemDetailsView}
                             sceneStyle={ NavigationStyles.listViewScene } title="Item / Details" />
