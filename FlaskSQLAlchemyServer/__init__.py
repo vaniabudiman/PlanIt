@@ -219,14 +219,10 @@ def trips(tripID=None):
 
     if request.method == POST:
         try:
-            post_tripName = str(request.json['tripID'])
+            post_tripName = str(request.json['tripName'])
             post_active = str(request.json['active'])
-            post_startDate = str(request.json.get('startDate', None))
-            if post_startDate is not None:
-                post_startDate = to_datetime(post_startDate)
-            post_endDate = str(request.json.get('active', None))
-            if post_endDate is not None:
-                post_endDate = to_datetime(post_endDate)
+            post_startDate = to_datetime(str(request.json['startDate']))
+            post_endDate = to_datetime(str(request.json['endDate']))
         except (KeyError, ValueError) as err:
             return bad_request(err)
 
@@ -528,6 +524,7 @@ def bookmarks(bookmarkID=None):
                     Bookmark(max_id,
                              bookmark['lat'],
                              bookmark['lon'],
+                             bookmark['placeID'],
                              post_tripID,
                              bookmark.get('eventID', None)))
         except KeyError as ke:
@@ -659,8 +656,8 @@ if __name__ == '__main__' or __name__ == '__init__':
     """
     # ADDING:
     db_session = create_db_session()
-    user1 = User('admin', 'admin', 'Ad Min', "admin@admin.com", "CAD")
-    user2 = User('user2', 'user2', 'Us Er2', "admin@admin.com", "USD")
+    user1 = User('admin', 'admin', 'Ad Min', 'admin@admin.com', 'CAD')
+    user2 = User('user2', 'user2', 'Us Er2', 'admin@admin.com', 'USD')
     db_session.add_all([user1, user2])
     trip1 = Trip(1, 'admin_trip', True,
                  to_datetime('Sat, 10 Aug 2013 07:00:00 GMT'),
@@ -679,11 +676,17 @@ if __name__ == '__main__' or __name__ == '__init__':
                    to_datetime('Tue, 12 Aug 2013 17:17:17 GMT'),
                    to_datetime('Tue, 12 Aug 2013 18:18:18 GMT'),
                    49.267132, -122.968941, True, None, 1)
-    db_session.add_all([event1, event2])
-    # Burnaby bookmark.
-    bookmark1 = Bookmark(1, 49.246292, -123.116226, 1, None)
-    # Burnaby bookmark with eventID 2.
-    bookmark2 = Bookmark(2, 49.246292, -123.116226, 1, 2)
+    event3 = Event(3, 'testAustralia',
+                   to_datetime('Tue, 12 Aug 2013 17:17:17 GMT'),
+                   to_datetime('Tue, 12 Aug 2013 18:18:18 GMT'),
+                   -33.870943, 151.190311, True,
+                   to_datetime('Tue, 12 Aug 2013 17:00:00 GMT'), 1)
+    db_session.add_all([event1, event2, event3])
+    # Example locations:
+    bookmark1 = Bookmark(1, -33.866891, 151.200814,
+                         '45a27fd8d56c56dc62afc9b49e1d850440d5c403', 1, None)
+    bookmark2 = Bookmark(2, -33.870943, 151.190311,
+                         '30bee58f819b6c47bd24151802f25ecf11df8943', 1, 3)
     db_session.add_all([bookmark1, bookmark2])
     db_session.commit()
     print_database()
