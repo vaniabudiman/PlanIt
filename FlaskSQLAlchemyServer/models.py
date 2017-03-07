@@ -159,6 +159,7 @@ class Bookmark(base):
     bookmarkID = Column(Integer, primary_key=True, unique=True)
     lat = Column(Integer, nullable=False)
     lon = Column(Integer, nullable=False)
+    placeID = Column(String, nullable=False)
     tripID = Column(Integer,
                     ForeignKey('trip.tripID',
                                ondelete=CASCADE,
@@ -175,10 +176,11 @@ class Bookmark(base):
     sharedBookmarks = relationship('SharedBookmark', cascade=CASCADE_OPTIONS,
                                    backref='bookmark', passive_updates=False)
 
-    def __init__(self, bookmarkID, lat, lon, tripID, eventID):
+    def __init__(self, bookmarkID, lat, lon, placeID, tripID, eventID):
         self.bookmarkID = bookmarkID
         self.lat = lat
         self.lon = lon
+        self.placeID = placeID
         self.tripID = tripID
         self.eventID = eventID
 
@@ -186,6 +188,7 @@ class Bookmark(base):
         return {"bookmarkID": self.bookmarkID,
                 "lat": self.lat,
                 "lon": self.lon,
+                "placeID": self.placeID,
                 "tripID": self.tripID,
                 "eventID": self.eventID}
 
