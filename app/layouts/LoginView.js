@@ -65,7 +65,7 @@ class LoginView extends Component {
                     <View style={LoginStyles.wrapper}>
                         <View style={LoginStyles.inputWrap}>
                             <View style={LoginStyles.iconWrap}>
-                                <Icon name="user-o" style={LoginStyles.icon} resizeMode="contain" />
+                                <Icon name="user-circle" style={LoginStyles.icon} resizeMode="contain" />
                             </View>
                             <TextInput placeholder="Username"
                                     placeholderTextColor="#FFF"
@@ -104,7 +104,7 @@ class LoginView extends Component {
                             <Text style={LoginStyles.accountText}>Don't have an account?</Text>
                             <TouchableOpacity activeOpacity={.5}>
                                 <View>
-                                    <Text style={LoginStyles.signupLinkText} onPress={Actions.signUp}>Sign Up</Text>
+                                    <Text style={LoginStyles.signupLinkText} onPress={Actions.signUp}>Sign Up!</Text>
                                 </View>
                             </TouchableOpacity>
                         </View>

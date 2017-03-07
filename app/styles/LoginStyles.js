@@ -13,7 +13,7 @@ export default StyleSheet.create({
     },
     markWrap: {
         flex: 1,
-        paddingTop: 50,
+        paddingTop: 30,
         backgroundColor: "rgba(0,0,0,.5)"
     },
     brandWrap: {
@@ -64,7 +64,7 @@ export default StyleSheet.create({
     input: {
         flex: 1,
         paddingHorizontal: 10,
-        fontWeight: "bold",
+        fontWeight: "normal",
         fontSize: 18
     },
     button: {
@@ -84,24 +84,24 @@ export default StyleSheet.create({
         backgroundColor: "transparent",
         textAlign: "right",
         paddingRight: 20,
-        fontWeight: "bold",
+        fontWeight: "normal",
         fontSize: 18,
         marginBottom: 10
     },
     signupWrap: {
         backgroundColor: "transparent",
         flexDirection: "row",
-        alignItems: "flex-end",
-        justifyContent: "flex-end",
+        alignItems: "center",
+        justifyContent: "center",
         paddingRight: 20,
     },
     accountText: {
-        fontWeight: "bold",
+        fontWeight: "normal",
         color: "white",
         fontSize: 18
     },
     signupLinkText: {
-        fontWeight: "bold",
+        fontWeight: "normal",
         color: "#39a7a3",
         marginLeft: 5,
         fontSize: 18
