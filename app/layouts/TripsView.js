@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import { Actions } from "react-native-router-flux";
 import ListMapTemplate from "../templates/ListMapTemplate.js";
 import realm from "../../Realm/realm.js";
 
@@ -108,7 +109,8 @@ export default class TripView extends Component {
     // TODO: remove/edit... this is just an example on how the callback would work
     _handleClickItem (item) {
         // Make necessary calls to do w/e you want when clicking on item identified by id
-        alert("clicked on item: " + item.id);
+        // alert("clicked on item: " + item.id);
+        Actions.tripHome({ trip: item.id });
     }
 
      // TODO: remove/edit... this is just an example on how the callback would work
