@@ -2,10 +2,8 @@ import React, { Component } from "react";
 import { View, Text } from "react-native";
 import { Actions } from "react-native-router-flux";
 import { connect } from "react-redux";
-import Icon from "react-native-vector-icons/FontAwesome";
 import realm from "../../Realm/realm.js";
-import { GlobalStyles, $blue, $gray } from "../styles/GlobalStyles.js";
-import { inc } from "../core/Actions.js";
+import { GlobalStyles, $blue } from "../styles/GlobalStyles.js";
 
 
 class HomeView extends Component {
@@ -21,8 +19,6 @@ class HomeView extends Component {
 
     componentWillMount () {
         // Bind Redux action creators
-        // TODO: testing demonstration only, remove later on
-        this._handleInc = () => this.props.dispatch(inc());
     }
 
     render () {
@@ -39,10 +35,6 @@ class HomeView extends Component {
                 <Text style={GlobalStyles.text} onPress={Actions.itemDetails}>Item / Details View</Text>
                 <Text style={GlobalStyles.text} onPress={Actions.formView}>Form View</Text>
 
-                <Text style={GlobalStyles.text}>{"Count: " + this.props.count}</Text>
-                <Icon.Button name="plus" backgroundColor={$gray} onPress={this._handleInc}>
-                    Click me to Increment count
-                </Icon.Button>
                 {
                     /*
                      * TODO:
@@ -63,6 +55,6 @@ class HomeView extends Component {
 export default connect((state) => {
     // mapStateToProps
     return {
-        count: state.app.count // TODO: testing demonstration only, remove later on
+        all: state // TODO: demo only; remove and do props as needed
     };
 })(HomeView);
