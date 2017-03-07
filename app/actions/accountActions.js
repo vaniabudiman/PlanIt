@@ -15,9 +15,8 @@ function loginAttempt () {
     };
 }
 
-function loginSuccess (response) {
+function loginSuccess () {
     return {
-        response,
         type: Types.LOGIN_SUCCESS
     };
 }
@@ -35,12 +34,9 @@ function signupAttempt () {
     };
 }
 
-function signupSuccess (response) {
-    return dispatch => {
-        dispatch({
-            response,
-            type: Types.SIGNUP_SUCCESS,
-        });
+function signupSuccess () {
+    return {
+        type: Types.SIGNUP_SUCCESS,
     };
 }
 
@@ -68,7 +64,7 @@ export function login (loginData) {
         .then(response => { // Header response.
             // console.log(response);
             if (response.status >= 200 && response.status < 300) {
-                dispatch(loginSuccess(response));
+                dispatch(loginSuccess());
                 alert("Login Success. Hello " + loginData.userName + "!");
             } else {
                 const error = new Error();
@@ -103,7 +99,7 @@ export function signup (signupData) {
         })
         .then(response => {
             if (response.status >= 200 && response.status < 300) {
-                dispatch(signupSuccess(response));
+                dispatch(signupSuccess());
                 alert("Signup Success. Try logging in now " + signupData.userName + "!");
                 return response.json();
             } else {
