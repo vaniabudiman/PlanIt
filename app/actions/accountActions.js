@@ -1,30 +1,37 @@
 import { apiURL } from "../config/ServerConfig.js";
 
 export const Types = {
-    FETCH_ATTEMPT: "FETCH_ATTEMPT",
+    LOGIN_ATTEMPT: "LOGIN_ATTEMPT",
     LOGIN_SUCCESS: "LOGIN_SUCCESS",
     LOGIN_FAILED: "LOGIN_FAILED",
+    SIGNUP_ATTEMPT: "SIGNUP_ATTEMPT",
     SIGNUP_SUCCESS: "SIGNUP_SUCCESS",
     SIGNUP_FAILED: "SIGNUP_FAILED",
 };
 
-function fetchAttempt () {
+function loginAttempt () {
     return {
-        type: Types.FETCH_ATTEMPT,
+        type: Types.LOGIN_ATTEMPT
     };
 }
 
 function loginSuccess (response) {
     return {
         response,
-        type: Types.LOGIN_SUCCESS,
+        type: Types.LOGIN_SUCCESS
     };
 }
 
 function loginFailed (error) {
     return {
         error,
-        type: Types.LOGIN_FAILED,
+        type: Types.LOGIN_FAILED
+    };
+}
+
+function signupAttempt () {
+    return {
+        type: Types.SIGNUP_ATTEMPT
     };
 }
 
@@ -46,7 +53,7 @@ function signupFailed (error) {
 
 export function login (loginData) {
     return dispatch => {
-        dispatch(fetchAttempt());
+        dispatch(loginAttempt());
         fetch(apiURL + "login", {
             method: "POST",
             headers: {
@@ -79,7 +86,7 @@ export function login (loginData) {
 
 export function signup (signupData) {
     return dispatch => {
-        dispatch(fetchAttempt());
+        dispatch(signupAttempt());
         fetch(apiURL + "users", {
             method: "POST",
             headers: {
