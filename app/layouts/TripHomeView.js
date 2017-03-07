@@ -31,7 +31,7 @@ export default class TripHomeView extends Component {
 
         switch (id) {
             case "Itinerary":
-                route = () => Actions.login(defaultProps);   // TODO: change to bookmark view when implemented
+                route = () => Actions.itinerary(defaultProps);
                 break;
             case "Bookmarks":
                 route = () => Actions.bookmarks(defaultProps);
