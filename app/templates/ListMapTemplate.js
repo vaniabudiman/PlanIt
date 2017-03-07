@@ -1,8 +1,10 @@
 import React, { Component } from "react";
+import { Dimensions } from "react-native";
 import { ListViewStyles } from "../styles/ListViewStyles.js";
 import MapView from "react-native-maps";
 import Icon from "react-native-vector-icons/FontAwesome";
 import { ListView, Text, TextInput, Title, Subtitle, Divider, View, Row, Button, TouchableOpacity } from "@shoutem/ui";
+import CalendarPicker from "react-native-calendar-picker";
 
 
 /**
@@ -132,6 +134,18 @@ import { ListView, Text, TextInput, Title, Subtitle, Divider, View, Row, Button,
  * @property {ListMapTemplate~onToggleMap} [onToggleMap]
  *    Callback to be triggerred when the switch controlling the map show/hide is toggled.
  *
+ * @property {boolean} [enableCalendar=false]
+ *    Whether or not the calendar should be enabled.
+ * @property {ListCalendarTemplate~CalendarObject} [calendarProps]
+ *    Object of properties to be added to the CalendarView specifically.
+ *          TODO: not sure if the template should restrict the calendar Props allowed to be passed in or not.
+ *                I think it'll be convenient for you guys to be able to pass w/e is necessary for the calendar
+ *                based on the particular view you're implementing though. So leaving like this for now
+ * @property {boolean} [showCalendar=false]
+ *    Whether or not the calendar is displayed.
+ * @property {ListCalendarTemplate~onToggleCalendar} [onToggleCalendar]
+ *    Callback to be triggerred when the switch controlling the calendar show/hide is toggled.
+ *
  * @property {boolean} [enableSearch=false]
  *    Whether or not the search bar should be enabled.
  * @property {ListMapTemplate~onSearch} [onSearch]
@@ -164,10 +178,14 @@ export default class ListMapTemplate extends Component {
         onRefresh: React.PropTypes.func,
         onLoadMore: React.PropTypes.func,
         enableMap: React.PropTypes.bool,
+        enableCalendar: React.PropTypes.bool,
         mapProps: React.PropTypes.object,
+        calendarProps: React.PropTypes.object,
         enableSearch: React.PropTypes.bool,
         showMap: React.PropTypes.bool,
         onToggleMap: React.PropTypes.func,
+        showCalendar: React.PropTypes.bool,
+        onToggleCalendar: React.PropTypes.func,
         onSearch: React.PropTypes.func,
         showAdd: React.PropTypes.bool,
         onAdd: React.PropTypes.func,
@@ -183,8 +201,10 @@ export default class ListMapTemplate extends Component {
     static defaultProps = {
         data: [],
         enableMap: false,
+        enableCalendar: false,
         enableSearch: false,
         showMap: false,
+        showCalendar: false,
         showAdd: false,
         showInfo: false,
         showShare: false,
@@ -195,16 +215,24 @@ export default class ListMapTemplate extends Component {
         super(props);
 
         this.state = {
-            showMap: this.props.showMap
+            showMap: this.props.showMap,
+            showCalendar: this.props.showCalendar,
+            date: new Date("April 1, 2017 00:00:00")
         };
 
         // Bind callback handlers
         this._handleInputValueChange = this._handleInputValueChange.bind(this);
         this._handleToggleMap = this._handleToggleMap.bind(this);
+        this._handleToggleCalendar = this._handleToggleCalendar.bind(this);
+        this._handleDateSelect = this._handleDateSelect.bind(this);
     }
 
     _handleInputValueChange (str) {
         this.props.onSearch(str);
+    }
+
+    _handleDateSelect (date) {
+        this.setState({ date: date });
     }
 
     _handleToggleMap () {
@@ -212,14 +240,21 @@ export default class ListMapTemplate extends Component {
         this.setState({ showMap: newMapToggleState }, () => this.props.onToggleMap(newMapToggleState));
     }
 
+    _handleToggleCalendar () {
+        var newCalendarToggleState = !this.state.showCalendar;
+        this.setState({
+            showCalendar: newCalendarToggleState }, () => this.props.onToggleCalendar(newCalendarToggleState)
+        );
+    }
+
     renderSearchBar () {
         if (this.props.enableSearch) {
             return (
                 <View>
                     { /* TODO: fix alignment of search icon to the left of the search placeholder to match mocks */ }
-                    <View>
+                    {/*<View>
                         <Icon name="search" />
-                    </View>
+                    </View>*/}
                     <TextInput placeholder="Search..."
                         multiline={false}
                         maxLength={40}
@@ -246,6 +281,39 @@ export default class ListMapTemplate extends Component {
     renderMap () {
         if (this.props.enableMap && this.state.showMap) {
             return <MapView style={{ flex: 1 }} {...this.props.mapProps} />;
+        }
+    }
+
+    renderCalendarToggle () {
+        if (this.props.enableCalendar) {
+            return (
+                <TouchableOpacity onPress={this._handleToggleCalendar} style={{ height: 20 }}>
+                    <View>
+                        { /* TODO: fix alignment of label & toggle to match mocks */ }
+                        <Text style={{ fontSize: 20 }}>
+                            Calendar
+                            <Icon name={this.state.showCalendar ? "toggle-on" : "toggle-off" } size={20} />
+                        </Text>
+                        
+                    </View>
+                </TouchableOpacity>
+            );
+        }
+    }
+
+    renderCalendar () {
+        if (this.props.enableCalendar && this.state.showCalendar) {
+            return (
+                <View>
+                    <CalendarPicker selectedDate={this.state.date}
+                                    onDateChange={this._handleDateSelect}
+                                    screenWidth={Dimensions.get("window").width}
+                                    selectedBackgroundColor={"#5ce600"}
+                                    scaleFactor={.9}
+                                    minDate={new Date(this.props.calendarProps.startDate)}
+                                    maxDate={new Date(this.props.calendarProps.endDate)} />
+                </View>
+            );
         }
     }
 
@@ -311,6 +379,8 @@ export default class ListMapTemplate extends Component {
             <View style={{ flex: 1, flexDirection: "column" }}>
                 {(this.props.data.length !== 0) && this.renderMapToggle()}
                 {(this.props.data.length !== 0) && this.renderMap()}
+                {(this.props.data.length !== 0) && this.renderCalendarToggle()}
+                {(this.props.data.length !== 0) && this.renderCalendar()}
                 {(this.props.data.length !== 0) && this.renderSearchBar()}
                 {
                     this.props.data.length === 0
