@@ -21,8 +21,8 @@ const TripSchema = {
         tripID: "int", // auto-increment id not supported in realm
         tripName: "string",
         active: "bool",
-        startDate: { type: "date", optional: true }, // js Date objects also contain time
-        endDate: { type: "date", optional: true },
+        startDate: "date", // js Date objects also contain time
+        endDate: "date",
         bookmarks: { type: "list", objectType: "Bookmark" },
         events: { type: "list", objectType: "Event" }
     }
@@ -117,7 +117,9 @@ realm.write(() => {
         let trip = realm.create("Trip", {
             tripID: i,
             tripName: "Test Trip" + i,
-            active: false
+            active: false,
+            startDate: new Date(),
+            endDate: new Date()
         }, true);
         trips.push(trip);
     }
