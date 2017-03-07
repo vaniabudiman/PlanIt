@@ -21,7 +21,7 @@ export default class ContinentsView extends Component {
 
     componentDidMount () {
         // TODO: remove this... just testing for now
-        alert("trips home for trip id: " + this.props.trip);
+        alert("continents for trip id: " + this.props.trip);
     }
 
     _getCell (cell) {
