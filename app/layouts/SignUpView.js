@@ -7,7 +7,8 @@ import {
   View,
   Image,
   TextInput,
-  TouchableOpacity
+  TouchableOpacity,
+  Picker
 } from "react-native";
 import { Actions, ActionConst } from "react-native-router-flux";
 import Icon from "react-native-vector-icons/FontAwesome";
@@ -57,27 +58,34 @@ class SignUpView extends Component {
         return (
             <View style={SignUpStyles.container}>
                 <Image source={{ uri: "login" }}
-                        style={[SignUpStyles.container, SignUpStyles.bg]}
+                        style={[SignUpStyles.container, SignUpStyles.background]}
                         resizeMode="cover">
-                    <View style={SignUpStyles.headerContainer}>
-                        <View style={SignUpStyles.headerIconView}>
-                            <TouchableOpacity style={SignUpStyles.headerBackButtonView}>
-                                <Icon name="angle-left" style={SignUpStyles.backButtonIcon} resizeMode="contain" />
-                            </TouchableOpacity>
-                        </View>
-                        <View style={SignUpStyles.headerTitleView}>
-                            <Text style={SignUpStyles.titleViewText}>Sign Up</Text>
-                        </View>
+                    <View style={SignUpStyles.markWrap}>
+                        <Text style={SignUpStyles.brandWrap}>
+                            <Text style={SignUpStyles.planText}>Plan</Text>
+                            <Text style={SignUpStyles.itText}>It</Text>&nbsp;
+                            <Icon name="plane" style={SignUpStyles.brandIcon} resizeMode="contain" />
+                        </Text>
+                        <Text style={SignUpStyles.signUpText}>Sign Up</Text>
                     </View>
                     <View style={SignUpStyles.inputsContainer}>
                         <View style={SignUpStyles.inputContainer}>
                             <View style={SignUpStyles.iconContainer}>
-                                <Icon name="user-o" style={SignUpStyles.inputIcon} resizeMode="contain" />
+                                <Icon name="user-circle" style={SignUpStyles.inputIcon} resizeMode="contain" />
                             </View>
                             <TextInput style={[SignUpStyles.input]}
                                     placeholder="Name"
                                     placeholderTextColor="#FFF"
-                                    underlineColorAndroid="transparent" />
+                                    underlineColorAndroid="rgba(250, 250, 250, 0.8)" />
+                        </View>
+                        <View style={SignUpStyles.inputContainer}>
+                            <View style={SignUpStyles.iconContainer}>
+                                <Icon name="id-badge" style={SignUpStyles.inputIcon} resizeMode="contain" />
+                            </View>
+                            <TextInput style={[SignUpStyles.input]}
+                                    placeholder="Username"
+                                    placeholderTextColor="#FFF"
+                                    underlineColorAndroid="rgba(250, 250, 250, 0.8)" />
                         </View>
                         <View style={SignUpStyles.inputContainer}>
                             <View style={SignUpStyles.iconContainer}>
@@ -85,7 +93,8 @@ class SignUpView extends Component {
                             </View>
                             <TextInput style={[SignUpStyles.input]}
                                     placeholder="Email"
-                                    placeholderTextColor="#FFF" />
+                                    placeholderTextColor="#FFF"
+                                    underlineColorAndroid="rgba(250, 250, 250, 0.8)" />
                         </View>
                         <View style={SignUpStyles.inputContainer}>
                             <View style={SignUpStyles.iconContainer}>
@@ -94,20 +103,36 @@ class SignUpView extends Component {
                             <TextInput secureTextEntry={true}
                                     style={[SignUpStyles.input]}
                                     placeholder="Password"
-                                    placeholderTextColor="#FFF" />
+                                    placeholderTextColor="#FFF"
+                                    underlineColorAndroid="rgba(250, 250, 250, 0.8)" />
+                        </View>
+                        <View style={SignUpStyles.inputContainer}>
+                            <View style={SignUpStyles.iconContainer}>
+                                <Icon name="dollar" style={SignUpStyles.inputIcon} resizeMode="contain" />
+                            </View>
+                            <Picker style={SignUpStyles.picker}
+                                    selectedValue={this.state.currency}
+                                    onValueChange={(curr) => this.setState({ currency: curr })}>
+                                    {/* TODO: populate w/ available currencies */}
+                                    <Picker.Item label="Select Home Currency" value="" />
+                                    <Picker.Item label="USD (United States)" value="usd" />
+                                    <Picker.Item label="CAD (Canadian)" value="cad" />
+                                    <Picker.Item label="GBP (British Pounds)" value="gpb" />
+                                    <Picker.Item label="EUR (Euro)" value="eur" />
+                            </Picker>
                         </View>
                     </View>
                     <View style={SignUpStyles.footerContainer}>
                         <TouchableOpacity onPress={this._signup}>
                             <View style={SignUpStyles.signup}>
-                                <Text style={SignUpStyles.whiteFont}>Join</Text>
+                                <Text style={SignUpStyles.buttonText}>Join</Text>
                             </View>
                         </TouchableOpacity>
                         <TouchableOpacity>
                             <View style={SignUpStyles.signin}>
-                                <Text style={SignUpStyles.greyFont}>
+                                <Text style={SignUpStyles.accountText}>
                                     Already have an account?
-                                    <Text style={SignUpStyles.whiteFont} onPress={Actions.login}> Sign In</Text>
+                                    <Text style={SignUpStyles.signinLinkText} onPress={Actions.login}> Sign In</Text>
                                 </Text>
                             </View>
                         </TouchableOpacity>
