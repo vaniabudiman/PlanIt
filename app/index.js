@@ -18,6 +18,7 @@ import CountriesView from "./layouts/CountriesView.js";
 import TripHomeView from "./layouts/TripHomeView.js";
 import LoginView from "./layouts/LoginView.js";
 import SignUpView from "./layouts/SignUpView.js";
+import BookmarksView from "./layouts/BookmarksView.js";
 
 
 // Connect the router to the Redux store
@@ -48,7 +49,8 @@ export default class PlanIt extends Component {
                             sceneStyle={NavigationStyles.tripHomeViewScene} {...navBarProps} />
                         <Scene key="login" component={LoginView} title="Login" hideNavBar={true} />
                         <Scene key="signUp" component={SignUpView} title="Sign Up" hideNavBar={true} />
-                       
+                        <Scene key="bookmarks" component={BookmarksView}
+                            sceneStyle={ NavigationStyles.listViewScene } title="Bookmarks" {...navBarProps} />
                         <Scene key="trips" component={TripsView}
                             sceneStyle={ NavigationStyles.listViewScene } title="Trips" {...navBarProps} />
                         <Scene key="itemDetails" component={ItemDetailsView}
