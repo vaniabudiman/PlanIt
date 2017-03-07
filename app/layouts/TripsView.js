@@ -110,7 +110,7 @@ export default class TripView extends Component {
     _handleClickItem (item) {
         // Make necessary calls to do w/e you want when clicking on item identified by id
         // alert("clicked on item: " + item.id);
-        Actions.tripHome({ trip: item.id });
+        Actions.tripHome({ tripId: item.id });
     }
 
      // TODO: remove/edit... this is just an example on how the callback would work

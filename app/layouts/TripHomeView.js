@@ -9,12 +9,12 @@ import TripHomeTiles from "../data/TripHomeTiles.js";
 export default class TripHomeView extends Component {
 
     static propTypes = {
-        trip: React.PropTypes.number
+        tripId: React.PropTypes.number
     }
 
     componentDidMount () {
         // TODO: remove this... just testing for now
-        alert("trips home for trip id: " + this.props.trip);
+        alert("trips home for trip id: " + this.props.tripId);
     }
 
     constructor (props) {
@@ -26,7 +26,7 @@ export default class TripHomeView extends Component {
     }
 
     getRoute (id) {
-        let defaultProps = { trip: this.props.trip };
+        let defaultProps = { tripId: this.props.tripId };
         let route;
 
         switch (id) {
@@ -34,7 +34,7 @@ export default class TripHomeView extends Component {
                 route = () => Actions.login(defaultProps);   // TODO: change to bookmark view when implemented
                 break;
             case "Bookmarks":
-                route = () => Actions.bookmarks(defaultProps);   // TODO: change to bookmark view when implemented
+                route = () => Actions.bookmarks(defaultProps);
                 break;
             case "Currency Conversion":
                 route = () => Actions.login(defaultProps);   // TODO: change to bookmark view when implemented
