@@ -7,12 +7,21 @@ import ContinentStyles from "../styles/ContinentStyles.js";
 
 export default class ContinentsView extends Component {
 
+    static propTypes = {
+        trip: React.PropTypes.number
+    }
+
     constructor (props) {
         super(props);
 
         // Bind helpers to 'this'
         this._getCell = this._getCell.bind(this);
         this._getRow = this._getRow.bind(this);
+    }
+
+    componentDidMount () {
+        // TODO: remove this... just testing for now
+        alert("continents for trip id: " + this.props.trip);
     }
 
     _getCell (cell) {
