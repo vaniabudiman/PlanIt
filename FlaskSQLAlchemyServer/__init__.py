@@ -13,6 +13,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.sql import func
 # Our defined modules.
 from base import base, engine
+from models import DT_FORMAT
 from models import User, Trip, Event, Bookmark
 
 # Versioning.
@@ -47,21 +48,6 @@ DELETE = 'DELETE'
 # Session key variables.
 KEY__LOGGED_IN = 'logged_in'
 KEY__USERNAME = 'user_name'
-
-# DateTime string format.
-# https://docs.python.org/2/library/datetime.html#strftime-strptime-behavior
-# TODO: Consider http://stackoverflow.com/a/8154033/5608215
-#       Server request would take a string of UTC format and parse with
-#       datetime.strptime("..."); any retrieval of DateTime would then use
-#       datetime.strftime("%a, %d %b %Y %H:%M:%S %Z") to convert back.
-#       Mobile side javascript will use dateObj.toUTCString() to convert to this
-#       formatted string and convert back with Date(dateString)
-#  %Y: Year with century as a decimal number. 1970, 1988, 2001, 2013
-#  %m: Month as a zero-padded decimal number. 01, 02, ..., 12
-#  %d: Day of the month as a zero-padded decimal number. 01, 02, ..., 31
-#  %H: Hour (24-hour clock) as a zero-padded decimal number. 00, 01, ..., 23
-#  %M: Minute as a zero-padded decimal number. 00, 01, ..., 59
-DT_FORMAT = '%Y%b%d%H%M'
 
 
 # Generic responses. Function instead of a var because requires app context.
@@ -235,9 +221,12 @@ def trips(tripID=None):
         try:
             post_tripName = str(request.json['tripID'])
             post_active = str(request.json['active'])
-            post_startDate = to_datetime(
-                str(request.json.get('startDate', None)))
-            post_endDate = to_datetime(str(request.json.get('active', None)))
+            post_startDate = str(request.json.get('startDate', None))
+            if post_startDate is not None:
+                post_startDate = to_datetime(post_startDate)
+            post_endDate = str(request.json.get('active', None))
+            if post_endDate is not None:
+                post_endDate = to_datetime(post_endDate)
         except (KeyError, ValueError) as err:
             return bad_request(err)
 
@@ -674,15 +663,21 @@ if __name__ == '__main__' or __name__ == '__init__':
     user2 = User('user2', 'user2', 'Us Er2', "admin@admin.com", "USD")
     db_session.add_all([user1, user2])
     trip1 = Trip(1, 'admin_trip', True,
-                 datetime.now(), datetime.now(),
+                 to_datetime('Sat, 10 Aug 2013 07:00:00 GMT'),
+                 to_datetime('Sat, 17 Aug 2013 08:00:00 GMT'),
                  'admin')
     trip2 = Trip(2, 'user2_trip', True,
-                 datetime.now(), datetime.now(),
+                 to_datetime('Sat, 10 Aug 2013 08:00:00 GMT'),
+                 to_datetime('Sat, 24 Aug 2013 09:00:00 GMT'),
                  'user2')
     db_session.add_all([trip1, trip2])
-    event1 = Event(1, 'test', datetime.now(), datetime.now(),
+    event1 = Event(1, 'test',
+                   to_datetime('Mon, 11 Aug 2013 15:15:15 GMT'),
+                   to_datetime('Mon, 11 Aug 2013 16:16:16 GMT'),
                    None, None, True, None, 1)
-    event2 = Event(2, 'testVancouver', datetime.now(), datetime.now(),
+    event2 = Event(2, 'testVancouver',
+                   to_datetime('Tue, 12 Aug 2013 17:17:17 GMT'),
+                   to_datetime('Tue, 12 Aug 2013 18:18:18 GMT'),
                    49.267132, -122.968941, True, None, 1)
     db_session.add_all([event1, event2])
     # Burnaby bookmark.
