@@ -1,6 +1,3 @@
-/*
- * API/fetch() calling structure credit: https://github.com/reactjs/redux/issues/291#issuecomment-122829159
- */
 import { apiURL } from "../config/ServerConfig.js";
 
 export const Types = {

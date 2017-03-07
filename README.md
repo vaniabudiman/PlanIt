@@ -62,3 +62,6 @@ https://github.com/gcanti/tcomb-form-native
 
 https://github.com/oblador/react-native-vector-icons
 
+### API/fetch() calling structure credit:
+
+https://github.com/reactjs/redux/issues/291#issuecomment-122829159
