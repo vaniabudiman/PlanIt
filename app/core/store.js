@@ -4,6 +4,7 @@ import createLogger from "redux-logger";
 import AppReducer from "./Reducer.js";
 import AccountReducer from "../reducers/accountReducer.js";
 import CitiesReducer from "../reducers/citiesReducer.js";
+import AttractionsReducer from "../reducers/attractionsReducer.js";
 
 
 var createStoreWithMiddleware = applyMiddleware(
@@ -15,7 +16,8 @@ var createStoreWithMiddleware = applyMiddleware(
 var baseReducers = {
     app: AppReducer,
     account: AccountReducer,
-    cities: CitiesReducer
+    cities: CitiesReducer,
+    attractions: AttractionsReducer
 };
 
 var store = (function configureStore (initialState) {
