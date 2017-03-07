@@ -219,14 +219,10 @@ def trips(tripID=None):
 
     if request.method == POST:
         try:
-            post_tripName = str(request.json['tripID'])
+            post_tripName = str(request.json['tripName'])
             post_active = str(request.json['active'])
-            post_startDate = str(request.json.get('startDate', None))
-            if post_startDate is not None:
-                post_startDate = to_datetime(post_startDate)
-            post_endDate = str(request.json.get('active', None))
-            if post_endDate is not None:
-                post_endDate = to_datetime(post_endDate)
+            post_startDate = to_datetime(str(request.json['startDate']))
+            post_endDate = to_datetime(str(request.json['endDate']))
         except (KeyError, ValueError) as err:
             return bad_request(err)
 

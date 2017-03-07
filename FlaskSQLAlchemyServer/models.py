@@ -79,8 +79,8 @@ class Trip(base):
     tripID   = Column(Integer, primary_key=True, unique=True)
     tripName = Column(String(VARCHAR_LEN), nullable=False)
     active   = Column(Boolean, nullable=False)
-    startDate = Column(DateTime)
-    endDate   = Column(DateTime)
+    startDate = Column(DateTime, nullable=False)
+    endDate   = Column(DateTime, nullable=False)
     userName = Column(String(VARCHAR_LEN),
                       ForeignKey('user.userName',
                                  ondelete=CASCADE,
