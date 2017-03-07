@@ -40,21 +40,28 @@ export default class PlanIt extends Component {
             <Provider store={store}>
                 <RouterWithRedux>
                     <Scene key="root">
-                        <Scene key="home" component={HomeView} title="Home View" inital={true} {...navBarProps} />
+                        <Scene key="login" component={LoginView} title="Login" hideNavBar={true} initial={true} />
+                        <Scene key="signUp" component={SignUpView} title="Sign Up" hideNavBar={true} />
+
+                        <Scene key="trips" component={TripsView}
+                            sceneStyle={ NavigationStyles.listViewScene } title="Trips" {...navBarProps} />
+                        <Scene key="tripHome" component={TripHomeView} title="Trip Homepage"
+                            sceneStyle={NavigationStyles.tripHomeViewScene} {...navBarProps} />
+
                         <Scene key="continents" component={ContinentsView} title="Continents"
                             sceneStyle={NavigationStyles.continentsViewScene} {...navBarProps} />
                         <Scene key="countries" component={CountriesView} title="Countries"
                             sceneStyle={NavigationStyles.listViewScene} {...navBarProps} />
-                        <Scene key="tripHome" component={TripHomeView} title="Trip Homepage"
-                            sceneStyle={NavigationStyles.tripHomeViewScene} {...navBarProps} />
-                        <Scene key="login" component={LoginView} title="Login" hideNavBar={true} />
-                        <Scene key="signUp" component={SignUpView} title="Sign Up" hideNavBar={true} />
+
+
+                        <Scene key="home" component={HomeView} title="Home View" inital={true} {...navBarProps} />
+
                         <Scene key="bookmarks" component={BookmarksView}
                             sceneStyle={ NavigationStyles.listViewScene } title="Bookmarks" {...navBarProps} />
-                        <Scene key="trips" component={TripsView}
-                            sceneStyle={ NavigationStyles.listViewScene } title="Trips" {...navBarProps} />
+
                         <Scene key="itemDetails" component={ItemDetailsView}
                             sceneStyle={ NavigationStyles.listViewScene } title="Item / Details" />
+
                         <Scene key="formView" component={FormView}
                             sceneStyle={ NavigationStyles.listViewScene } title="Form View" {...navBarProps} />
 
