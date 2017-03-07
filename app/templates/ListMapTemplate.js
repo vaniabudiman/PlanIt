@@ -9,7 +9,7 @@ import { ListView, Text, TextInput, Title, Subtitle, Divider, View, Row, Button,
  * @typedef ListMapTemplate~ListObject
  * @desc An object representing an item in the list
  *
- * @property {number} id
+ * @property {number | string} id
  *    Unique id for this item.
  * @property {string} title
  *    Title of the list item.
@@ -156,7 +156,7 @@ export default class ListMapTemplate extends Component {
 
     static propTypes = {
         data: React.PropTypes.arrayOf(React.PropTypes.shape({
-            id: React.PropTypes.number,
+            id: React.PropTypes.oneOfType([React.PropTypes.number, React.PropTypes.string]),
             title: React.PropTypes.string,
             subtitle: React.PropTypes.string
         })).isRequired,

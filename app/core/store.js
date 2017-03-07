@@ -3,6 +3,7 @@ import thunk from "redux-thunk";
 import createLogger from "redux-logger";
 import AppReducer from "./Reducer.js";
 import AccountReducer from "../reducers/accountReducer.js";
+import CitiesReducer from "../reducers/citiesReducer.js";
 
 
 var createStoreWithMiddleware = applyMiddleware(
@@ -13,7 +14,8 @@ var createStoreWithMiddleware = applyMiddleware(
 
 var baseReducers = {
     app: AppReducer,
-    account: AccountReducer
+    account: AccountReducer,
+    cities: CitiesReducer
 };
 
 var store = (function configureStore (initialState) {
