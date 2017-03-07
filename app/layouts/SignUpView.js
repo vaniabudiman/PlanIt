@@ -47,8 +47,8 @@ class SignUpView extends Component {
         this.requireAuthentication(nextProps.signupStatusCode);
     }
 
-    requireAuthentication (loginStatus) {
-        if (loginStatus === "201") {
+    requireAuthentication (signUpStatus) {
+        if (signUpStatus === "201") {
             Actions.login({ type: ActionConst.RESET });
         }
         // Other statuses as necessary

@@ -73,7 +73,8 @@ export function login (loginData) {
         .catch(error => {
             // console.log("Request Failed", error);
             alert("Login Failed: " + error.response.status); // TODO: remove this and do something with the fetch error
-        });};
+        });
+    };
 }
 
 export function signup (signupData) {
@@ -104,12 +105,14 @@ export function signup (signupData) {
                 dispatch(signupFailed(error));
                 throw error;
             }
-        }) // return response.json() and use another .then if you want the body json response.
+            // return response.json() and use another .then (see commented out below) if you want the body json response.
+        })
         // .then(response => {
         //     // json response of newly created User object is here
         // })
         .catch(error => {
             // console.log("Request Failed", error);
             alert("Signup Failed: " + error.response.status);
-        });};
+        });
+    };
 }
