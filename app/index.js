@@ -15,6 +15,7 @@ import UserProfileView from "./layouts/UserProfileView.js";
 import ItemDetailsView from "./layouts/ItemDetailsView.js";
 import ContinentsView from "./layouts/ContinentsView.js";
 import CountriesView from "./layouts/CountriesView.js";
+import CitiesView from "./layouts/CitiesView.js";
 import TripHomeView from "./layouts/TripHomeView.js";
 import LoginView from "./layouts/LoginView.js";
 import SignUpView from "./layouts/SignUpView.js";
@@ -51,6 +52,8 @@ export default class PlanIt extends Component {
                         <Scene key="continents" component={ContinentsView} title="Continents"
                             sceneStyle={NavigationStyles.continentsViewScene} {...navBarProps} />
                         <Scene key="countries" component={CountriesView} title="Countries"
+                            sceneStyle={NavigationStyles.listViewScene} {...navBarProps} />
+                        <Scene key="cities" component={CitiesView} title="Cities"
                             sceneStyle={NavigationStyles.listViewScene} {...navBarProps} />
 
                         <Scene key="bookmarks" component={BookmarksView}

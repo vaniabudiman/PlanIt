@@ -1,13 +1,17 @@
 import React, { Component } from "react";
 import Countries from "../data/countries.json";
-import { filter, extend } from "underscore";
+import { extend } from "underscore";
 import ListMapTemplate from "../templates/ListMapTemplate.js";
+import { Actions } from "react-native-router-flux";
 
 
 export default class CountriesView extends Component {
 
     constructor (props) {
         super(props);
+
+        // Bind callback handlers
+        this._handleClickItem = this._handleClickItem.bind(this);
     }
 
     static propTypes = {
@@ -16,16 +20,24 @@ export default class CountriesView extends Component {
 
     _handleClickItem (item) {
         // Make necessary calls to do w/e you want when clicking on item identified by name
-        alert("clicked on country: " + item.name);
+        Actions.cities({ country: item.id });
+
     }
 
     render () {
         const selectedContinent = this.props.continent;
-        const countriesFilteredByContinent = filter(Countries.countries, (country) => {
+        const countriesFilteredByContinent = [];
+
+        for (var key in Countries.countries) {
+            let country = Countries.countries[key];
             if (country.continent === selectedContinent) {
-                return extend(country, { title: country.name });    // add title needed by template
+                // add title needed by template
+                countriesFilteredByContinent.push(extend(country, {
+                    title: country.name,
+                    id: key })
+                );
             }
-        });
+        }
 
         return (
             <ListMapTemplate data={countriesFilteredByContinent}
