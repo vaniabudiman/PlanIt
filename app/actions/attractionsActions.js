@@ -17,13 +17,13 @@ function getAttractionsAttempt () {
     };
 }
 
-//function getAttractionsSuccess (response) {
-//    dispatch({
-//            items: response.geonames,
-//            type: Types.GET_ATTRACTIONS_SUCCESS,
-//        });
-//    };
-//}
+function getAttractionsSuccess (response) {
+    return {
+        items: response.results,
+        pageToken: response.next_page_token,
+        type: Types.GET_ATTRACTIONS_SUCCESS,
+    };
+}
 
 function getAttractionsFailed (error) {
     return {
@@ -79,15 +79,10 @@ export function getAttractions (countryCode, pageToken) {
             }
 //            return { header: response, response: response.json() };
         })
-         .then(response => {
+        .then(response => {
              // json response of newly created User object is here
-//             getAttractionsSuccess(response);
-             dispatch({
-                 items: response.results,
-                 pageToken: response.next_page_token,
-                 type: Types.GET_ATTRACTIONS_SUCCESS,
-             });
-         })
+            dispatch(getAttractionsSuccess(response));
+        })
         .catch(error => {
             // console.log("Request Failed", error);
             alert("Login Failed: " + error.response.status); // TODO: remove this and do something with the fetch error

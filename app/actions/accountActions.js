@@ -18,11 +18,9 @@ function fetchAttempt () {
 }
 
 function loginSuccess (response) {
-    return dispatch => {
-        dispatch({
-            response,
-            type: Types.LOGIN_SUCCESS,
-        });
+    return {
+        response,
+        type: Types.LOGIN_SUCCESS,
     };
 }
 
