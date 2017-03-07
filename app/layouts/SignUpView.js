@@ -12,7 +12,7 @@ import {
 import { Actions, ActionConst } from "react-native-router-flux";
 import Icon from "react-native-vector-icons/FontAwesome";
 import SignUpStyles from "../styles/SignUpStyles.js";
-import { signup } from "../core/Actions.js";
+import { signup } from "../actions/accountActions.js";
 import { connect } from "react-redux";
 
 

@@ -12,7 +12,7 @@ import {
 import { Actions, ActionConst } from "react-native-router-flux";
 import Icon from "react-native-vector-icons/FontAwesome";
 import LoginStyles from "../styles/LoginStyles.js";
-import { login } from "../core/Actions.js";
+import { login } from "../actions/accountActions.js";
 import { connect } from "react-redux";
 
 
@@ -118,6 +118,6 @@ class LoginView extends Component {
 export default connect((state) => {
     // mapStateToProps
     return {
-        loginStatusCode: state.app.loginStatusCode,
+        loginStatusCode: state.account.loginStatusCode,
     };
 })(LoginView);

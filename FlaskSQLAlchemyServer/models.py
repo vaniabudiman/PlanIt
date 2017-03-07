@@ -11,6 +11,33 @@ VARCHAR_LEN = 40
 CASCADE = 'CASCADE'
 CASCADE_OPTIONS = 'all,delete-orphan'
 
+# DateTime string format.
+# https://docs.python.org/2/library/datetime.html#strftime-strptime-behavior
+# JS <-> Python conversion http://stackoverflow.com/a/8154033/5608215
+#   Mobile:
+#       # Creating a Date object.
+#       var dateObj = new Date( ... );
+#       # When using dateObj as a parameter to a request, first convert to UTC.
+#       var dateParameter = dateObj.toUTCString();
+#       # When receiving a date string from a request, convert back to Date.
+#       var fetchedDateObj = new Date(fetchedDateString);
+#
+#   Server:
+#       # Receiving date parameter; convert to DateTime object.
+#       datetime_obj = datetime.strptime(input, DT_FORMAT)
+#       # Convert DateTime object to string for json output.
+#       datetime_output = datetime_obj.strftime(DT_FORMAT)
+#
+#  %a: Weekday as locale’s abbreviated name. Sun, Mon, ..., Sat
+#  %d: Day of the month as a zero-padded decimal number. 01, 02, ..., 31
+#  %b: Month as locale’s abbreviated name. Jan, Feb, ..., Dec
+#  %Y: Year with century as a decimal number. 1970, 1988, 2001, 2013
+#  %H: Hour (24-hour clock) as a zero-padded decimal number. 00, 01, ..., 23
+#  %M: Minute as a zero-padded decimal number. 00, 01, ..., 59
+#  %S: Second as a zero-padded decimal number. 00, 01, ..., 59
+#  %Z: Time zone name (empty string if the object is naive). (empty), UTC, EST, CST
+DT_FORMAT = '%a, %d %b %Y %H:%M:%S %Z'
+
 
 class User(base):
     __tablename__ = 'user'
@@ -80,8 +107,8 @@ class Trip(base):
         return {"tripID": self.tripID,
                 "tripName": self.tripName,
                 "active": self.active,
-                "startDate": self.startDate,
-                "endDate": self.endDate,
+                "startDate": self.startDate.strftime(DT_FORMAT),
+                "endDate": self.endDate.strftime(DT_FORMAT),
                 "userName": self.userName}
 
 
@@ -208,8 +235,8 @@ class Event(base):
     def to_dict(self):
         return {"eventID": self.eventID,
                 "eventName": self.eventName,
-                "startDateTime": self.startDateTime,
-                "endDateTime": self.endDateTime,
+                "startDateTime": self.startDateTime.strftime(DT_FORMAT),
+                "endDateTime": self.endDateTime.strftime(DT_FORMAT),
                 "lat": self.lat,
                 "lon": self.lon,
                 "reminderFlag": self.reminderFlag,
