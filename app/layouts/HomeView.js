@@ -33,6 +33,7 @@ class HomeView extends Component {
                 <Text style={GlobalStyles.text} onPress={Actions.tripHome}>Go to Trip Home View</Text>
                 <Text style={GlobalStyles.text} onPress={Actions.login}>Go to Login View</Text>
                 <Text style={GlobalStyles.text} onPress={Actions.signUp}>Go to Sign Up View</Text>
+                <Text style={GlobalStyles.text} onPress={Actions.bookmarks}>Bookmarks View</Text>
 
                 <Text style={GlobalStyles.text} onPress={Actions.trips}>Trips View</Text>
                 <Text style={GlobalStyles.text} onPress={Actions.itemDetails}>Item / Details View</Text>
