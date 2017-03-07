@@ -8,7 +8,7 @@ import ContinentStyles from "../styles/ContinentStyles.js";
 export default class ContinentsView extends Component {
 
     static propTypes = {
-        trip: React.PropTypes.number
+        tripId: React.PropTypes.number
     }
 
     constructor (props) {
@@ -21,11 +21,11 @@ export default class ContinentsView extends Component {
 
     componentDidMount () {
         // TODO: remove this... just testing for now
-        alert("continents for trip id: " + this.props.trip);
+        alert("continents for trip id: " + this.props.tripId);
     }
 
     _getCell (cell) {
-        const goToCountriesView = () => Actions.countries({ continent: cell.id });
+        const goToCountriesView = () => Actions.countries({ continentId: cell.id });
 
         //TODO: route to appropriate countries list view "onPress" of image
         return (

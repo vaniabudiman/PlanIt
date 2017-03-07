@@ -10,7 +10,7 @@ import { View, Text, TextInput, ListView, Button, Subtitle, Divider, Row, Toucha
  *
  * @property {string} TEXT
 */
-export var Types = {
+export const Types = {
     TEXT: "text"
 };
 

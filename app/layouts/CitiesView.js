@@ -11,14 +11,14 @@ class CitiesView extends Component {
 
     static propTypes = {
         dispatch: React.PropTypes.func,
-        country: React.PropTypes.string,
+        countryId: React.PropTypes.string,
         cities: React.PropTypes.array
     }
 
     componentWillMount () {
 
         // Bind Redux action creators
-        this.props.dispatch(getCities(this.props.country));
+        this.props.dispatch(getCities(this.props.countryId));
     }
 
     _handleClickItem (item) {
@@ -27,7 +27,7 @@ class CitiesView extends Component {
     }
 
     render () {
-        const selectedCountry = this.props.country;
+        const selectedCountry = this.props.countryId;
         // generate cities by filtering by country
         return (
             <Text>{this.props.cities.length} of {selectedCountry}</Text>

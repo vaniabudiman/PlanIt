@@ -25,7 +25,7 @@ var mapProps = {
 export default class BookmarksView extends Component {
 
     static propTypes = {
-        trip: React.PropTypes.number
+        tripId: React.PropTypes.number
     }
 
     constructor (props) {
@@ -52,7 +52,7 @@ export default class BookmarksView extends Component {
 
     componentDidMount () {
         // TODO: remove this... just testing for now
-        alert("bookmarks for trip id: " + this.props.trip);
+        alert("bookmarks for trip id: " + this.props.tripId);
     }
 
     // TODO: remove/edit... this is just an example on how the callback would work

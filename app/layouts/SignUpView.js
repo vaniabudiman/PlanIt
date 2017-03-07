@@ -14,6 +14,7 @@ import { Actions, ActionConst } from "react-native-router-flux";
 import Icon from "react-native-vector-icons/FontAwesome";
 import SignUpStyles from "../styles/SignUpStyles.js";
 import { signup } from "../actions/accountActions.js";
+import FETCH_STATUS from "../constants/fetchStatusConstants.js";
 import { connect } from "react-redux";
 
 
@@ -21,7 +22,7 @@ class SignUpView extends Component {
 
     static propTypes = {
         dispatch: React.PropTypes.func,
-        signupStatusCode: React.PropTypes.string,
+        signupStatus: React.PropTypes.string,
     }
 
     constructor (props) {
@@ -37,18 +38,18 @@ class SignUpView extends Component {
     }
 
     componentWillMount () {
-        this.requireAuthentication(this.props.signupStatusCode);
+        this.requireAuthentication(this.props.signupStatus);
 
         // Bind Redux action creators
         this._signup = () => this.props.dispatch(signup(this.state));
     }
 
     componentWillReceiveProps (nextProps) {
-        this.requireAuthentication(nextProps.signupStatusCode);
+        this.requireAuthentication(nextProps.signupStatus);
     }
 
-    requireAuthentication (loginStatus) {
-        if (loginStatus === "201") {
+    requireAuthentication (signUpStatus) {
+        if (signUpStatus === FETCH_STATUS.SUCCESS) {
             Actions.login({ type: ActionConst.RESET });
         }
         // Other statuses as necessary
@@ -146,6 +147,6 @@ class SignUpView extends Component {
 export default connect((state) => {
     // mapStateToProps
     return {
-        signupStatusCode: state.app.signupStatusCode,
+        signupStatus: state.app.signupStatus,
     };
 })(SignUpView);

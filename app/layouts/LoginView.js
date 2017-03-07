@@ -13,6 +13,7 @@ import { Actions, ActionConst } from "react-native-router-flux";
 import Icon from "react-native-vector-icons/FontAwesome";
 import LoginStyles from "../styles/LoginStyles.js";
 import { login } from "../actions/accountActions.js";
+import FETCH_STATUS from "../constants/fetchStatusConstants.js";
 import { connect } from "react-redux";
 
 
@@ -20,7 +21,7 @@ class LoginView extends Component {
 
     static propTypes = {
         dispatch: React.PropTypes.func,
-        loginStatusCode: React.PropTypes.string,
+        loginStatus: React.PropTypes.string,
     }
 
     constructor (props) {
@@ -32,18 +33,18 @@ class LoginView extends Component {
     }
 
     componentWillMount () {
-        this.requireAuthentication(this.props.loginStatusCode);
+        this.requireAuthentication(this.props.loginStatus);
 
         // Bind Redux action creators
         this._login = () => this.props.dispatch(login(this.state));
     }
 
     componentWillReceiveProps (nextProps) {
-        this.requireAuthentication(nextProps.loginStatusCode);
+        this.requireAuthentication(nextProps.loginStatus);
     }
 
     requireAuthentication (loginStatus) {
-        if (loginStatus === "201") {
+        if (loginStatus === FETCH_STATUS.SUCCESS) {
             Actions.trips({ type: ActionConst.RESET });
         }
         // Other statuses as necessary
@@ -118,6 +119,6 @@ class LoginView extends Component {
 export default connect((state) => {
     // mapStateToProps
     return {
-        loginStatusCode: state.account.loginStatusCode,
+        loginStatus: state.account.loginStatus,
     };
 })(LoginView);

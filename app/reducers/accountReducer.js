@@ -1,29 +1,33 @@
 import { Types } from "../actions/accountActions.js";
+import FETCH_STATUS from "../constants/fetchStatusConstants.js";
 
 
 const initialState = {
-    loginStatusCode: "000",
-    signupStatusCode: "000",
+    loginStatus: "",
+    signupStatus: "",
 };
 
 export default function (state = initialState, action) {
     var nextState = state;
 
     switch (action.type) {
-        case Types.FETCH_ATTEMPT:
-            nextState = { ...state, statusCode: state.statusCode = "100" };
+        case Types.LOGIN_ATTEMPT:
+            nextState = { ...state, loginStatus: FETCH_STATUS.ATTEMPTING };
             break;
         case Types.LOGIN_SUCCESS:
-            nextState = { ...state, loginStatusCode: state.loginStatusCode = String(action.response.status) };
+            nextState = { ...state, loginStatus: FETCH_STATUS.SUCCESS };
             break;
         case Types.LOGIN_FAILED:
-            nextState = { ...state, loginStatusCode: state.loginStatusCode = "FAILED" };
+            nextState = { ...state, loginStatus: FETCH_STATUS.FAILED };
+            break;
+        case Types.SIGNUP_ATTEMPT:
+            nextState = { ...state, signupStatus: FETCH_STATUS.ATTEMPTING };
             break;
         case Types.SIGNUP_SUCCESS:
-            nextState = { ...state, signupStatusCode: state.signupStatusCode = String(action.response.status) };
+            nextState = { ...state, signupStatus: FETCH_STATUS.SUCCESS };
             break;
         case Types.SIGNUP_FAILED:
-            nextState = { ...state, signupStatusCode: state.signupStatusCode = "FAILED" };
+            nextState = { ...state, signupStatus: FETCH_STATUS.FAILED };
             break;
         default:
             return state;

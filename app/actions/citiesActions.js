@@ -14,13 +14,12 @@ function getCitiesAttempt () {
     };
 }
 
-//function getCitiesSuccess (response) {
-//    dispatch({
-//            items: response.geonames,
-//            type: Types.GET_CITIES_SUCCESS,
-//        });
-//    };
-//}
+function getCitiesSuccess (response) {
+    return {
+        items: response.geonames,
+        type: Types.GET_CITIES_SUCCESS,
+    };
+}
 
 function getCitiesFailed (error) {
     return {
@@ -58,14 +57,10 @@ export function getCities (countryCode) {
             }
 //            return { header: response, response: response.json() };
         })
-         .then(response => {
+        .then(response => {
              // json response of newly created User object is here
-//             getCitiesSuccess(response);
-             dispatch({
-                 items: response.geonames,
-                 type: Types.GET_CITIES_SUCCESS,
-             });
-         })
+            dispatch(getCitiesSuccess(response));
+        })
         .catch(error => {
             // console.log("Request Failed", error);
             alert("Login Failed: " + error.response.status); // TODO: remove this and do something with the fetch error
