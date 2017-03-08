@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import { View, Text } from "react-native";
 import { GlobalStyles } from "../styles/GlobalStyles.js";
+import FormTemplate, { Types } from "../templates/FormTemplate.js";
 
 
 // TODO: remove these mocks
