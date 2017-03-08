@@ -27,6 +27,7 @@ class SignUpView extends Component {
 
     constructor (props) {
         super(props);
+
         this.state = {
             // TODO: view textinputs need to set these states; see LoginView.js for onChangeText usage
             userName: "",
@@ -35,9 +36,7 @@ class SignUpView extends Component {
             email: "",
             homeCurrency: "",
         };
-    }
 
-    componentWillMount () {
         this.requireAuthentication(this.props.signupStatus);
 
         // Bind Redux action creators

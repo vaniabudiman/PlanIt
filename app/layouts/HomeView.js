@@ -17,10 +17,6 @@ class HomeView extends Component {
         super(props);
     }
 
-    componentWillMount () {
-        // Bind Redux action creators
-    }
-
     render () {
         return (
             <View style={[GlobalStyles.container, { backgroundColor: $blue }]}>
