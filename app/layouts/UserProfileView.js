@@ -4,15 +4,11 @@ import FormTemplate, { Types } from "../templates/FormTemplate.js";
 
 // TODO: remove these mocks
 let inputs = [
-    { id: 1, title: "input 1", placeholder: "placeholder 1", value: "value 1", type: Types.TEXT },
-    { id: 3, title: "input 3", placeholder: "placeholder 3", value: "readOnly value 3", readOnly: true },
-    { id: 4, title: "input 4", placeholder: "placeholder 4", value: "readOnly value 4", readOnly: true },
-    { id: 5, title: "input 5", placeholder: "placeholder 5", value: "value 5" },
-    { id: 6, title: "input 5", placeholder: "placeholder 6", value: "value 6" },
-    { id: 7, title: "input 5", placeholder: "placeholder 7", value: "value 7" },
-    { id: 8, title: "input 5", placeholder: "placeholder 8", value: "value 8" },
-    { id: 9, title: "input 5", placeholder: "placeholder 9", value: "value 9" },
-    { id: 10, title: "input 5", placeholder: "placeholder 10", value: "value 10" },
+    { id: 1, title: "Username", placeholder: "placeholder 1", value: "value 1"},
+    { id: 2, title: "Password", placeholder: "placeholder 2", value: "value 2" },
+    { id: 3, title: "Name", placeholder: "placeholder 3", value: "value 3" },
+    { id: 4, title: "Email", placeholder: "placeholder 4", value: "value 4" },
+    { id: 5, title: "Home Currency", placeholder: "placeholder 5", value: "value 5" }
 ];
 
 
@@ -41,16 +37,16 @@ export default class UserProfileView extends Component {
     _handleRefresh () {
         // Make necessary calls to fetch & fresh data from server/Realm as necessary
         alert("refreshing");
-        this.setState({ loadingTrips: true });
-        setTimeout(() => this.setState({ loadingTrips: false }), 1000);
+        this.setState({ loadingProfile: true });
+        setTimeout(() => this.setState({ loadingProfile: false }), 1000);
     }
 
     // TODO: remove/edit... this is just an example on how the callback would work
     _handleLoadMore () {
         // Make necessary calls to fetch more data from server/Realm as necessary
         alert("loading more");
-        this.setState({ loadingTrips: true });
-        setTimeout(() => this.setState({ loadingTrips: false }), 1000);
+        this.setState({ loadingProfile: true });
+        setTimeout(() => this.setState({ loadingProfile: false }), 1000);
     }
 
     // TODO: remove/edit... this is just an example on how the callback would work
