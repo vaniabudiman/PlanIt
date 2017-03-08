@@ -6,6 +6,7 @@ import AppReducer from "./Reducer.js";
 import AccountReducer from "../reducers/accountReducer.js";
 import CitiesReducer from "../reducers/citiesReducer.js";
 import AttractionsReducer from "../reducers/attractionsReducer.js";
+import EventsReducer from "../reducers/eventsReducer.js";
 
 
 var createStoreWithMiddleware = applyMiddleware(
@@ -18,7 +19,8 @@ var baseReducers = {
     app: AppReducer,
     account: AccountReducer,
     cities: CitiesReducer,
-    attractions: AttractionsReducer
+    attractions: AttractionsReducer,
+    events: EventsReducer
 };
 
 var store = (function configureStore (initialState) {

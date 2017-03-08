@@ -1,4 +1,6 @@
 import React, { Component } from "react";
+import { connect } from "react-redux";
+import { getEvents } from "../actions/eventsActions.js";
 import ListMapTemplate from "../templates/ListMapTemplate.js";
 
 
@@ -22,10 +24,13 @@ var mapProps = {
 };
 
 
-export default class EventsView extends Component {
+class EventsView extends Component {
 
     static propTypes = {
-        tripId: React.PropTypes.number
+        tripId: React.PropTypes.number,
+        events: React.PropTypes.array,
+        eventsGETStatus: React.PropTypes.string,
+        dispatch: React.PropTypes.func
     }
 
     constructor (props) {
@@ -36,6 +41,7 @@ export default class EventsView extends Component {
         //      - how we do the loading state may be different / vary depending on how data is loaded in from server/Realm
         this.state = {
             items: items,   // TODO: change this to an empty list to see an example of the empty message
+            events: this.props.events,
             loadingevents: false
         };
 
@@ -49,6 +55,21 @@ export default class EventsView extends Component {
         this._handleClickItem = this._handleClickItem.bind(this);
         this._handleCreateItem = this._handleCreateItem.bind(this);
     }
+
+    componentWillMount () {
+
+        // Bind Redux action creators
+
+        // TODO: assign real tripID to fetch events
+        const tripId = "1";
+        this.props.dispatch(getEvents(tripId));
+    }
+
+    componentWillReceiveProps (nextProps) {
+        // Always update state events w/ latest events from props
+        this.setState({ events: nextProps.events });
+    }
+
 
     componentDidMount () {
         // TODO: remove this... just testing for now
@@ -138,3 +159,11 @@ export default class EventsView extends Component {
         );
     }
 }
+
+export default connect((state) => {
+    // map state to props
+    return {
+        events: state.events.events,
+        eventsGETStatus: state.events.eventsGETStatus
+    };
+})(EventsView);
