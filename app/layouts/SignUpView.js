@@ -92,7 +92,9 @@ class SignUpView extends Component {
                                     placeholderTextColor="#FFF"
                                     multiline={false}
                                     maxLength={FORM.CHAR_LIMIT}
-                                    onChangeText={(userName) => this.setState({ userName: userName.replace(FORM.REPLACE_REGEX, "") })}
+                                    onChangeText={(userName) => this.setState({
+                                        userName: userName.replace(FORM.REPLACE_REGEX, "")
+                                    })}
                                     value={this.state.userName}
                                     underlineColorAndroid="rgba(250, 250, 250, 0.8)" />
                         </View>
@@ -105,7 +107,9 @@ class SignUpView extends Component {
                                     placeholderTextColor="#FFF"
                                     multiline={false}
                                     maxLength={FORM.CHAR_LIMIT}
-                                    onChangeText={(email) => this.setState({ email: email.replace(FORM.REPLACE_REGEX, "") })}
+                                    onChangeText={(email) => this.setState({
+                                        email: email.replace(FORM.REPLACE_REGEX, "")
+                                    })}
                                     value={this.state.email}
                                     underlineColorAndroid="rgba(250, 250, 250, 0.8)" />
                         </View>
@@ -119,7 +123,9 @@ class SignUpView extends Component {
                                     placeholderTextColor="#FFF"
                                     multiline={false}
                                     maxLength={FORM.CHAR_LIMIT}
-                                    onChangeText={(pass) => this.setState({ password: pass.replace(FORM.REPLACE_REGEX, "") })}
+                                    onChangeText={(pass) => this.setState({
+                                        password: pass.replace(FORM.REPLACE_REGEX, "")
+                                    })}
                                     value={this.state.password}
                                     underlineColorAndroid="rgba(250, 250, 250, 0.8)" />
                         </View>

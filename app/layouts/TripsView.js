@@ -2,6 +2,9 @@ import React, { Component } from "react";
 import { Actions } from "react-native-router-flux";
 import ListMapTemplate from "../templates/ListMapTemplate.js";
 import realm from "../../Realm/realm.js";
+import { connect } from "react-redux";
+import { getTrips } from "../actions/tripsActions";
+import FETCH_STATUS from "../constants/fetchStatusConstants.js";
 
 
 /*
@@ -39,7 +42,13 @@ var mapProps = {
 };
 
 
-export default class TripView extends Component {
+class TripsView extends Component {
+
+    static propTypes = {
+        dispatch: React.PropTypes.func,
+        trips: React.PropTypes.array,
+        tripsGETStatus: React.PropTypes.string,
+    }
 
     constructor (props) {
         super(props);
@@ -49,7 +58,9 @@ export default class TripView extends Component {
         //      - how we do the loading state may be different / vary depending on how data is loaded in from server/Realm
         this.state = {
             items: items,   // TODO: change this to an empty list to see an example of the empty message
-            loadingTrips: false
+            loadingTrips: false,
+
+            trips: this.props.trips,
         };
 
         // Bind callback handlers
@@ -61,6 +72,20 @@ export default class TripView extends Component {
         this._handleToggleMap = this._handleToggleMap.bind(this);
         this._handleClickItem = this._handleClickItem.bind(this);
         this._handleCreateItem = this._handleCreateItem.bind(this);
+
+        this._getTrips = () => this.props.dispatch(getTrips()); // TODO: use this somewhere
+    }
+
+    componentWillReceiveProps (nextProps) {
+        this.requireAuthentication(nextProps);
+        this.setState({ trips: nextProps.trips });
+    }
+
+    requireAuthentication (nextProps) {
+        if (nextProps.tripsGETStatus === FETCH_STATUS.SUCCESS) {
+            this.setState({ trips: nextProps.trips });
+            // TODO: push new trips to view
+        }
     }
 
     // TODO: remove/edit... this is just an example on how the callback would work
@@ -147,3 +172,10 @@ export default class TripView extends Component {
         );
     }
 }
+
+export default connect((state) => {
+    return {
+        trips: state.trips.trips,
+        tripsGETStatus: state.trips.tripsGETStatus
+    };
+})(TripsView);
