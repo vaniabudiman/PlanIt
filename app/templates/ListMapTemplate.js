@@ -377,11 +377,11 @@ export default class ListMapTemplate extends Component {
     render () {
         return (
             <View style={{ flex: 1, flexDirection: "column" }}>
-                {(this.props.data.length !== 0) && this.renderMapToggle()}
-                {(this.props.data.length !== 0) && this.renderMap()}
-                {(this.props.data.length !== 0) && this.renderCalendarToggle()}
-                {(this.props.data.length !== 0) && this.renderCalendar()}
-                {(this.props.data.length !== 0) && this.renderSearchBar()}
+                {this.renderMapToggle()}
+                {this.renderMap()}
+                {this.renderCalendarToggle()}
+                {this.renderCalendar()}
+                {this.renderSearchBar()}
                 {
                     this.props.data.length === 0
                         ? <Text style={{ alignSelf: "center", paddingTop: 50 }}>{this.props.emptyListMessage}</Text>
