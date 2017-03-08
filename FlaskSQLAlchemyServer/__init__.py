@@ -139,15 +139,29 @@ def users(userName=None):
         finally:
             close_session(db)
     elif request.method == GET:
-        db = create_db_session()
         curr_userName = session.get(KEY__USERNAME)
-        query = db.query(User).filter(User.userName == curr_userName).first()
-        if not query:
+        get_userName = request.args.get('userName', None)
+        if get_userName is not None:
+            db = create_db_session()
+            try:
+                user = db.query(User).filter(
+                    User.userName == get_userName).first()
+                if get_userName == curr_userName:
+                    return make_response(jsonify({'user': user.to_dict()}), 200)
+                else:
+                    ret_dict = {'userName': user.userName, 'name': user.name}
+                    return make_response(jsonify({'user': ret_dict}), 200)
+            finally:
+                close_session(db)
+        else:
+            db = create_db_session()
+            user = db.query(User).filter(User.userName == curr_userName).first()
+            if not user:
+                close_session(db)
+                return make_response('User not found.', 404)
+            ret_dict = {'user': user.to_dict()}
             close_session(db)
-            return make_response('User not found.', 404)
-        ret_dict = {'user': query.to_dict()}
-        close_session(db)
-        return make_response(jsonify(ret_dict), 200)
+            return make_response(jsonify(ret_dict), 200)
     elif userName:
         curr_userName = session.get(KEY__USERNAME)
         if request.method == PUT:
