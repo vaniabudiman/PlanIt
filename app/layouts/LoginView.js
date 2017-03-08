@@ -72,7 +72,9 @@ class LoginView extends Component {
                                     placeholderTextColor="#FFF"
                                     multiline={false}
                                     maxLength={FORM.CHAR_LIMIT}
-                                    onChangeText={(userName) => this.setState({ userName: userName.replace(" ", "") })}
+                                    onChangeText={(userName) => this.setState({
+                                        userName: userName.replace(FORM.REPLACE_REGEX, "")
+                                    })}
                                     value={this.state.userName}
                                     underlineColorAndroid="rgba(250, 250, 250, 0.8)" />
                         </View>
@@ -85,7 +87,9 @@ class LoginView extends Component {
                                     placeholderTextColor="#FFF"
                                     multiline={false}
                                     maxLength={FORM.CHAR_LIMIT}
-                                    onChangeText={(pass) => this.setState({ password: pass.replace(/\s/g, "") })}
+                                    onChangeText={(pass) => this.setState({
+                                        password: pass.replace(FORM.REPLACE_REGEX, "")
+                                    })}
                                     value={this.state.password}
                                     secureTextEntry={true}
                                     underlineColorAndroid="rgba(250, 250, 250, 0.8)" />
