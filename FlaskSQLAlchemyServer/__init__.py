@@ -265,7 +265,7 @@ def trips(tripID=None):
             else:
                 trip_list = db.query(Trip).filter(
                     Trip.userName == curr_userName).all()
-                if len(trips) == 0:
+                if len(trip_list) == 0:
                     return make_response('No Trips found.', 404)
                 trips_dict = {'trips': [trip.to_dict() for trip in trip_list]}
                 return make_response(jsonify(trips_dict), 200)
@@ -710,7 +710,11 @@ if __name__ == '__main__' or __name__ == '__init__':
                  to_datetime('Sat, 10 Aug 2013 08:00:00 GMT'),
                  to_datetime('Sat, 24 Aug 2013 09:00:00 GMT'),
                  'user2')
-    db_session.add_all([trip1, trip2])
+    trip3 = Trip(3, 'admin_trip3', True,
+                 to_datetime('Sat, 17 Aug 2013 04:00:00 GMT'),
+                 to_datetime('Sat, 24 Aug 2013 05:00:00 GMT'),
+                 'admin')
+    db_session.add_all([trip1, trip2, trip3])
     event1 = Event(1, 'test',
                    to_datetime('Mon, 11 Aug 2013 15:15:15 GMT'),
                    to_datetime('Mon, 11 Aug 2013 16:16:16 GMT'),
