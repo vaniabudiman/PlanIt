@@ -15,6 +15,7 @@ import Icon from "react-native-vector-icons/FontAwesome";
 import SignUpStyles from "../styles/SignUpStyles.js";
 import { signup } from "../actions/accountActions.js";
 import FETCH_STATUS from "../constants/fetchStatusConstants.js";
+import FORM from "../constants/formConstants.js"
 import { connect } from "react-redux";
 
 
@@ -76,6 +77,10 @@ class SignUpView extends Component {
                             <TextInput style={[SignUpStyles.input]}
                                     placeholder="Name"
                                     placeholderTextColor="#FFF"
+                                    multiline={false}
+                                    maxLength={FORM.CHAR_LIMIT}
+                                    onChangeText={(name) => this.setState({ name: name })}
+                                    value={this.state.name}
                                     underlineColorAndroid="rgba(250, 250, 250, 0.8)" />
                         </View>
                         <View style={SignUpStyles.inputContainer}>
@@ -85,6 +90,10 @@ class SignUpView extends Component {
                             <TextInput style={[SignUpStyles.input]}
                                     placeholder="Username"
                                     placeholderTextColor="#FFF"
+                                    multiline={false}
+                                    maxLength={FORM.CHAR_LIMIT}
+                                    onChangeText={(userName) => this.setState({ userName: userName.replace(" ", "") })}
+                                    value={this.state.userName}
                                     underlineColorAndroid="rgba(250, 250, 250, 0.8)" />
                         </View>
                         <View style={SignUpStyles.inputContainer}>
@@ -94,6 +103,10 @@ class SignUpView extends Component {
                             <TextInput style={[SignUpStyles.input]}
                                     placeholder="Email"
                                     placeholderTextColor="#FFF"
+                                    multiline={false}
+                                    maxLength={FORM.CHAR_LIMIT}
+                                    onChangeText={(email) => this.setState({ email: email.replace(" ", "") })}
+                                    value={this.state.email}
                                     underlineColorAndroid="rgba(250, 250, 250, 0.8)" />
                         </View>
                         <View style={SignUpStyles.inputContainer}>
@@ -104,6 +117,10 @@ class SignUpView extends Component {
                                     style={[SignUpStyles.input]}
                                     placeholder="Password"
                                     placeholderTextColor="#FFF"
+                                    multiline={false}
+                                    maxLength={FORM.CHAR_LIMIT}
+                                    onChangeText={(pass) => this.setState({ password: pass.replace(" ", "") })}
+                                    value={this.state.password}
                                     underlineColorAndroid="rgba(250, 250, 250, 0.8)" />
                         </View>
                         <View style={SignUpStyles.inputContainer}>
@@ -112,7 +129,10 @@ class SignUpView extends Component {
                             </View>
                             <Picker style={SignUpStyles.picker}
                                     selectedValue={this.state.currency}
-                                    onValueChange={(curr) => this.setState({ currency: curr })}>
+                                    onValueChange={(curr) => {
+                                        this.setState({ currency: curr });
+                                        this.setState({ homeCurrency: curr });
+                                    }}>
                                     {/* TODO: populate w/ available currencies */}
                                     <Picker.Item label="Select Home Currency" value="" />
                                     <Picker.Item label="USD (United States)" value="usd" />
@@ -146,6 +166,6 @@ class SignUpView extends Component {
 export default connect((state) => {
     // mapStateToProps
     return {
-        signupStatus: state.app.signupStatus,
+        signupStatus: state.account.signupStatus,
     };
 })(SignUpView);
