@@ -13,14 +13,14 @@ function getCitiesAttempt () {
 function getCitiesSuccess (response) {
     return {
         cities: response.geonames,
-        type: Types.GET_CITIES_SUCCESS,
+        type: Types.GET_CITIES_SUCCESS
     };
 }
 
 function getCitiesFailed (error) {
     return {
         error,
-        type: Types.GET_CITIES_FAILED,
+        type: Types.GET_CITIES_FAILED
     };
 }
 
