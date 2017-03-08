@@ -148,6 +148,8 @@ import CalendarPicker from "react-native-calendar-picker";
  *
  * @property {boolean} [enableSearch=false]
  *    Whether or not the search bar should be enabled.
+ * @property {string} [searchString]
+ *    Search text value to display in the search bar.
  * @property {ListMapTemplate~onSearch} [onSearch]
  *    Callback to be triggerred when searching.
  *
@@ -195,7 +197,8 @@ export default class ListMapTemplate extends Component {
         onShare: React.PropTypes.func,
         loadingData: React.PropTypes.bool,
         onClickItem: React.PropTypes.func,
-        onCreateItem: React.PropTypes.func
+        onCreateItem: React.PropTypes.func,
+        searchString: React.PropTypes.string
     }
 
     static defaultProps = {
@@ -256,6 +259,7 @@ export default class ListMapTemplate extends Component {
                         <Icon name="search" />
                     </View>*/}
                     <TextInput placeholder="Search..."
+                        value={this.props.searchString}
                         multiline={false}
                         maxLength={40}
                         onChangeText={this._handleInputValueChange} />
@@ -392,6 +396,7 @@ export default class ListMapTemplate extends Component {
                     data={this.props.data}
                     renderRow={item => this.renderRow(item)}
                     onRefresh={this.props.onRefresh}
+                    loading={this.props.loadingData}
                 />
                 {this.renderCreateButton()}
             </View>

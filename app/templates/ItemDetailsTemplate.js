@@ -281,6 +281,7 @@ export default class ItemDetailsTemplate extends Component {
                     data={this.props.data}
                     renderRow={item => this.renderRow(item)}
                     onRefresh={this.props.onRefresh}
+                    loading={this.props.loadingData}
                 />
                 {this.renderButtons()}
             </View>
