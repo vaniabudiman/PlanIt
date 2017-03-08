@@ -30,7 +30,7 @@ export function getBookmarks (tripId) {
     return dispatch => {
         dispatch(getBookmarksAttempt());
 
-        fetch(apiURL + "bookmarks/" + tripId, {
+        fetch(apiURL + "bookmarks?tripID=" + tripId, {
             method: "GET",
             headers: {
                 Accept: "application/json",

@@ -30,7 +30,7 @@ export function getEvents (tripId) {
     return dispatch => {
         dispatch(getEventsAttempt());
 
-        fetch(apiURL + "events/" + tripId, {
+        fetch(apiURL + "events?tripID=" + tripId, {
             method: "GET",
             headers: {
                 Accept: "application/json",
