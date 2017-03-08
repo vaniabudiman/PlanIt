@@ -26,13 +26,12 @@ class LoginView extends Component {
 
     constructor (props) {
         super(props);
+
         this.state = {
             userName: "",
             password: "",
         };
-    }
 
-    componentWillMount () {
         this.requireAuthentication(this.props.loginStatus);
 
         // Bind Redux action creators

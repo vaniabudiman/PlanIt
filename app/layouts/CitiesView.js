@@ -7,18 +7,14 @@ class CitiesView extends Component {
 
     constructor (props) {
         super(props);
+
+        this.props.dispatch(getCities(this.props.countryId));
     }
 
     static propTypes = {
         dispatch: React.PropTypes.func,
         countryId: React.PropTypes.string,
         cities: React.PropTypes.array
-    }
-
-    componentWillMount () {
-
-        // Bind Redux action creators
-        this.props.dispatch(getCities(this.props.countryId));
     }
 
     _handleClickItem (item) {
