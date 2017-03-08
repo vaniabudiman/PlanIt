@@ -15,7 +15,7 @@ import Icon from "react-native-vector-icons/FontAwesome";
 import SignUpStyles from "../styles/SignUpStyles.js";
 import { signup } from "../actions/accountActions.js";
 import FETCH_STATUS from "../constants/fetchStatusConstants.js";
-import FORM from "../constants/formConstants.js"
+import FORM from "../constants/formConstants.js";
 import { connect } from "react-redux";
 
 
