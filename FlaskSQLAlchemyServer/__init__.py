@@ -250,7 +250,7 @@ def trips(tripID=None):
         finally:
             close_session(db)
     elif request.method == GET:
-        post_tripID = int(request.json.get('tripID', None))
+        post_tripID = request.args.get('tripID', None)
 
         db = create_db_session()
         try:
@@ -267,7 +267,7 @@ def trips(tripID=None):
                     Trip.userName == curr_userName).all()
                 if len(trips) == 0:
                     return make_response('No Trips found.', 404)
-                trips_dict = {'trip': [trip.to_dict() for trip in trip_list]}
+                trips_dict = {'trips': [trip.to_dict() for trip in trip_list]}
                 return make_response(jsonify(trips_dict), 200)
         finally:
             close_session(db)
@@ -391,7 +391,7 @@ def events(eventID=None):
         finally:
             close_session(db)
     elif request.method == GET:
-        post_tripID = int(request.json.get('tripID', None))
+        post_tripID = request.args.get('tripID', None)
         if post_tripID is not None:
             db = create_db_session()
             try:
@@ -412,7 +412,7 @@ def events(eventID=None):
             finally:
                 close_session(db)
 
-        post_eventID = int(request.json.get('eventID', None))
+        post_eventID = request.args.get('eventID', None)
         if post_eventID is not None:
             db = create_db_session()
             try:
@@ -566,27 +566,49 @@ def bookmarks(bookmarkID=None):
         finally:
             close_session(db)
     elif request.method == GET:
-        try:
-            post_tripID = int(request.json['tripID'])
-            post_bookmarkID = int(request.json['bookmarkID'])
-        except KeyError:
-            return bad_request()
+        post_tripID = request.args.get('tripID', None)
+        if post_tripID is not None:
+            db = create_db_session()
+            try:
+                trip = db.query(Trip).filter(Trip.tripID == post_tripID).first()
+                if trip is None:
+                    return make_response('Trip not found.', 404)
+                bookmark_list = db.query(Bookmark).filter(
+                    Bookmark.tripID == post_tripID).all()
+                if len(bookmark_list) == 0:
+                    return make_response(
+                        'No Bookmarks found for the given Trip.', 404)
+                if trip.userName != session.get(KEY__USERNAME):
+                    return make_response(
+                        'User not authorized to view these Bookmarks.', 401)
+                bookmarks_dict = {
+                    'bookmarks': [bm.to_dict() for bm in bookmark_list]}
+                return make_response(jsonify(bookmarks_dict), 200)
+            finally:
+                close_session(db)
 
-        db = create_db_session()
-        try:
-            trip = db.query(Trip).filter(Trip.tripID == post_tripID).first()
-            bookmark = db.query(Bookmark).filter(
-                Bookmark.bookmarkID == post_bookmarkID).first()
-            if trip is None:
-                return make_response('Trip not found.', 404)
-            if bookmark is None:
-                return make_response('Bookmark not found.', 404)
-            if trip.userName != session.get(KEY__USERNAME):
-                return make_response(
-                    'User not authorized to view this Bookmark.', 401)
-            return make_response(jsonify({'bookmark': bookmark.to_dict}), 200)
-        finally:
-            close_session(db)
+        post_bookmarkID = request.args.get('bookmarkID', None)
+        if post_bookmarkID is not None:
+            db = create_db_session()
+            try:
+                bookmark = db.query(Bookmark).filter(
+                    Bookmark.bookmarkID == post_bookmarkID).first()
+                if bookmark is None:
+                    return make_response('Bookmark not found.', 404)
+                trip = db.query(Trip).filter(
+                    Trip.tripID == bookmark.tripID).first()
+                if trip is None:
+                    return make_response(
+                        'Trip associated to given Bookmark not found.', 404)
+                if trip.userName != session.get(KEY__USERNAME):
+                    return make_response(
+                        'User not authorized to view this Bookmark.', 401)
+                return make_response(jsonify({'bookmark': bookmark.to_dict()}),
+                                     200)
+            finally:
+                close_session(db)
+
+        return bad_request()
     elif bookmarkID:
         db = create_db_session()
         curr_userName = session.get(KEY__USERNAME)
