@@ -215,7 +215,7 @@ def users(userName=None):
 def trips(tripID=None):
     curr_userName = session.get(KEY__USERNAME)
     if curr_userName is None:
-        return bad_request()
+        return make_response('A User session is required to view Trips.', 401)
 
     if request.method == POST:
         try:
