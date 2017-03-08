@@ -49,6 +49,8 @@ function signupFailed (error) {
 
 export function login (loginData) {
     return dispatch => {
+        if (loginData.userName === "") { return (alert("Please enter your Username!")); }
+        if (loginData.password === "") { return (alert("Please enter your Password!")); }
         dispatch(loginAttempt());
         fetch(apiURL + "login", {
             method: "POST",
@@ -82,6 +84,11 @@ export function login (loginData) {
 
 export function signup (signupData) {
     return dispatch => {
+        if (signupData.name === "") { return (alert("Please enter a Name!")); }
+        if (signupData.userName === "") { return (alert("Please enter a Username!")); }
+        if (signupData.email === "") { return (alert("Please enter an Email!")); }
+        if (signupData.password === "") { return (alert("Please enter a Password!")); }
+        if (signupData.homeCurrency === "") { return (alert("Please select a Home Currency!")); }
         dispatch(signupAttempt());
         fetch(apiURL + "users", {
             method: "POST",

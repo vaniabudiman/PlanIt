@@ -14,6 +14,7 @@ import Icon from "react-native-vector-icons/FontAwesome";
 import LoginStyles from "../styles/LoginStyles.js";
 import { login } from "../actions/accountActions.js";
 import FETCH_STATUS from "../constants/fetchStatusConstants.js";
+import FORM from "../constants/formConstants.js";
 import { connect } from "react-redux";
 
 
@@ -50,7 +51,6 @@ class LoginView extends Component {
     }
 
     render () {
-        const limit = 40;
         return (
             <View style={LoginStyles.container}>
                 {/*TODO: testing rest api call status, remove later on*/}
@@ -67,24 +67,26 @@ class LoginView extends Component {
                             <View style={LoginStyles.iconWrap}>
                                 <Icon name="user-circle" style={LoginStyles.icon} resizeMode="contain" />
                             </View>
-                            <TextInput placeholder="Username"
+                            <TextInput style={LoginStyles.input}
+                                    placeholder="Username"
                                     placeholderTextColor="#FFF"
                                     multiline={false}
-                                    maxLength={limit}
-                                    onChangeText={userName => this.setState({ userName })}
-                                    style={LoginStyles.input}
+                                    maxLength={FORM.CHAR_LIMIT}
+                                    onChangeText={(userName) => this.setState({ userName: userName.replace(" ", "") })}
+                                    value={this.state.userName}
                                     underlineColorAndroid="rgba(250, 250, 250, 0.8)" />
                         </View>
                         <View style={LoginStyles.inputWrap}>
                             <View style={LoginStyles.iconWrap}>
                                 <Icon name="key" style={LoginStyles.icon} resizeMode="contain" />
                             </View>
-                            <TextInput placeholderTextColor="#FFF"
+                            <TextInput style={LoginStyles.input}
                                     placeholder="Password"
+                                    placeholderTextColor="#FFF"
                                     multiline={false}
-                                    maxLength={limit}
-                                    style={LoginStyles.input}
-                                    onChangeText={password => this.setState({ password })}
+                                    maxLength={FORM.CHAR_LIMIT}
+                                    onChangeText={(pass) => this.setState({ password: pass.replace(/\s/g, "") })}
+                                    value={this.state.password}
                                     secureTextEntry={true}
                                     underlineColorAndroid="rgba(250, 250, 250, 0.8)" />
                         </View>
