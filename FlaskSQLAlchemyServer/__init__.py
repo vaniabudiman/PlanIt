@@ -391,27 +391,48 @@ def events(eventID=None):
         finally:
             close_session(db)
     elif request.method == GET:
-        try:
-            post_tripID = int(request.json['tripID'])
-            post_eventID = int(request.json['eventID'])
-        except KeyError:
-            return bad_request()
+        post_tripID = int(request.json.get('tripID', None))
+        if post_tripID is not None:
+            db = create_db_session()
+            try:
+                trip = db.query(Trip).filter(Trip.tripID == post_tripID).first()
+                if trip is None:
+                    return make_response('Trip not found.', 404)
+                event_list = db.query(Event).filter(
+                    Event.tripID == post_tripID).all()
+                if len(event_list) == 0:
+                    return make_response('No Events found for the given Trip.',
+                                         404)
+                if trip.userName != session.get(KEY__USERNAME):
+                    return make_response(
+                        'User not authorized to view these Events.', 401)
+                events_dict = {
+                    'events': [event.to_dict() for event in event_list]}
+                return make_response(jsonify(events_dict), 200)
+            finally:
+                close_session(db)
 
-        db = create_db_session()
-        try:
-            trip = db.query(Trip).filter(Trip.tripID == post_tripID).first()
-            event = db.query(Event).filter(
-                Event.eventID == post_eventID).first()
-            if trip is None:
-                return make_response('Trip not found.', 404)
-            if event is None:
-                return make_response('Event not found.', 404)
-            if trip.userName != session.get(KEY__USERNAME):
-                return make_response('User not authorized to view this Event.',
-                                     401)
-            return make_response(jsonify({'event': event.to_dict}), 200)
-        finally:
-            close_session(db)
+        post_eventID = int(request.json.get('eventID', None))
+        if post_eventID is not None:
+            db = create_db_session()
+            try:
+                event = db.query(Event).filter(
+                    Event.eventID == post_eventID).first()
+                if event is None:
+                    return make_response('Event not found.', 404)
+                trip = db.query(Trip).filter(
+                    Trip.tripID == event.tripID).first()
+                if trip is None:
+                    return make_response(
+                        'Trip associated to given Event not found.', 404)
+                if trip.userName != session.get(KEY__USERNAME):
+                    return make_response(
+                        'User not authorized to view this Event.', 401)
+                return make_response(jsonify({'event': event.to_dict()}), 200)
+            finally:
+                close_session(db)
+
+        return bad_request()
     elif eventID:
         db = create_db_session()
         curr_userName = session.get(KEY__USERNAME)
