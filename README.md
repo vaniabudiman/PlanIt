@@ -51,6 +51,12 @@ npm install
 ```
 Or else the app won't start up properly.
 
+### Realm Migration:
+If the realm schema is updated and throws an error prompting migration, uncomment the following line in realm.js
+```
+//Realm.clearTestState() // deletes all existing realm files
+```
+Then, reinstall the app. Make sure re-comment the line afterwards or else it'll delete the realm files every time realm.js is run.
 
 ## Additional Libraries Info
 
