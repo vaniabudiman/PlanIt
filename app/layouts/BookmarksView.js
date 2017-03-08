@@ -1,4 +1,6 @@
 import React, { Component } from "react";
+import { connect } from "react-redux";
+import { getBookmarks } from "../actions/bookmarksActions.js";
 import ListMapTemplate from "../templates/ListMapTemplate.js";
 
 
@@ -22,10 +24,13 @@ var mapProps = {
 };
 
 
-export default class BookmarksView extends Component {
+class BookmarksView extends Component {
 
     static propTypes = {
-        tripId: React.PropTypes.number
+        tripId: React.PropTypes.number,
+        bookmarks: React.PropTypes.array,
+        bookmarksGETStatus: React.PropTypes.string,
+        dispatch: React.PropTypes.func
     }
 
     constructor (props) {
@@ -36,6 +41,7 @@ export default class BookmarksView extends Component {
         //      - how we do the loading state may be different / vary depending on how data is loaded in from server/Realm
         this.state = {
             items: items,   // TODO: change this to an empty list to see an example of the empty message
+            bookmarks: this.props.bookmarks,
             loadingBookmarks: false
         };
 
@@ -48,6 +54,20 @@ export default class BookmarksView extends Component {
         this._handleToggleMap = this._handleToggleMap.bind(this);
         this._handleClickItem = this._handleClickItem.bind(this);
         this._handleCreateItem = this._handleCreateItem.bind(this);
+    }
+
+    componentWillMount () {
+
+        // Bind Redux action creators
+
+        // TODO: assign real tripID to fetch bookmarks
+        const tripId = "1";
+        this.props.dispatch(getBookmarks(tripId));
+    }
+
+    componentWillReceiveProps (nextProps) {
+        // Always update state bookmarks w/ latest bookmarks from props
+        this.setState({ bookmarks: nextProps.bookmarks });
     }
 
     componentDidMount () {
@@ -138,3 +158,11 @@ export default class BookmarksView extends Component {
         );
     }
 }
+
+export default connect((state) => {
+    // map state to props
+    return {
+        bookmark: state.events.bookmarks,
+        bookmarksGETStatus: state.bookmarks.bookmarksGETStatus
+    };
+})(BookmarksView);

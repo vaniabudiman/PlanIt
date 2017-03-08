@@ -1,36 +1,36 @@
 import { apiURL } from "../config/ServerConfig.js";
 
 export const Types = {
-    GET_EVENTS_ATTEMPT: "GET_EVENTS_ATTEMPT",
-    GET_EVENTS_SUCCESS: "GET_EVENTS_SUCCESS",
-    GET_EVENTS_FAILED: "GET_EVENTS_FAILED"
+    GET_BOOKMARKS_ATTEMPT: "GET_BOOKMARKS_ATTEMPT",
+    GET_BOOKMARKS_SUCCESS: "GET_BOOKMARKS_SUCCESS",
+    GET_BOOKMARKS_FAILED: "GET_BOOKMARKS_FAILED"
 };
 
-function getEventsAttempt () {
+function getBookmarksAttempt () {
     return {
-        type: Types.GET_EVENTS_ATTEMPT
+        type: Types.GET_BOOKMARKS_ATTEMPT
     };
 }
 
-function getEventsSuccess (response) {
+function getBookmarksSuccess (response) {
     return {
-        events: response,
-        type: Types.GET_EVENTS_SUCCESS
+        bookmarks: response,
+        type: Types.GET_BOOKMARKS_SUCCESS
     };
 }
 
-function getEventsFailed (error) {
+function getBookmarksFailed (error) {
     return {
         error,
-        type: Types.GET_EVENTS_FAILED
+        type: Types.GET_BOOKMARKS_FAILED
     };
 }
 
-export function getEvents (tripId) {
+export function getBookmarks (tripId) {
     return dispatch => {
-        dispatch(getEventsAttempt());
+        dispatch(getBookmarksAttempt());
 
-        fetch(apiURL + "events/" + tripId, {
+        fetch(apiURL + "bookmarks/" + tripId, {
             method: "GET",
             headers: {
                 Accept: "application/json",
@@ -43,12 +43,12 @@ export function getEvents (tripId) {
             } else {
                 const error = new Error();
                 error.response = response;
-                dispatch(getEventsFailed(error));
+                dispatch(getBookmarksFailed(error));
                 throw error;
             }
         })
         .then(response => {
-            dispatch(getEventsSuccess(response));
+            dispatch(getBookmarksSuccess(response));
         })
         .catch(error => {
             alert("Request Failed: ", error); // TODO: remove this and do something with the fetch error

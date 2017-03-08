@@ -1,10 +1,10 @@
 import React, { Component } from "react";
-import FormTemplate, { Types } from "../templates/FormTemplate.js";
+import FormTemplate from "../templates/FormTemplate.js";
 
 
 // TODO: remove these mocks
 let inputs = [
-    { id: 1, title: "Username", placeholder: "placeholder 1", value: "value 1"},
+    { id: 1, title: "Username", placeholder: "placeholder 1", value: "value 1" },
     { id: 2, title: "Password", placeholder: "placeholder 2", value: "value 2" },
     { id: 3, title: "Name", placeholder: "placeholder 3", value: "value 3" },
     { id: 4, title: "Email", placeholder: "placeholder 4", value: "value 4" },
