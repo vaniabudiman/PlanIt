@@ -1,9 +1,10 @@
 import { Types } from "../actions/citiesActions.js";
+import FETCH_STATUS from "../constants/fetchStatusConstants.js";
 
 
 const initialState = {
-    items: [],
-    citiesStatusCode: "000"
+    cities: [],
+    citiesGETStatus: ""
 };
 
 export default function (state = initialState, action) {
@@ -11,13 +12,13 @@ export default function (state = initialState, action) {
 
     switch (action.type) {
         case Types.GET_CITIES_ATTEMPT:
-            nextState = { ...state, citiesStatusCode: "FETCHING_CITIES" };
+            nextState = { ...state, citiesGETStatus: FETCH_STATUS.ATTEMPTING };
             break;
         case Types.GET_CITIES_SUCCESS:
-            nextState = { ...state, citiesStatusCode: "OK", items: action.items };
+            nextState = { ...state, citiesGETStatus: FETCH_STATUS.SUCCESS, cities: action.cities };
             break;
         case Types.GET_CITIES_FAILED:
-            nextState = { ...state, citiesStatusCode: "FAILED" };
+            nextState = { ...state, citiesGETStatus: FETCH_STATUS.FAILED };
             break;
         default:
             return state;
