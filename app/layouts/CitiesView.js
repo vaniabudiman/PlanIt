@@ -19,7 +19,6 @@ class CitiesView extends Component {
         super(props);
 
         this.state = {
-            countryId: this.props.countryId,
             cities: this.props.cities,
             searchString: ""
         };

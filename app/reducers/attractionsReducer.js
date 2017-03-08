@@ -1,10 +1,11 @@
 import { Types } from "../actions/attractionsActions.js";
+import FETCH_STATUS from "../constants/fetchStatusConstants.js";
 
 
 const initialState = {
-    items: [],
-    attractionsStatusCode: "000",
-    pageToken: ""
+    attractions: [],
+    attractionsGETStatus: "",
+    nextPageToken: ""
 };
 
 export default function (state = initialState, action) {
@@ -12,16 +13,23 @@ export default function (state = initialState, action) {
 
     switch (action.type) {
         case Types.GET_ATTRACTIONS_ATTEMPT:
-            nextState = { ...state, attractionsStatusCode: "FETCHING_ATTRACTIONS" };
+            nextState = { ...state, attractionsGETStatus: FETCH_STATUS.ATTEMPTING };
             break;
         case Types.GET_ATTRACTIONS_SUCCESS:
-            nextState = { ...state, attractionsStatusCode: "OK", items: action.items, pageToken: action.pageToken };
+            nextState = {
+                ...state,
+                attractionsGETStatus: FETCH_STATUS.SUCCESS,
+                attractions: state.nextPageToken === ""
+                    ? action.attractions
+                    : state.attractions.concat(action.attractions),
+                nextPageToken: action.nextPageToken
+            };
             break;
         case Types.GET_ATTRACTIONS_FAILED:
-            nextState = { ...state, attractionsStatusCode: "FAILED" };
+            nextState = { ...state, attractionsGETStatus: FETCH_STATUS.FAILED };
             break;
         case Types.CLEAR_ATTRACTIONS_PAGE_TOKEN:
-            nextState = { ...state, pageToken: "" };
+            nextState = { ...state, nextPageToken: "" };
             break;
         default:
             return state;

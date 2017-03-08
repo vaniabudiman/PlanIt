@@ -3,7 +3,7 @@ import { Dimensions } from "react-native";
 import { ListViewStyles } from "../styles/ListViewStyles.js";
 import MapView from "react-native-maps";
 import Icon from "react-native-vector-icons/FontAwesome";
-import { ListView, Text, TextInput, Title, Subtitle, Divider, View, Row, Button, TouchableOpacity } from "@shoutem/ui";
+import { ListView, Text, TextInput, Title, Subtitle, Caption, Divider, View, Row, Button, TouchableOpacity } from "@shoutem/ui";
 import CalendarPicker from "react-native-calendar-picker";
 
 
@@ -17,6 +17,8 @@ import CalendarPicker from "react-native-calendar-picker";
  *    Title of the list item.
  * @property {string} subtitle
  *    Subtitle for this list item.
+ * @property {string} caption
+ *    Caption for this list item.
  * @property {ListMapTemplate~MapItemObject} [mapDetails]
  *    Optional map item object that holds info for rendering item on the map.
  *          TODO: Currently nothing in the template makes us of this property.
@@ -368,6 +370,7 @@ export default class ListMapTemplate extends Component {
                             <View styleName="vertical">
                                 <Title>{item.title}</Title>
                                 <Subtitle>{item.subtitle}</Subtitle>
+                                <Caption>{item.caption}</Caption>
                             </View>
                             {this.renderRowIcons(item)}
                         </View>
@@ -396,6 +399,7 @@ export default class ListMapTemplate extends Component {
                     data={this.props.data}
                     renderRow={item => this.renderRow(item)}
                     onRefresh={this.props.onRefresh}
+                    onLoadMore={this.props.onLoadMore}
                     loading={this.props.loadingData}
                 />
                 {this.renderCreateButton()}
