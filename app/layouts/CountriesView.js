@@ -14,8 +14,28 @@ export default class CountriesView extends Component {
     constructor (props) {
         super(props);
 
+        let continentCountries = this.getCountries(this.props.continentId);
+
+        this.state = {
+            countries: continentCountries,
+            matchedCountries: continentCountries,
+            searchString: ""
+        };
+
         // Bind callback handlers
+        this._handleSearch = this._handleSearch.bind(this);
         this._handleClickItem = this._handleClickItem.bind(this);
+    }
+
+    componentWillReceiveProps (nextProps) {
+        if (this.props.continentId !== nextProps.continentId) {
+            let continentCountries = this.getCountries(nextProps.continentId);
+
+            this.setState({
+                countries: continentCountries,
+                matchedCountries: continentCountries
+            });
+        }
     }
 
     _handleClickItem (item) {
@@ -24,12 +44,25 @@ export default class CountriesView extends Component {
 
     }
 
-    render () {
+    _handleSearch (str) {
+        str = str.trim().toLowerCase();
+
+        if (str === "") {
+            return this.state.countries;
+        } else {
+            let matchedCountries = this.state.countries.filter((country) => {
+                return country.title.toLowerCase().indexOf(str) !== -1;
+            });
+            this.setState({ matchedCountries: matchedCountries, searchString: str });
+        }
+    }
+
+    getCountries (continentId) {
         const countriesFilteredByContinent = [];
 
         for (var key in Countries.countries) {
             let country = Countries.countries[key];
-            if (country.continent === this.props.continentId) {
+            if (country.continent === continentId) {
                 // add title needed by template
                 countriesFilteredByContinent.push(extend(country, {
                     title: country.name,
@@ -38,8 +71,15 @@ export default class CountriesView extends Component {
             }
         }
 
+        return countriesFilteredByContinent;
+    }
+
+    render () {
         return (
-            <ListMapTemplate data={countriesFilteredByContinent}
+            <ListMapTemplate data={this.state.matchedCountries}
+                enableSearch={true}
+                searchString={this.state.searchString}
+                onSearch={this._handleSearch}
                 onClickItem={this._handleClickItem} />
         );
     }
