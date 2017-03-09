@@ -1,4 +1,5 @@
 import { apiURL } from "../config/ServerConfig.js";
+import { isDevMode } from "../utils/utils.js";
 
 export const Types = {
     LOGIN_ATTEMPT: "LOGIN_ATTEMPT",
@@ -61,7 +62,7 @@ export function login (loginData) {
         .then(response => {
             if (response.status >= 200 && response.status < 300) {
                 dispatch(loginSuccess());
-                alert("Login Success. Hello " + loginData.userName + "!");
+                isDevMode() && alert("Login Success. Hello " + loginData.userName + "!");
             } else {
                 const error = new Error();
                 error.response = response;
@@ -173,7 +174,8 @@ export function putUser (userData) {
 
         let body = buildUsersPUTRequestBody(userData);
         if (Object.keys(body).length === 0) {
-            alert("Nothing new to save!");
+            // Nothing to update.
+            alert("Nothing to update!");
             return;
         }
 

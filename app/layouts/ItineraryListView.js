@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import ListMapTemplate from "../templates/ListMapTemplate.js";
 import { connect } from "react-redux";
 import { getEvents } from "../actions/eventsActions.js";
+import { isDevMode } from "../utils/utils.js";
 
 
 // TODO: remove this mock
@@ -90,13 +91,13 @@ class ItineraryListView extends Component {
     // TODO: remove/edit... this is just an example on how the callback would work
     _handleClickItem (item) {
         // Make necessary calls to do w/e you want when clicking on item identified by id
-        alert("clicked on item: " + item.title);
+        isDevMode() && alert("clicked on item: " + item.title);
     }
 
     // TODO: remove/edit... this is just an example on how the callback would work
     _handleToggleCalendar (newCalendarToggleState) {
         // Make necessary calls to do w/e you want based on this new calendar toggled state
-        alert("calendar toggled to: " + newCalendarToggleState);
+        isDevMode() && alert("calendar toggled to: " + newCalendarToggleState);
     }
 
     render () {
@@ -108,7 +109,7 @@ class ItineraryListView extends Component {
                 onSearch={this._handleSearch}
                 enableCalendar={enableCalendar}
                 calendarProps={calendarProps}
-                showCalendar={showCalendar}
+                showCalendar={false}
                 onRefresh={this._handleRefresh}
                 onToggleCalendar={this._handleToggleCalendar}
                 onClickItem={this._handleClickItem} />
