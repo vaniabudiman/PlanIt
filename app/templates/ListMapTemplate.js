@@ -357,9 +357,9 @@ export default class ListMapTemplate extends Component {
     renderRowIcons (item) {
         let icons = [];
 
-        if (this.props.showAdd) {
+        if (this.props.showEdit) {
             icons.push(
-                <TouchableOpacity key={"icon-edit-" + item.id} onPress={this.props.onAdd.bind(null, item.id)}>
+                <TouchableOpacity key={"icon-edit-" + item.id} onPress={this.props.onEdit.bind(null, item.id)}>
                     <Icon name="edit" style={ListViewStyles.optionIcons} size={16} />
                 </TouchableOpacity>
             );

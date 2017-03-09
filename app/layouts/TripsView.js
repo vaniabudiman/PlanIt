@@ -134,9 +134,9 @@ class TripsView extends Component {
     }
 
     // TODO: remove/edit... this is just an example on how the callback would work
-    _handleAdd (id) {
+    _handleUpdate (id) {
         // Make necessary calls to add the item identified by id
-        alert("adding: " + id);
+        alert("updating: " + id);
     }
 
     // TODO: remove/edit... this is just an example on how the callback would work
@@ -180,11 +180,9 @@ class TripsView extends Component {
                 enableMap={true}
                 mapProps={mapProps}
                 onRefresh={this._handleRefresh}
-                showAdd={true}
-                showInfo={true}
+                showEdit={true}
                 showShare={true}
-                onAdd={this._handleAdd}
-                onInfo={this._handleInfo}
+                onEdit={this._handleUpdate}
                 onShare={this._handleShare}
                 onToggleMap={this._handleToggleMap}
                 onClickItem={this._handleClickItem}
