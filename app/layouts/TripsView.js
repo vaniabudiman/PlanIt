@@ -133,7 +133,7 @@ class TripsView extends Component {
     render () {
         return (
             <ListMapTemplate data={this.formattedTrips()}
-                emptyListMessage={"Create a trip to begin!"}
+                emptyListMessage={this.props.tripsGETStatus === FETCH_STATUS.SUCCESS ? "Create a trip to begin!" : ""}
                 loadingData={this.props.tripsGETStatus === FETCH_STATUS.ATTEMPTING}
                 enableSearch={true}
                 onSearch={this._handleSearch}

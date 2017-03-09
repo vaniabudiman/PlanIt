@@ -57,7 +57,10 @@ class AttractionDetailsView extends Component {
             { id: 2, title: "Location address", description: this.props.details.formatted_address },
             { id: 3, title: "Contact #", description: this.props.details.international_phone_number },
             { id: 4, title: "Tags/Categories", description: getTypesDisplayString(this.props.details.types) },
-            { id: 5, title: "Average user rating", description: this.props.details.rating.toString() },
+            { id: 5, title: "Average user rating",
+                description: this.props.details.rating
+                                ? this.props.details.rating.toString()
+                                : "Unavailable" },
             { id: 6, title: "Costliness on a scale of 0 (free) to 4 (very expensive)",
                 description: this.props.details.price_level
                                 ? this.props.details.price_level.toString()

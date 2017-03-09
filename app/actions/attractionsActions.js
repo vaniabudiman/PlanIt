@@ -45,7 +45,8 @@ function postAttractionsFailed () { return { type: Types.POST_ATTRACTIONS_FAILED
 function buildRequestURL (lat, lon, pageToken, query) {
     let api = query ? "/textsearch" : "/nearbysearch";
     let rootURL = "https://maps.googleapis.com/maps/api/place" + api + "/json";
-    let apiKey = "AIzaSyBpbTBGgKbBpdWyPyQ8S8cFvBNc8-6KiOw";
+    // let apiKey = "AIzaSyBpbTBGgKbBpdWyPyQ8S8cFvBNc8-6KiOw";
+    let apiKey = "AIzaSyBj1cQ0SRz1mFFwN4eCsqKAGNBCH4SSLbI";
 
     // TODO: potential addition... to make these specifiable by user
     let radius = "10000";
@@ -58,38 +59,6 @@ function buildRequestURL (lat, lon, pageToken, query) {
         "&query=" + query +
         "&key=" + apiKey +
         "&pagetoken=" + pageToken;
-}
-
-export function getAttractions (city, pageToken, query = "") {
-    return dispatch => {
-        dispatch(getAttractionsAttempt());
-        fetch(buildRequestURL(city.lat, city.lon, pageToken, query), {
-            method: "GET",
-            headers: {
-                Accept: "application/json",
-                "Content-Type": "application/json",
-            }
-        })
-        .then(response => { // Header response.
-            // console.log(response);
-            if (response.status >= 200 && response.status < 300) {
-                return response.json();
-            } else {
-                const error = new Error();
-                error.response = response;
-                dispatch(getAttractionsFailed(error));
-                throw error;
-            }
-        })
-        .then(response => { // json response
-            dispatch(getAttractionsSuccess(response));
-        })
-        .catch(error => {
-            // console.log("Request Failed", error);
-            throw (error);
-            // alert("Login Failed: " + error.response.status); // TODO: remove this and do something with the fetch error
-        });
-    };
 }
 
 export function postAttractions (attraction, tripID) {
@@ -130,6 +99,41 @@ export function postAttractions (attraction, tripID) {
         })
         .catch(error => {
             alert("Failed to save Attraction." + error.response.status);
+        });
+    };
+}
+
+export function getAttractions (city, pageToken, query = "") {
+    return dispatch => {
+        dispatch(getAttractionsAttempt());
+        fetch(buildRequestURL(city.lat, city.lon, pageToken, query), {
+            method: "GET",
+            headers: {
+                Accept: "application/json",
+                "Content-Type": "application/json",
+            }
+        })
+        .then(response => { // Header response.
+            // console.log(response);
+            if (response.status >= 200 && response.status < 300) {
+                return response.json();
+            } else {
+                const error = new Error();
+                error.response = response;
+                dispatch(getAttractionsFailed(error));
+                throw error;
+            }
+        })
+        .then(response => { // json response
+            dispatch(getAttractionsSuccess(response));
+            if (response.status === "OVER_QUERY_LIMIT") {
+                alert(response.error_message);
+            }
+        })
+        .catch(error => {
+            // console.log("Request Failed", error);
+            throw (error);
+            // alert("Login Failed: " + error.response.status); // TODO: remove this and do something with the fetch error
         });
     };
 }

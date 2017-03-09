@@ -160,7 +160,7 @@ class BookmarksView extends Component {
                 onRefresh={this._handleRefresh}
                 showDelete={true}
                 onDelete={this._handleDelete}
-                showShare={true}
+                showShare={false}
                 onShare={this._handleShare}
                 onClickItem={this._handleClickItem} />
         );

@@ -26,7 +26,8 @@ function getAttractionDetailsFailed (error) {
 
 function buildRequestURL (placeId) {
     let rootURL = "https://maps.googleapis.com/maps/api/place/details/json";
-    let apiKey = "AIzaSyBpbTBGgKbBpdWyPyQ8S8cFvBNc8-6KiOw";
+    // let apiKey = "AIzaSyBpbTBGgKbBpdWyPyQ8S8cFvBNc8-6KiOw";
+    let apiKey = "AIzaSyBj1cQ0SRz1mFFwN4eCsqKAGNBCH4SSLbI";
 
     return rootURL +
         "?placeid=" + placeId +
@@ -56,6 +57,9 @@ export function getAttractionDetails (placeId) {
         })
         .then(response => { // json response
             dispatch(getAttractionDetailsSuccess(response));
+            if (response.status === "OVER_QUERY_LIMIT") {
+                alert(response.error_message);
+            }
         })
         .catch(error => {
             // console.log("Request Failed", error);
