@@ -166,6 +166,11 @@ import CalendarPicker from "react-native-calendar-picker";
  * @property {ListMapTemplate~onSearch} [onSearch]
  *    Callback to be triggerred when searching.
  *
+ * @property {boolean} [showDelete=false]
+ *    Whether or not the delete icon is displayed for the list items.
+ * @property {ListMapTemplate~onEdit} [onDelete]
+ *    Callback to be triggered when the delete icon is clicked.
+ *
  * @property {boolean} [showEdit=false]
  *    Whether or not the edit icon is displayed for the list items.
  * @property {ListMapTemplate~onEdit} [onEdit]
@@ -216,6 +221,8 @@ export default class ListMapTemplate extends Component {
         onInfo: React.PropTypes.func,
         showShare: React.PropTypes.bool,
         onShare: React.PropTypes.func,
+        showDelete: React.PropTypes.bool,
+        onDelete: React.PropTypes.func,
         loadingData: React.PropTypes.bool,
         onClickItem: React.PropTypes.func,
         onCreateItem: React.PropTypes.func,
@@ -233,6 +240,7 @@ export default class ListMapTemplate extends Component {
         showAdd: false,
         showInfo: false,
         showShare: false,
+        showDelete: false,
         loadingData: false
     }
 
@@ -368,6 +376,14 @@ export default class ListMapTemplate extends Component {
 
     renderRowIcons (item) {
         let icons = [];
+
+        if (this.props.showDelete) {
+            icons.push(
+                <TouchableOpacity key={"icon-trash-" + item.id} onPress={this.props.onDelete.bind(null, item)}>
+                    <Icon name="trash" style={ListViewStyles.optionIcons} size={16} />
+                </TouchableOpacity>
+            );
+        }
 
         if (this.props.showEdit) {
             icons.push(
