@@ -13,9 +13,9 @@ function getTripsAttempt () {
 }
 
 function getTripsSuccess (response, tripID) {
-    let resp = tripID ? response.trip : response.trips;
+    let resp = tripID ? [response.trip] : response.trips;
     return {
-        trips: resp,
+        trips: resp, // Array of trip objects. e.g. [{tripID: 1, ...},{tripID: 2, ...}]
         type: Types.GET_TRIPS_SUCCESS
     };
 }
