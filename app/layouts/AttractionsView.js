@@ -113,7 +113,10 @@ class AttractionsView extends Component {
                 enableSearch={true}
                 searchString={this.state.searchString}
                 onSearch={this._handleSearch}
-                loadingData={this.props.attractionsGETStatus === FETCH_STATUS.ATTEMPTING } />
+                loadingData={
+                    (this.props.attractionsGETStatus === FETCH_STATUS.ATTEMPTING) ||
+                    (this.props.attractionsPOSTStatus === FETCH_STATUS.ATTEMPTING)
+                } />
         );
     }
 }

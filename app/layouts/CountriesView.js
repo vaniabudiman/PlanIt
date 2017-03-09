@@ -49,7 +49,7 @@ export default class CountriesView extends Component {
         str = str.trim().toLowerCase();
 
         if (str === "") {
-            return this.state.countries;
+            this.setState({ matchedCountries: this.state.countries, searchString: "" });
         } else {
             let matchedCountries = this.state.countries.filter((country) => {
                 return country.title.toLowerCase().indexOf(str) !== -1;

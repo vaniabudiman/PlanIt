@@ -1,7 +1,8 @@
 import React, { Component } from "react";
 import { connect } from "react-redux";
+import { Actions } from "react-native-router-flux";
 import FETCH_STATUS from "../constants/fetchStatusConstants.js";
-import { getBookmarks } from "../actions/bookmarksActions.js";
+import { getBookmarks, deleteBookmark } from "../actions/bookmarksActions.js";
 import ListMapTemplate from "../templates/ListMapTemplate.js";
 
 
@@ -24,6 +25,7 @@ class BookmarksView extends Component {
         tripId: React.PropTypes.number,
         bookmarks: React.PropTypes.array,
         bookmarksGETStatus: React.PropTypes.string,
+        bookmarksDELETEStatus: React.PropTypes.string,
         dispatch: React.PropTypes.func
     }
 
@@ -40,7 +42,7 @@ class BookmarksView extends Component {
         // Bind callback handlers
         this._handleSearch = this._handleSearch.bind(this);
         this._handleRefresh = this._handleRefresh.bind(this);
-        this._handleInfo = this._handleInfo.bind(this);
+        this._handleDelete = this._handleDelete.bind(this);
         this._handleShare = this._handleShare.bind(this);
         this._handleToggleMap = this._handleToggleMap.bind(this);
         this._handleClickItem = this._handleClickItem.bind(this);
@@ -63,7 +65,8 @@ class BookmarksView extends Component {
         return this.state.bookmarks.map((bookmark) => {
             return {
                 title: bookmark.name,
-                id: bookmark.placeID,
+                id: bookmark.bookmarkID,
+                placeId: bookmark.placeID,
                 subtitle: bookmark.address,
                 caption: bookmark.type
             };
@@ -108,11 +111,10 @@ class BookmarksView extends Component {
         this.setState({ searchString: "" });
     }
 
-    _handleInfo (item) {    // TODO: check ListMapTemplate updated to bind entire item to onInfo instead of just id
-        // Make necessary calls to get/navigate to info on item identified by id
-        alert("info for: " + item && item.id);
+    _handleDelete (item) {
+        alert ("delete for: " + item.id);
 
-        // TODO: go to attraction details page
+        this.props.dispatch(deleteBookmark(item.id));
     }
 
     // TODO: remove/edit... this is just an example on how the callback would work
@@ -120,16 +122,21 @@ class BookmarksView extends Component {
         // Make necessary calls to do w/e you want when clicking on item identified by id
         alert("clicked on item: " + item.id);
 
-        // TODO: go to attraction details page
+        Actions.attractionDetails({
+            title: "Bookmark Details",
+            tripId: this.props.tripId,
+            attraction: { id: item.placeId }, // just add id for placeId in call to leverage the same view
+            allowCreate: false
+        });
     }
 
     _handleToggleMap (showMap) {
-        alert("toggled map");
+        alert("toggled map: " + showMap);
     }
 
     _handleShare (item) {   // TODO: check ListMapTemplate updated to bind entire item to onShare instead of just id
         // Make necessary calls to share the item identified by id
-        alert("share: " + item && item.id);
+        alert("share: " + item.id);
 
         // TODO: implement in sprint 2
     }
@@ -140,7 +147,10 @@ class BookmarksView extends Component {
                 emptyListMessage={
                     this.props.bookmarksGETStatus !== FETCH_STATUS.ATTEMPTING
                         ? "You don't have any bookmarks for this trip yet. Start browsing and create one!" : ""}
-                loadingData={this.props.bookmarksGETStatus === FETCH_STATUS.ATTEMPTING}
+                loadingData={
+                    (this.props.bookmarksGETStatus === FETCH_STATUS.ATTEMPTING) ||
+                    (this.props.bookmarksDELETEStatus === FETCH_STATUS.ATTEMPTING)
+                }
                 enableSearch={true}
                 onSearch={this._handleSearch}
                 enableMap={true}
@@ -148,9 +158,9 @@ class BookmarksView extends Component {
                 mapProps={mapProps}
                 mapMarkers={this.formattedBookmarkMarkers()}
                 onRefresh={this._handleRefresh}
-                showInfo={true}
+                showDelete={true}
+                onDelete={this._handleDelete}
                 showShare={true}
-                onInfo={this._handleInfo}
                 onShare={this._handleShare}
                 onClickItem={this._handleClickItem} />
         );
@@ -161,6 +171,7 @@ export default connect((state) => {
     // map state to props
     return {
         bookmarks: state.bookmarks.bookmarks,
-        bookmarksGETStatus: state.bookmarks.bookmarksGETStatus
+        bookmarksGETStatus: state.bookmarks.bookmarksGETStatus,
+        bookmarksDELETEStatus: state.bookmarks.bookmarksDELETEStatus
     };
 })(BookmarksView);

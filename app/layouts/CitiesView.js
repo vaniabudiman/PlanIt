@@ -65,7 +65,7 @@ class CitiesView extends Component {
             // empty search value, so return all current cities from props
             this.setState({ cities: this.props.cities, searchString: str });
         } else {
-            let matchedCities = this.state.cities.filter((city) => {
+            let matchedCities = this.props.cities.filter((city) => {
                 // Match on city "name" or "adminName1" fields
                 return (city.name.toLowerCase().indexOf(str) !== -1) ||
                     (city.adminName1.toLowerCase().indexOf(str) !== -1);
