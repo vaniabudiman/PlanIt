@@ -31,34 +31,21 @@ Object.keys(trips).map(function (key, i) {
 });
 */
 
-
-// TODO: remove this mock OR edit it (adding necessary props from the MapView api) to suite the trips view's needs
-var mapProps = {
-    // TODO: for the map enabled views it will be best if we can do someting like this to get a descent default
-    //       location centering & scaling (per locations... e.g. trips/bookmars/etc.)
-    region: {
-        latitude: 37.78825,
-        longitude: -122.4324,
-        latitudeDelta: 0.015,
-        longitudeDelta: 0.0121
-    }
-};
-
-
 class TripsView extends Component {
 
     static propTypes = {
         dispatch: React.PropTypes.func,
         trips: React.PropTypes.array,
         tripsGETStatus: React.PropTypes.string,
+        refresh: React.PropTypes.bool
     }
 
     constructor (props) {
         super(props);
 
         this.state = {
-            loadingTrips: false,
             trips: this.props.trips,
+            searchString: ""
         };
 
         this.requestTrips(this.props.dispatch);
@@ -67,15 +54,16 @@ class TripsView extends Component {
         this._handleSearch = this._handleSearch.bind(this);
         this._handleRefresh = this._handleRefresh.bind(this);
         this._handleUpdate = this._handleUpdate.bind(this);
-        this._handleInfo = this._handleInfo.bind(this);
         this._handleShare = this._handleShare.bind(this);
-        this._handleToggleMap = this._handleToggleMap.bind(this);
         this._handleClickItem = this._handleClickItem.bind(this);
         this._handleCreateItem = this._handleCreateItem.bind(this);
     }
 
     componentWillReceiveProps (nextProps) {
-        this.requireAuthentication(nextProps);
+        if (nextProps.refresh) {
+            this.requestTrips(nextProps.dispatch);
+        }
+
         this.setState({ trips: nextProps.trips });
     }
 
@@ -88,19 +76,15 @@ class TripsView extends Component {
             return {
                 id: trip.tripID,
                 title: trip.tripName,
-                subtitle: new Date(trip.startDate).toDateString() + " - " + new Date(trip.endDate).toDateString()
+                subtitle: new Date(trip.startDate).toDateString() + " - " + new Date(trip.endDate).toDateString(),
+                tripName: trip.tripName,
+                startDate: trip.startDate,
+                endDate: trip.endDate
             };
         });
     }
 
-    requireAuthentication (nextProps) {
-        if (nextProps.tripsGETStatus === FETCH_STATUS.SUCCESS) {
-            this.setState({ trips: nextProps.trips });
-            // TODO: push new trips to view
-        }
-    }
-
-    // TODO: remove/edit... this is just an example on how the callback would work
+    // contains search on tripName
     _handleSearch (str) {
         str = str.trim().toLowerCase();
 
@@ -119,30 +103,15 @@ class TripsView extends Component {
 
     // TODO: remove/edit... this is just an example on how the callback would work
     _handleRefresh () {
-        // Make necessary calls to fetch & fresh data from server/Realm as necessary
-        alert("refreshing");
-        this.setState({ loadingTrips: true });
-        setTimeout(() => this.setState({ loadingTrips: false }), 1000);
+        // Just fire off another fetch to refresh
+        this.requestTrips(this.props.dispatch);
+
+        this.setState({ searchString: "" });
     }
 
-    // TODO: remove/edit... this is just an example on how the callback would work
-    _handleLoadMore () {
-        // Make necessary calls to fetch more data from server/Realm as necessary
-        alert("loading more");
-        this.setState({ loadingTrips: true });
-        setTimeout(() => this.setState({ loadingTrips: false }), 1000);
-    }
-
-    // TODO: remove/edit... this is just an example on how the callback would work
-    _handleUpdate (id) {
-        // Make necessary calls to add the item identified by id
-        alert("updating: " + id);
-    }
-
-    // TODO: remove/edit... this is just an example on how the callback would work
-    _handleInfo (id) {
-        // Make necessary calls to get/navigate to info on item identified by id
-        alert("info for: " + id);
+    // Take user to trip update form (creation w/ prefill)
+    _handleUpdate (trip) {
+        Actions.tripForm({ trip: trip, title: "Update Trip" });
     }
 
     // TODO: remove/edit... this is just an example on how the callback would work
@@ -151,42 +120,31 @@ class TripsView extends Component {
         alert("share: " + id);
     }
 
-    // TODO: remove/edit... this is just an example on how the callback would work
+    // Take user to trip homepage
     _handleClickItem (item) {
-        // Make necessary calls to do w/e you want when clicking on item identified by id
-        // alert("clicked on item: " + item.id);
-        Actions.tripHome({ tripId: item.id });
+        Actions.tripHome({ tripId: item.id, title: "Create Trip" });
     }
 
-     // TODO: remove/edit... this is just an example on how the callback would work
+     // Take user to trip creation form
     _handleCreateItem () {
-        // Make necessary calls to navigate to item creation screen
         Actions.tripForm();
-    }
-
-    // TODO: remove/edit... this is just an example on how the callback would work
-    _handleToggleMap (newMapToggleState) {
-        // Make necessary calls to do w/e you want based on this new map toggled state
-        alert("map toggled to: " + newMapToggleState);
     }
 
     render () {
         return (
             <ListMapTemplate data={this.formattedTrips()}
                 emptyListMessage={"Create a trip to begin!"}
-                loadingData={this.state.loadingTrips}
+                loadingData={this.props.tripsGETStatus === FETCH_STATUS.ATTEMPTING}
                 enableSearch={true}
                 onSearch={this._handleSearch}
-                enableMap={true}
-                mapProps={mapProps}
                 onRefresh={this._handleRefresh}
                 showEdit={true}
                 //showShare={true}
                 onEdit={this._handleUpdate}
                 //onShare={this._handleShare}
-                onToggleMap={this._handleToggleMap}
                 onClickItem={this._handleClickItem}
-                onCreateItem={this._handleCreateItem} />
+                onCreateItem={this._handleCreateItem}
+                searchString={this.state.searchString} />
         );
     }
 }
@@ -194,6 +152,7 @@ class TripsView extends Component {
 export default connect((state) => {
     return {
         trips: state.trips.trips,
-        tripsGETStatus: state.trips.tripsGETStatus
+        tripsGETStatus: state.trips.tripsGETStatus,
+        refresh: state.trips.refresh
     };
 })(TripsView);
