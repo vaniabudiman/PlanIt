@@ -275,7 +275,7 @@ def trips(tripID=None):
                 if trip.userName != curr_userName:
                     return make_response(
                         'User not authorized to view this Trip.', 401)
-                return make_response(jsonify({'trip': [trip.to_dict]}), 200)
+                return make_response(jsonify({'trip': [trip.to_dict()]}), 200)
             else:
                 trip_list = db.query(Trip).filter(
                     Trip.userName == curr_userName).all()
@@ -570,7 +570,7 @@ def bookmarks(bookmarkID=None):
             db.add_all(bookmark_list)
             db.commit()
             bookmarks_dict = {
-                'events': [bookmark.to_dict() for bookmark in bookmark_list]}
+                'bookmarks': [bookmark.to_dict() for bookmark in bookmark_list]}
             return make_response(jsonify(bookmarks_dict), 201)
         except IntegrityError:
             db.rollback()
