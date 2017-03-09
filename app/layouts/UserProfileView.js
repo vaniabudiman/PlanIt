@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 import FormTemplate from "../templates/FormTemplate.js";
+import { Actions } from "react-native-router-flux";
 import { getUser, putUser } from "../actions/accountActions.js";
 import { connect } from "react-redux";
 import FETCH_STATUS from "../constants/fetchStatusConstants.js";
@@ -49,6 +50,8 @@ class UserProfileView extends Component {
 
     _handleCancel () {
         this.setState({ userData: JSON.parse(JSON.stringify(this.state.originalUserData)) });
+        // go back to the last page
+        Actions.pop();
     }
 
     // TODO: remove/edit... this is just an example on how the callback would work
