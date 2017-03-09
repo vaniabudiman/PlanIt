@@ -82,22 +82,22 @@ import CalendarPicker from "react-native-calendar-picker";
 /**
  * @callback ListMapTemplate~onAdd
  *
- * @param {number} id
- *    Unique id for the item to be added.
+ * @param {object} item
+ *    Item to be added.
 */
 
 /**
  * @callback ListMapTemplate~onInfo
  *
- * @param {number} id
- *    Unique id for the item to get info on.
+ * @param {object} item
+ *   Item to get info on.
 */
 
 /**
  * @callback ListMapTemplate~onShare
  *
- * @param {number} id
- *    Unique id for the item to be shared.
+ * @param {object} item
+ *    Item to be shared.
 */
 
 /**
@@ -366,21 +366,21 @@ export default class ListMapTemplate extends Component {
         }
         if (this.props.showAdd) {
             icons.push(
-                <TouchableOpacity key={"icon-add-" + item.id} onPress={this.props.onAdd.bind(null, item.id)}>
+                <TouchableOpacity key={"icon-add-" + item.id} onPress={this.props.onAdd.bind(null, item)}>
                     <Icon name="plus" style={ListViewStyles.optionIcons} size={16} />
                 </TouchableOpacity>
             );
         }
         if (this.props.showInfo) {
             icons.push(
-                <TouchableOpacity key={"icon-info-" + item.id} onPress={this.props.onInfo.bind(null, item.id)}>
+                <TouchableOpacity key={"icon-info-" + item.id} onPress={this.props.onInfo.bind(null, item)}>
                     <Icon name="info-circle" style={ListViewStyles.optionIcons} size={16} />
                 </TouchableOpacity>
             );
         }
         if (this.props.showShare) {
             icons.push(
-                <TouchableOpacity key={"icon-share-" + item.id} onPress={this.props.onShare.bind(null, item.id)}>
+                <TouchableOpacity key={"icon-share-" + item.id} onPress={this.props.onShare.bind(null, item)}>
                     <Icon name="share-alt" style={ListViewStyles.optionIcons} size={16} />
                 </TouchableOpacity>
             );

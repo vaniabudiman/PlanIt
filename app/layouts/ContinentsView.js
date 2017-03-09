@@ -25,7 +25,7 @@ export default class ContinentsView extends Component {
     }
 
     _getCell (cell) {
-        const goToCountriesView = () => Actions.countries({ continentId: cell.id });
+        const goToCountriesView = () => Actions.countries({ continentId: cell.id, tripId: this.props.tripId });
 
         //TODO: route to appropriate countries list view "onPress" of image
         return (
