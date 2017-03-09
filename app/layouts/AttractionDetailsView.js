@@ -14,7 +14,8 @@ class AttractionDetailsView extends Component {
         tripId: React.PropTypes.number,
         attraction: React.PropTypes.object,
         details: React.PropTypes.object,
-        attractionDetailsGETStatus: React.PropTypes.string
+        attractionDetailsGETStatus: React.PropTypes.string,
+        attractionsPOSTStatus: React.PropTypes.string
     }
 
     constructor (props) {
@@ -75,7 +76,10 @@ class AttractionDetailsView extends Component {
                 onRefresh={this._handleRefresh}
                 showAdd={true}
                 onAdd={this._handleAdd}
-                loadingData={this.props.attractionDetailsGETStatus === FETCH_STATUS.ATTEMPTING} />
+                loadingData={
+                    (this.props.attractionDetailsGETStatus === FETCH_STATUS.ATTEMPTING) ||
+                    (this.props.attractionsPOSTStatus === FETCH_STATUS.ATTEMPTING)
+                } />
         );
     }
 }
@@ -84,6 +88,7 @@ export default connect((state) => {
     // mapStateToProps
     return {
         details: state.attractionDetails.details,
-        attractionDetailsGETStatus: state.attractionDetails.attractionDetailsGETStatus
+        attractionDetailsGETStatus: state.attractionDetails.attractionDetailsGETStatus,
+        attractionsPOSTStatus: state.attractions.attractionsPOSTStatus
     };
 })(AttractionDetailsView);
