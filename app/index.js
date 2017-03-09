@@ -17,6 +17,7 @@ import ContinentsView from "./layouts/ContinentsView.js";
 import CountriesView from "./layouts/CountriesView.js";
 import CitiesView from "./layouts/CitiesView.js";
 import AttractionsView from "./layouts/AttractionsView.js";
+import AttractionDetailsView from "./layouts/AttractionDetailsView.js";
 import TripHomeView from "./layouts/TripHomeView.js";
 import LoginView from "./layouts/LoginView.js";
 import SignUpView from "./layouts/SignUpView.js";
@@ -62,6 +63,8 @@ export default class PlanIt extends Component {
                             sceneStyle={NavigationStyles.listViewScene} {...navBarProps} />
                         <Scene key="attractions" component={AttractionsView} title="Attractions"
                             sceneStyle={NavigationStyles.listViewScene} {...navBarProps} />
+                        <Scene key="attractionDetails" component={AttractionDetailsView} title="Attraction Details"
+                            sceneStyle={NavigationStyles.listViewScene} {...navBarProps} />
 
                         <Scene key="bookmarks" component={BookmarksView}
                             sceneStyle={ NavigationStyles.listViewScene } title="Bookmarks" {...navBarProps} />
@@ -69,7 +72,7 @@ export default class PlanIt extends Component {
                             sceneStyle={ NavigationStyles.listViewScene } title="Events" {...navBarProps} />
 
                         { /* TODO: remove these... testing / examples for now */ }
-                        <Scene key="home" component={HomeView} title="Home View" inital={true} {...navBarProps} />
+                        <Scene key="home" component={HomeView} title="Home View" {...navBarProps} />
 
                         <Scene key="itinerary" component={ItineraryListView}
                             sceneStyle={ NavigationStyles.listViewScene } title="Itinerary" {...navBarProps} />

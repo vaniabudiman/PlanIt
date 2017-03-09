@@ -6,6 +6,7 @@ import AppReducer from "./Reducer.js";
 import AccountReducer from "../reducers/accountReducer.js";
 import CitiesReducer from "../reducers/citiesReducer.js";
 import AttractionsReducer from "../reducers/attractionsReducer.js";
+import AttractionDetailsReducer from "../reducers/attractionDetailsReducer.js";
 import EventsReducer from "../reducers/eventsReducer.js";
 import BookmarksReducer from "../reducers/bookmarksReducer.js";
 import TripsReducer from "../reducers/tripsReducer";
@@ -22,6 +23,7 @@ var baseReducers = {
     account: AccountReducer,
     cities: CitiesReducer,
     attractions: AttractionsReducer,
+    attractionDetails: AttractionDetailsReducer,
     events: EventsReducer,
     bookmarks: BookmarksReducer,
     trips: TripsReducer,
