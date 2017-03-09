@@ -15,7 +15,12 @@ class AttractionDetailsView extends Component {
         attraction: React.PropTypes.object,
         details: React.PropTypes.object,
         attractionDetailsGETStatus: React.PropTypes.string,
-        attractionsPOSTStatus: React.PropTypes.string
+        attractionsPOSTStatus: React.PropTypes.string,
+        allowCreate: React.PropTypes.bool
+    }
+
+    static defaultProps = {
+        allowCreate: true
     }
 
     constructor (props) {
@@ -54,7 +59,9 @@ class AttractionDetailsView extends Component {
             { id: 4, title: "Tags/Categories", description: getTypesDisplayString(this.props.details.types) },
             { id: 5, title: "Average user rating", description: this.props.details.rating.toString() },
             { id: 6, title: "Costliness on a scale of 0 (free) to 4 (very expensive)",
-                description: this.props.details.price_level ? this.props.details.price_level : "Unavailable" }
+                description: this.props.details.price_level
+                                ? this.props.details.price_level.toString()
+                                : "Unavailable" }
 
             // { id: __, title: "Business website (if applicable)", description: TODO },
             // { id: __, title: "Hours of operation & current open status", description: TODO}
@@ -74,7 +81,7 @@ class AttractionDetailsView extends Component {
         return (
             <ItemDetailsTemplate data={this.formattedAttractionDetails()}
                 onRefresh={this._handleRefresh}
-                showAdd={true}
+                showAdd={this.props.allowCreate}
                 onAdd={this._handleAdd}
                 loadingData={
                     (this.props.attractionDetailsGETStatus === FETCH_STATUS.ATTEMPTING) ||

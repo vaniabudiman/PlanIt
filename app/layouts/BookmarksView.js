@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 import { connect } from "react-redux";
+import { Actions } from "react-native-router-flux";
 import FETCH_STATUS from "../constants/fetchStatusConstants.js";
 import { getBookmarks, deleteBookmark } from "../actions/bookmarksActions.js";
 import ListMapTemplate from "../templates/ListMapTemplate.js";
@@ -121,7 +122,12 @@ class BookmarksView extends Component {
         // Make necessary calls to do w/e you want when clicking on item identified by id
         alert("clicked on item: " + item.id);
 
-        // TODO: go to attraction details page
+        Actions.attractionDetails({
+            title: "Bookmark Details",
+            tripId: this.props.tripId,
+            attraction: { id: item.placeId }, // just add id for placeId in call to leverage the same view
+            allowCreate: false
+        });
     }
 
     _handleToggleMap (showMap) {
