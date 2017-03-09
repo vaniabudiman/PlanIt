@@ -3,8 +3,10 @@ import FETCH_STATUS from "../constants/fetchStatusConstants.js";
 
 
 const initialState = {
+    trip: {},
     trips: [],
     tripsGETStatus: "",
+    tripPOSTStatus: ""
 };
 
 export default function (state = initialState, action) {
@@ -19,6 +21,15 @@ export default function (state = initialState, action) {
             break;
         case Types.GET_TRIPS_FAILED:
             nextState = { ...state, tripsGETStatus: FETCH_STATUS.FAILED };
+            break;
+        case Types.CREATE_TRIP_ATTEMPT:
+            nextState = { ...state, tripPOSTStatus: FETCH_STATUS.ATTEMPTING };
+            break;
+        case Types.CREATE_TRIP_SUCCESS:
+            nextState = { ...state, tripPOSTStatus: FETCH_STATUS.SUCCESS, trip: action.trip };
+            break;
+        case Types.CREATE_TRIP_FAILED:
+            nextState = { ...state, tripPOSTStatus: FETCH_STATUS.FAILED };
             break;
         default:
             return state;

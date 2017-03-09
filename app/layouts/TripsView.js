@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import { Actions } from "react-native-router-flux";
 import ListMapTemplate from "../templates/ListMapTemplate.js";
-import realm from "../../Realm/realm.js";
+//import realm from "../../Realm/realm.js";
 import { connect } from "react-redux";
 import { getTrips } from "../actions/tripsActions.js";
 import FETCH_STATUS from "../constants/fetchStatusConstants.js";
@@ -16,7 +16,8 @@ import FETCH_STATUS from "../constants/fetchStatusConstants.js";
 */
 
 
-// TODO: remove these mocks
+// TODO: remove these mocks - leaving as example for how to access realm
+/*
 let trips = realm.objects("Trip");
 let items = [];
 Object.keys(trips).map(function (key, i) {
@@ -28,6 +29,8 @@ Object.keys(trips).map(function (key, i) {
         subtitle: "subtitle: " + trip.tripName
     });
 });
+*/
+
 
 // TODO: remove this mock OR edit it (adding necessary props from the MapView api) to suite the trips view's needs
 var mapProps = {
@@ -53,15 +56,12 @@ class TripsView extends Component {
     constructor (props) {
         super(props);
 
-        // TODO: remove... this is just an example
-        //      - the items will probs be coming from server (or Realm) if offline
-        //      - how we do the loading state may be different / vary depending on how data is loaded in from server/Realm
         this.state = {
-            items: items,   // TODO: change this to an empty list to see an example of the empty message
             loadingTrips: false,
-
             trips: this.props.trips,
         };
+
+        this.requestTrips(this.props.dispatch);
 
         // Bind callback handlers
         this._handleSearch = this._handleSearch.bind(this);
@@ -72,13 +72,25 @@ class TripsView extends Component {
         this._handleToggleMap = this._handleToggleMap.bind(this);
         this._handleClickItem = this._handleClickItem.bind(this);
         this._handleCreateItem = this._handleCreateItem.bind(this);
-
-        this._getTrips = () => this.props.dispatch(getTrips()); // TODO: use this somewhere
     }
 
     componentWillReceiveProps (nextProps) {
         this.requireAuthentication(nextProps);
         this.setState({ trips: nextProps.trips });
+    }
+
+    requestTrips (dispatch) {
+        dispatch(getTrips());
+    }
+
+    formattedTrips () {
+        return this.state.trips.map((trip) => {
+            return {
+                id: trip.tripID,
+                title: trip.tripName,
+                subtitle: new Date(trip.startDate).toDateString() + " - " + new Date(trip.endDate).toDateString()
+            };
+        });
     }
 
     requireAuthentication (nextProps) {
@@ -90,11 +102,19 @@ class TripsView extends Component {
 
     // TODO: remove/edit... this is just an example on how the callback would work
     _handleSearch (str) {
-        let newItems = items.filter(function (item) {
-            return item.title.toLowerCase().indexOf(str.toLowerCase()) !== -1;
-        });
+        str = str.trim().toLowerCase();
 
-        this.setState({ items: newItems });
+        if (str === "") {
+            // empty search value, so return all current cities from props
+            this.setState({ trips: this.props.trips, searchString: str });
+        } else {
+            let matchedTrips = this.state.trips.filter((trip) => {
+                // Match on city "name" or "adminName1" fields
+                return (trip.tripName.toLowerCase().indexOf(str) !== -1) ||
+                    (trip.tripName.toLowerCase().indexOf(str) !== -1);
+            });
+            this.setState({ trips: matchedTrips, searchString: str });
+        }
     }
 
     // TODO: remove/edit... this is just an example on how the callback would work
@@ -141,7 +161,7 @@ class TripsView extends Component {
      // TODO: remove/edit... this is just an example on how the callback would work
     _handleCreateItem () {
         // Make necessary calls to navigate to item creation screen
-        alert("create an item");
+        Actions.tripForm();
     }
 
     // TODO: remove/edit... this is just an example on how the callback would work
@@ -152,7 +172,7 @@ class TripsView extends Component {
 
     render () {
         return (
-            <ListMapTemplate data={this.state.items}
+            <ListMapTemplate data={this.formattedTrips()}
                 emptyListMessage={"Create a trip to begin!"}
                 loadingData={this.state.loadingTrips}
                 enableSearch={true}

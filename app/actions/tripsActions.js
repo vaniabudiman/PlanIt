@@ -3,7 +3,10 @@ import { apiURL } from "../config/ServerConfig.js";
 export const Types = {
     GET_TRIPS_ATTEMPT: "GET_TRIPS_ATTEMPT",
     GET_TRIPS_SUCCESS: "GET_TRIPS_SUCCESS",
-    GET_TRIPS_FAILED: "GET_TRIPS_FAILED"
+    GET_TRIPS_FAILED: "GET_TRIPS_FAILED",
+    CREATE_TRIP_ATTEMPT: "CREATE_TRIP_ATTEMPT",
+    CREATE_TRIP_SUCCESS: "CREATE_TRIP_SUCCESS",
+    CREATE_TRIP_FAILED: "CREATE_TRIP_FAILED"
 };
 
 function getTripsAttempt () {
@@ -24,6 +27,26 @@ function getTripsFailed (error) {
     return {
         error,
         type: Types.GET_TRIPS_FAILED
+    };
+}
+
+function createTripAttempt () {
+    return {
+        type: Types.CREATE_TRIP_ATTEMPT
+    };
+}
+
+function createTripSuccess (response) {
+    return {
+        trip: response.trip,
+        type: Types.CREATE_TRIP_SUCCESS
+    };
+}
+
+function createTripFailed (error) {
+    return {
+        error,
+        type: Types.CREATE_TRIP_FAILED
     };
 }
 
@@ -60,4 +83,42 @@ export function getTrips (tripID = null) {
         .catch(error => {
             alert("GET /trips Failed: " + error.response.status); // TODO: remove this and do something with the fetch error
         });};
+}
+
+export function createTrip (tripData) {
+    return dispatch => {
+        if (tripData.tripName === "") { return (alert("Please enter a trip name!")); }
+        if (tripData.startDate === "") { return (alert("Please enter a start date!")); }
+        if (tripData.endDate === "") { return (alert("Please enter an end date!")); }
+        dispatch(createTripAttempt());
+        fetch(apiURL + "trips", {
+            method: "POST",
+            headers: {
+                Accept: "application/json",
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                tripName: tripData.tripName,
+                startDate: tripData.startDate,
+                endDate: tripData.endDate,
+                active: false
+            }),
+        })
+        .then(response => {
+            if (response.status >= 200 && response.status < 300) {
+                return response.json();
+            } else {
+                const error = new Error();
+                error.response = response;
+                dispatch(createTripFailed(error));
+                throw error;
+            }
+        })
+        .then(response => {
+            dispatch(createTripSuccess(response));
+        })
+        .catch(error => {
+            alert("POST /trips Failed: " + error.response.status); // TODO: remove this and do something with the fetch error
+        });
+    };
 }

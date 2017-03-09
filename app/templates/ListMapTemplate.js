@@ -3,7 +3,18 @@ import { Dimensions } from "react-native";
 import { ListViewStyles } from "../styles/ListViewStyles.js";
 import MapView from "react-native-maps";
 import Icon from "react-native-vector-icons/FontAwesome";
-import { ListView, Text, TextInput, Title, Subtitle, Caption, Divider, View, Row, Button, TouchableOpacity } from "@shoutem/ui";
+import {
+    ListView,
+    Text,
+    TextInput,
+    Title,
+    Subtitle,
+    Caption,
+    Divider,
+    View,
+    Row,
+    Button,
+    TouchableOpacity } from "@shoutem/ui";
 import CalendarPicker from "react-native-calendar-picker";
 
 
@@ -155,6 +166,11 @@ import CalendarPicker from "react-native-calendar-picker";
  * @property {ListMapTemplate~onSearch} [onSearch]
  *    Callback to be triggerred when searching.
  *
+ * @property {boolean} [showEdit=false]
+ *    Whether or not the edit icon is displayed for the list items.
+ * @property {ListMapTemplate~onEdit} [onEdit]
+ *    Callback to be triggered when the edit icon is clicked.
+ *
  * @property {boolean} [showAdd=false]
  *    Whether or not the add icon is displayed for the list items.
  * @property {ListMapTemplate~onAdd} [onAdd]
@@ -191,6 +207,8 @@ export default class ListMapTemplate extends Component {
         showCalendar: React.PropTypes.bool,
         onToggleCalendar: React.PropTypes.func,
         onSearch: React.PropTypes.func,
+        showEdit: React.PropTypes.bool,
+        onEdit: React.PropTypes.func,
         showAdd: React.PropTypes.bool,
         onAdd: React.PropTypes.func,
         showInfo: React.PropTypes.bool,
@@ -210,6 +228,7 @@ export default class ListMapTemplate extends Component {
         enableSearch: false,
         showMap: false,
         showCalendar: false,
+        showEdit: false,
         showAdd: false,
         showInfo: false,
         showShare: false,
@@ -273,11 +292,13 @@ export default class ListMapTemplate extends Component {
     renderMapToggle () {
         if (this.props.enableMap) {
             return (
-                <TouchableOpacity onPress={this._handleToggleMap} style={{ height: 40 }}>
+                <TouchableOpacity onPress={this._handleToggleMap} style={{ height: 20 }}>
                     <View>
                         { /* TODO: fix alignment of label & toggle to match mocks */ }
-                        <Text style={{ fontSize: 20 }}>Map</Text>
-                        <Icon name={this.state.showMap ? "toggle-on" : "toggle-off" } size={20} />
+                        <Text style={{ fontSize: 20 }}>
+                            Map
+                            <Icon name={this.state.showMap ? "toggle-on" : "toggle-off" } size={20} />
+                        </Text>
                     </View>
                 </TouchableOpacity>
             );
@@ -336,6 +357,13 @@ export default class ListMapTemplate extends Component {
     renderRowIcons (item) {
         let icons = [];
 
+        if (this.props.showAdd) {
+            icons.push(
+                <TouchableOpacity key={"icon-edit-" + item.id} onPress={this.props.onAdd.bind(null, item.id)}>
+                    <Icon name="edit" style={ListViewStyles.optionIcons} size={16} />
+                </TouchableOpacity>
+            );
+        }
         if (this.props.showAdd) {
             icons.push(
                 <TouchableOpacity key={"icon-add-" + item.id} onPress={this.props.onAdd.bind(null, item.id)}>

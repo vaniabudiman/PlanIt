@@ -1,7 +1,19 @@
+/*eslint-disable valid-jsdoc*/
+
 import React, { Component } from "react";
 import MapView from "react-native-maps";
 import Icon from "react-native-vector-icons/FontAwesome";
-import { View, Text, TextInput, ListView, Button, Subtitle, Divider, Row, TouchableOpacity } from "@shoutem/ui";
+import {
+    View,
+    Text,
+    TextInput,
+    ListView,
+    Button,
+    Subtitle,
+    Divider,
+    Row,
+    TouchableOpacity } from "@shoutem/ui";
+import { DatePickerAndroid } from "react-native";
 
 
 /**
@@ -11,7 +23,8 @@ import { View, Text, TextInput, ListView, Button, Subtitle, Divider, Row, Toucha
  * @property {string} TEXT
 */
 export const Types = {
-    TEXT: "text"
+    TEXT: "text",
+    DATE: "date"
 };
 
 /**
@@ -140,7 +153,7 @@ export default class FormTemplate extends Component {
             title: React.PropTypes.string,
             placeholder: React.PropTypes.string,
             value: React.PropTypes.string,
-            type: React.PropTypes.oneOf([Types.TEXT])
+            type: React.PropTypes.oneOf([Types.TEXT, Types.DATE])
         })).isRequired,
         onInputValueChange: React.PropTypes.func.isRequired,
         onRefresh: React.PropTypes.func,
@@ -153,7 +166,9 @@ export default class FormTemplate extends Component {
         onCancel: React.PropTypes.func,
         showSave: React.PropTypes.bool,
         onSave: React.PropTypes.func,
-        loadingData: React.PropTypes.bool
+        loadingData: React.PropTypes.bool,
+        onDateSelect: React.PropTypes.func,
+        isUpdate: React.PropTypes.bool
     }
 
     static defaultProps = {
@@ -169,11 +184,12 @@ export default class FormTemplate extends Component {
         super(props);
 
         this.state = {
-            showMap: this.props.showMap
+            showMap: this.props.showMap,
         };
 
         // Bind callback handlers
         this._handleToggleMap = this._handleToggleMap.bind(this);
+        this._showPicker = this._showPicker.bind(this);
     }
 
     _handleToggleMap () {
@@ -181,14 +197,28 @@ export default class FormTemplate extends Component {
         this.setState({ showMap: newMapToggleState }, () => this.props.onToggleMap(newMapToggleState));
     }
 
+    _showPicker = async (itemId, options) => {
+        try {
+            const { action, year, month, day } = await DatePickerAndroid.open(options);
+            if (action !== DatePickerAndroid.dismissedAction) {
+                var date = new Date(year, month, day);
+                this.props.onDateSelect(itemId, date.toDateString());
+            }
+        } catch ({ code, message }) {
+            // TODO: implement catch block
+        }
+    }
+
     renderMapToggle () {
         if (this.props.enableMap) {
             return (
-                <TouchableOpacity onPress={this._handleToggleMap} style={{ height: 40 }}>
+                <TouchableOpacity onPress={this._handleToggleMap} style={{ height: 20 }}>
                     <View>
                         { /* TODO: fix alignment of label & toggle to match mocks */ }
-                        <Text style={{ fontSize: 20 }}>Map</Text>
-                        <Icon name={this.state.showMap ? "toggle-on" : "toggle-off" } size={20} />
+                        <Text style={{ fontSize: 20 }}>
+                            Map
+                            <Icon name={this.state.showMap ? "toggle-on" : "toggle-off" } size={20} />
+                        </Text>
                     </View>
                 </TouchableOpacity>
             );
@@ -206,7 +236,21 @@ export default class FormTemplate extends Component {
 
         switch (item.type) {
             // TODO: other types (as necessary in future)
-            default:
+            case "date": {
+                let value = (item.value === "") ? "Pick a Date" : item.value;
+                content = (
+                    <View>
+                        <Subtitle>{item.title}</Subtitle>
+                        <TouchableOpacity
+                            onPress={() => this._showPicker(item.id, { date: new Date() })}>
+                            <Text>{value}</Text>
+                        </TouchableOpacity>
+                        <Divider styleName="line" />
+                    </View>
+                );
+                break;
+            }
+            default: {
                 content = (
                     <View>
                         <Subtitle>{item.title}</Subtitle>
@@ -220,6 +264,7 @@ export default class FormTemplate extends Component {
                     </View>
                 );
                 break;
+            }
         }
 
         return <Row>{content}</Row>;
