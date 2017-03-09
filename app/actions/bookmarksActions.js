@@ -14,7 +14,7 @@ function getBookmarksAttempt () {
 
 function getBookmarksSuccess (response) {
     return {
-        bookmarks: response,
+        bookmarks: response.bookmarks,
         type: Types.GET_BOOKMARKS_SUCCESS
     };
 }
