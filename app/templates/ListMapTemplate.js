@@ -200,6 +200,7 @@ export default class ListMapTemplate extends Component {
         enableMap: React.PropTypes.bool,
         enableCalendar: React.PropTypes.bool,
         mapProps: React.PropTypes.object,
+        mapMarkers: React.PropTypes.array,
         calendarProps: React.PropTypes.object,
         enableSearch: React.PropTypes.bool,
         showMap: React.PropTypes.bool,
@@ -307,7 +308,17 @@ export default class ListMapTemplate extends Component {
 
     renderMap () {
         if (this.props.enableMap && this.state.showMap) {
-            return <MapView style={{ flex: 1 }} {...this.props.mapProps} />;
+            return (
+                <MapView style={{ flex: 1 }} region={ this.props.mapProps }>
+                    {this.props.mapMarkers.map(marker => (
+                        <MapView.Marker
+                            coordinate={marker.latlng}
+                            title={marker.title}
+                            description={marker.description}
+                        />
+                    ))}
+                </MapView>
+            );
         }
     }
 

@@ -15,13 +15,32 @@ let items = [{ id: "1", title: "bookmark1", description: "description to bookmar
 var mapProps = {
     // TODO: for the map enabled views it will be best if we can do someting like this to get a descent default
     //       location centering & scaling (per locations... e.g. bookmarks/bookmars/etc.)
-    region: {
-        latitude: 37.78825,
-        longitude: -122.4324,
-        latitudeDelta: 0.015,
-        longitudeDelta: 0.0121
-    }
+    latitude: 37.78825,
+    longitude: -122.4324,
+    latitudeDelta: 0.015,
+    longitudeDelta: 0.0121
 };
+
+// mapMarkers is just an example of the valid format of markers in ordder
+// for them to be rendered on the map
+var mapMarkers = [
+    {
+        latlng: {
+            latitude: 37.78825,
+            longitude: -122.4324
+        },
+        title: "title",
+        description: "desc"
+    },
+    {
+        latlng: {
+            latitude: 37.79825,
+            longitude: -122.4324
+        },
+        title: "title",
+        description: "desc"
+    }
+];
 
 
 class BookmarksView extends Component {
@@ -136,6 +155,21 @@ class BookmarksView extends Component {
         alert("map toggled to: " + newMapToggleState);
     }
 
+    formattedBookmarkMarkers () {
+        return this.state.bookmarks.map((bookmark) => {
+            return {
+                latlng: {
+                    latitude: bookmark.lat,
+                    longitude: bookmark.lon
+                },
+                title: "Bookmark ID: " + bookmark.bookmarkID,
+                description: "Trip ID: " + bookmark.tripID
+            };
+        });
+    }
+
+    // TODO: remove mapMarkers in the render function and pass in formattedBookmarkMarkers() instead for the mapMarkers attribute
+
     render () {
         return (
             <ListMapTemplate data={this.state.items}
@@ -145,6 +179,7 @@ class BookmarksView extends Component {
                 onSearch={this._handleSearch}
                 enableMap={true}
                 mapProps={mapProps}
+                mapMarkers={mapMarkers}
                 onRefresh={this._handleRefresh}
                 showAdd={true}
                 showInfo={true}
