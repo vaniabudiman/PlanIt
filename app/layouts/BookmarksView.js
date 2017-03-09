@@ -3,20 +3,8 @@ import { connect } from "react-redux";
 import { Actions } from "react-native-router-flux";
 import FETCH_STATUS from "../constants/fetchStatusConstants.js";
 import { getBookmarks, deleteBookmark } from "../actions/bookmarksActions.js";
+import { getRegionForCoordinates } from "../utils/utils.js";
 import ListMapTemplate from "../templates/ListMapTemplate.js";
-
-
-// TODO: remove this mock OR edit it (adding necessary props from the MapView api) to suite the bookmarks view's needs
-var mapProps = {
-    // TODO: for the map enabled views it will be best if we can do someting like this to get a descent default
-    //       location centering & scaling (per locations... e.g. bookmarks/bookmars/etc.)
-    region: {
-        latitude: -33.866891,
-        longitude: 151.200814,
-        latitudeDelta: 0.015,
-        longitudeDelta: 0.0121
-    }
-};
 
 
 class BookmarksView extends Component {
@@ -87,6 +75,19 @@ class BookmarksView extends Component {
         });
     }
 
+    calculateMapViewPort () {
+        if (this.state.bookmarks.length === 0) {
+            return null;
+        }
+
+        return getRegionForCoordinates(this.state.bookmarks.map((bookmark) => {
+            return {
+                latitude: bookmark.lat,
+                longitude: bookmark.lon
+            };
+        }));
+    }
+
     _handleSearch (str) {
         str = str.trim().toLowerCase();
 
@@ -155,7 +156,7 @@ class BookmarksView extends Component {
                 onSearch={this._handleSearch}
                 enableMap={true}
                 onToggleMap={this._handleToggleMap}
-                mapProps={mapProps}
+                mapProps={{ region: this.calculateMapViewPort() }}
                 mapMarkers={this.formattedBookmarkMarkers()}
                 onRefresh={this._handleRefresh}
                 showDelete={true}

@@ -3,10 +3,8 @@ import { connect } from "react-redux";
 import { Actions } from "react-native-router-flux";
 import FETCH_STATUS from "../constants/fetchStatusConstants.js";
 import { getAttractions, postAttractions, clearAttractionsPageToken } from "../actions/attractionsActions.js";
-import { getTypesDisplayString } from "../utils/utils.js";
+import { getTypesDisplayString, getRegionForCoordinates } from "../utils/utils.js";
 import ListMapTemplate from "../templates/ListMapTemplate.js";
-
-import { getRegionForCoordinates } from "../utils/utils.js";
 
 
 class AttractionsView extends Component {
