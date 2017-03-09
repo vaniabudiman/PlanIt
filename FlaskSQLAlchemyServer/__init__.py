@@ -526,7 +526,7 @@ def bookmarks(bookmarkID=None):
     if request.method == POST:
         try:
             post_tripID = int(request.json['tripID'])
-            post_bookmarks = request.json['events']
+            post_bookmarks = request.json['bookmarks']
         except KeyError:
             return bad_request()
 
@@ -560,6 +560,9 @@ def bookmarks(bookmarkID=None):
                              bookmark['lat'],
                              bookmark['lon'],
                              bookmark['placeID'],
+                             bookmark['name'],
+                             bookmark.get('address', None),
+                             bookmark.get('type', None),
                              post_tripID,
                              bookmark.get('eventID', None)))
         except KeyError as ke:
@@ -745,9 +748,13 @@ if __name__ == '__main__' or __name__ == '__init__':
     db_session.add_all([event1, event2, event3])
     # Example locations:
     bookmark1 = Bookmark(1, -33.866891, 151.200814,
-                         '45a27fd8d56c56dc62afc9b49e1d850440d5c403', 1, None)
+                         '45a27fd8d56c56dc62afc9b49e1d850440d5c403',
+                         'oneName', 'oneAddress', 'oneType',
+                         1, None)
     bookmark2 = Bookmark(2, -33.870943, 151.190311,
-                         '30bee58f819b6c47bd24151802f25ecf11df8943', 1, 3)
+                         '30bee58f819b6c47bd24151802f25ecf11df8943',
+                         'twoName', 'twoAddress', 'twoType',
+                         1, 3)
     db_session.add_all([bookmark1, bookmark2])
     db_session.commit()
     print_database()

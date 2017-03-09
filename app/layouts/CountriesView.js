@@ -8,7 +8,8 @@ import { Actions } from "react-native-router-flux";
 export default class CountriesView extends Component {
 
     static propTypes = {
-        continentId: React.PropTypes.string
+        continentId: React.PropTypes.string,
+        tripId: React.PropTypes.number,
     }
 
     constructor (props) {
@@ -40,7 +41,7 @@ export default class CountriesView extends Component {
 
     _handleClickItem (item) {
         // Make necessary calls to do w/e you want when clicking on item identified by name
-        Actions.cities({ countryId: item.id });
+        Actions.cities({ countryId: item.id, tripId: this.props.tripId });
 
     }
 

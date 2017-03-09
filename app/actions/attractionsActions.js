@@ -1,8 +1,14 @@
+import { apiURL } from "../config/ServerConfig.js";
+
 export const Types = {
     GET_ATTRACTIONS_ATTEMPT: "GET_ATTRACTIONS_ATTEMPT",
     GET_ATTRACTIONS_SUCCESS: "GET_ATTRACTIONS_SUCCESS",
     GET_ATTRACTIONS_FAILED: "GET_ATTRACTIONS_FAILED",
-    CLEAR_ATTRACTIONS_PAGE_TOKEN: "CLEAR_ATTRACTIONS_PAGE_TOKEN"
+    CLEAR_ATTRACTIONS_PAGE_TOKEN: "CLEAR_ATTRACTIONS_PAGE_TOKEN",
+
+    POST_ATTRACTIONS_ATTEMPT: "POST_ATTRACTIONS_ATTEMPT",
+    POST_ATTRACTIONS_SUCCESS: "POST_ATTRACTIONS_SUCCESS",
+    POST_ATTRACTIONS_FAILED: "POST_ATTRACTIONS_FAILED",
 };
 
 export function clearAttractionsPageToken () {
@@ -31,6 +37,10 @@ function getAttractionsFailed (error) {
         type: Types.GET_ATTRACTIONS_FAILED,
     };
 }
+
+function postAttractionsAttempt () { return { type: Types.POST_ATTRACTIONS_ATTEMPT }; }
+function postAttractionsSuccess () { return { type: Types.POST_ATTRACTIONS_SUCCESS }; }
+function postAttractionsFailed () { return { type: Types.POST_ATTRACTIONS_FAILED }; }
 
 function buildRequestURL (lat, lon, pageToken, query) {
     let api = query ? "/textsearch" : "/nearbysearch";
@@ -78,6 +88,45 @@ export function getAttractions (city, pageToken, query = "") {
             // console.log("Request Failed", error);
             throw (error);
             // alert("Login Failed: " + error.response.status); // TODO: remove this and do something with the fetch error
+        });
+    };
+}
+
+export function postAttractions (attraction, tripID) {
+    return dispatch => {
+        dispatch(postAttractionsAttempt());
+        let bookmark = {
+            lat: attraction.lat,
+            lon: attraction.lon,
+            placeID: attraction.id,
+        };
+        fetch(apiURL + "bookmarks", {
+            method: "POST",
+            headers: {
+                Accept: "application/json",
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                tripID: tripID,
+                bookmarks: [bookmark],
+            }),
+        })
+        .then(response => {
+            if (response.status >= 200 && response.status < 300) {
+                return response.json();
+            } else {
+                const error = new Error();
+                error.response = response;
+                dispatch(postAttractionsFailed(error));
+                throw error;
+            }
+        })
+        .then(response => {
+            alert("Attraction Bookmark successfully saved.");
+            dispatch(postAttractionsSuccess(response));
+        })
+        .catch(error => {
+            alert("Failed to save Attraction." + error.response.status);
         });
     };
 }

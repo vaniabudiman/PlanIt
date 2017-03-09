@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import { connect } from "react-redux";
 import { Actions } from "react-native-router-flux";
 import FETCH_STATUS from "../constants/fetchStatusConstants.js";
-import { getAttractions, clearAttractionsPageToken } from "../actions/attractionsActions.js";
+import { getAttractions, postAttractions, clearAttractionsPageToken } from "../actions/attractionsActions.js";
 import { getTypesDisplayString } from "../utils/utils.js";
 import ListMapTemplate from "../templates/ListMapTemplate.js";
 
@@ -12,9 +12,11 @@ class AttractionsView extends Component {
     static propTypes = {
         dispatch: React.PropTypes.func,
         city: React.PropTypes.object,
+        tripId: React.PropTypes.number,
         attractions: React.PropTypes.array,
         attractionsGETStatus: React.PropTypes.string,
-        nextPageToken: React.PropTypes.string
+        attractionsPOSTStatus: React.PropTypes.string,
+        nextPageToken: React.PropTypes.string,
     }
 
     constructor (props) {
@@ -32,6 +34,7 @@ class AttractionsView extends Component {
         this._handleRefresh = this._handleRefresh.bind(this);
         this._handleLoadMore = this._handleLoadMore.bind(this);
         this._handleSearch = this._handleSearch.bind(this);
+        this._handleAdd = this._handleAdd.bind(this);
     }
 
     componentWillReceiveProps (nextProps) {
@@ -58,8 +61,8 @@ class AttractionsView extends Component {
                 title: attraction.name,
                 subtitle: attraction.vicinity || attraction.formatted_address, // nearby vs. text search
                 caption: getTypesDisplayString(attraction.types),
-                lat: attraction.location ? attraction.location.lat : null,
-                lon: attraction.location ? attraction.location.lon : null,
+                lat: attraction.geometry.location.lat,
+                lon: attraction.geometry.location.lng,
                 icon: attraction.icon
             };
         });
@@ -90,15 +93,21 @@ class AttractionsView extends Component {
     }
 
     _handleClickItem (item) {
-        alert("clicked on attractions: " + item.name); //  TODO: remove this later
+        alert("clicked on attractions: " + item.title + "\n" + "tripID:" + this.props.tripId); //  TODO: remove this later
 
-        Actions.attractionDetails({ attraction: item });
+        Actions.attractionDetails({ attraction: item, tripId: this.props.tripId });
+    }
+
+    _handleAdd (item) {
+        this.props.dispatch(postAttractions(item, this.props.tripId));
     }
 
     render () {
         return (
             <ListMapTemplate data={this.formattedAttractions()}
                 onClickItem={this._handleClickItem}
+                showAdd={true}
+                onAdd={this._handleAdd}
                 onRefresh={this._handleRefresh}
                 onLoadMore={this._handleLoadMore}
                 enableSearch={true}
@@ -114,6 +123,7 @@ export default connect((state) => {
     return {
         attractions: state.attractions.attractions,
         attractionsGETStatus: state.attractions.attractionsGETStatus,
+        attractionsPOSTStatus: state.attractions.attractionsPOSTStatus,
         nextPageToken: state.attractions.nextPageToken
     };
 })(AttractionsView);

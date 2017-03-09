@@ -5,6 +5,17 @@ import { getBookmarks } from "../actions/bookmarksActions.js";
 import ListMapTemplate from "../templates/ListMapTemplate.js";
 
 
+// TODO: remove this mock OR edit it (adding necessary props from the MapView api) to suite the bookmarks view's needs
+// var mapProps = {
+//     // TODO: for the map enabled views it will be best if we can do someting like this to get a descent default
+//     //       location centering & scaling (per locations... e.g. bookmarks/bookmars/etc.)
+//     latitude: 37.78825,
+//     longitude: -122.4324,
+//     latitudeDelta: 0.015,
+//     longitudeDelta: 0.0121
+// };
+
+
 class BookmarksView extends Component {
 
     static propTypes = {
@@ -53,6 +64,19 @@ class BookmarksView extends Component {
                 id: bookmark.placeID,
                 subtitle: bookmark.address,
                 caption: bookmark.type
+            };
+        });
+    }
+
+    formattedBookmarkMarkers () {
+        return this.state.bookmarks.map((bookmark) => {
+            return {
+                latlng: {
+                    latitude: bookmark.lat,
+                    longitude: bookmark.lon
+                },
+                title: bookmark.name,
+                description: bookmark.address
             };
         });
     }
@@ -113,7 +137,8 @@ class BookmarksView extends Component {
                 enableSearch={true}
                 onSearch={this._handleSearch}
                 enableMap={true}
-                mapProps={{}}
+
+                mapMarkers={this.formattedBookmarkMarkers()}
                 onRefresh={this._handleRefresh}
                 showInfo={true}
                 showShare={true}
