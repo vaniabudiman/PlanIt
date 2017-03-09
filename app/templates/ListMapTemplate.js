@@ -301,10 +301,10 @@ export default class ListMapTemplate extends Component {
     renderMapToggle () {
         if (this.props.enableMap) {
             return (
-                <TouchableOpacity onPress={this._handleToggleMap} style={{ height: 20 }}>
+                <TouchableOpacity onPress={this._handleToggleMap} style={{ height: 30 }}>
                     <View>
                         { /* TODO: fix alignment of label & toggle to match mocks */ }
-                        <Text style={{ fontSize: 20 }}>
+                        <Text style={{ fontSize: 20, paddingLeft: 15, paddingTop: 5 }}>
                             Map
                             <Icon name={this.state.showMap ? "toggle-on" : "toggle-off" } size={20} />
                         </Text>
@@ -334,10 +334,10 @@ export default class ListMapTemplate extends Component {
     renderCalendarToggle () {
         if (this.props.enableCalendar) {
             return (
-                <TouchableOpacity onPress={this._handleToggleCalendar} style={{ height: 20 }}>
+                <TouchableOpacity onPress={this._handleToggleCalendar} style={{ height: 25 }}>
                     <View>
                         { /* TODO: fix alignment of label & toggle to match mocks */ }
-                        <Text style={{ fontSize: 20 }}>
+                        <Text style={{ fontSize: 20, paddingLeft: 15, paddingTop: 5 }}>
                             Calendar
                             <Icon name={this.state.showCalendar ? "toggle-on" : "toggle-off" } size={20} />
                         </Text>
