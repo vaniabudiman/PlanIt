@@ -173,8 +173,7 @@ export function putUser (userData) {
 
         let body = buildUsersPUTRequestBody(userData);
         if (Object.keys(body).length === 0) {
-            // Nothing to update.
-            alert("Nothing to update!");
+            alert("Nothing new to save!");
             return;
         }
 
