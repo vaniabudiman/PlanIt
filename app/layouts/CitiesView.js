@@ -82,7 +82,7 @@ class CitiesView extends Component {
     }
 
     _handleClickItem (item) {
-        alert("clicked on cities: " + item.name); //  TODO: remove this later
+        alert("clicked on cities: " + item.title); //  TODO: remove this later
 
         Actions.attractions({ city: item, tripId: this.props.tripId });
     }
