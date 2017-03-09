@@ -48,7 +48,7 @@ function buildRequestURL (lat, lon, pageToken, query) {
     let apiKey = "AIzaSyBpbTBGgKbBpdWyPyQ8S8cFvBNc8-6KiOw";
 
     // TODO: potential addition... to make these specifiable by user
-    let radius = "50000";   // NOTE: this is the max of the api... high to compensate for slightly off geonames api cities lat/lon
+    let radius = "10000";
     let type = "point_of_interest";
 
     return rootURL +

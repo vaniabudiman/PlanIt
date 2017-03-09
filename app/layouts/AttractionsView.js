@@ -6,6 +6,8 @@ import { getAttractions, postAttractions, clearAttractionsPageToken } from "../a
 import { getTypesDisplayString } from "../utils/utils.js";
 import ListMapTemplate from "../templates/ListMapTemplate.js";
 
+import { getRegionForCoordinates } from "../utils/utils.js";
+
 
 class AttractionsView extends Component {
 
@@ -23,11 +25,10 @@ class AttractionsView extends Component {
         super(props);
 
         this.state = {
-            attractions: this.props.attractions,
             searchString: ""
         };
 
-        this.requestAttractions(this.props.dispatch, this.props.city, this.props.nextPageToken);
+        this.requestAttractions(this.props.dispatch, this.props.city, "");
 
         // Bind Redux action creators
         this._handleClickItem = this._handleClickItem.bind(this);
@@ -35,6 +36,7 @@ class AttractionsView extends Component {
         this._handleLoadMore = this._handleLoadMore.bind(this);
         this._handleSearch = this._handleSearch.bind(this);
         this._handleAdd = this._handleAdd.bind(this);
+        this._handleToggleMap = this._handleToggleMap.bind(this);
     }
 
     componentWillReceiveProps (nextProps) {
@@ -42,9 +44,6 @@ class AttractionsView extends Component {
         if (!this.props.city || nextProps.city && (this.props.city.id !== nextProps.city.id)) {
             this.requestAttractions(nextProps.dispatch, nextProps.city, "");
         }
-
-        // Always update state attractions w/ latest attractions from props
-        this.setState({ attractions: nextProps.attractions });
     }
 
     requestAttractions (dispatch, city, nextPageToken, query) {
@@ -55,7 +54,7 @@ class AttractionsView extends Component {
     }
 
     formattedAttractions () {
-        return this.state.attractions.map((attraction) => {
+        return this.props.attractions.map((attraction) => {
             return {
                 id: attraction.place_id,
                 title: attraction.name,
@@ -66,6 +65,33 @@ class AttractionsView extends Component {
                 icon: attraction.icon
             };
         });
+    }
+
+    formattedAttractionMarkers () {
+        return this.props.attractions.map((attraction) => {
+            return {
+                id: attraction.place_id,
+                latlng: {
+                    latitude: attraction.geometry.location.lat,
+                    longitude: attraction.geometry.location.lng
+                },
+                title: attraction.name,
+                description: attraction.vicinity || attraction.formatted_address
+            };
+        });
+    }
+
+    calculateMapViewPort () {
+        if (this.props.attractions.length === 0) {
+            return null;
+        }
+
+        return getRegionForCoordinates(this.props.attractions.map((attraction) => {
+            return {
+                latitude: attraction.geometry.location.lat,
+                longitude: attraction.geometry.location.lng
+            };
+        }));
     }
 
     _handleSearch (str) {
@@ -102,10 +128,18 @@ class AttractionsView extends Component {
         this.props.dispatch(postAttractions(item, this.props.tripId));
     }
 
+    _handleToggleMap (showMap) {
+        alert("map toggled to: " + showMap);
+    }
+
     render () {
         return (
             <ListMapTemplate data={this.formattedAttractions()}
                 onClickItem={this._handleClickItem}
+                enableMap={true}
+                onToggleMap={this._handleToggleMap}
+                mapProps={{ region: this.calculateMapViewPort() }}
+                mapMarkers={this.formattedAttractionMarkers()}
                 showAdd={true}
                 onAdd={this._handleAdd}
                 onRefresh={this._handleRefresh}
