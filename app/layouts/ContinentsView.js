@@ -32,7 +32,6 @@ export default class ContinentsView extends Component {
             <TouchableOpacity key={cell.id} onPress={goToCountriesView}
                     style={StyleSheet.flatten(ContinentStyles.touchOpacitySizing)}>
                 <Image styleName="large"
-                        style={StyleSheet.flatten(ContinentStyles.tileSpacing)}
                         source={{ uri: cell.images[Math.floor(Math.random()*cell.images.length)] }}>
                     <Tile>
                         <Title>{cell.name}</Title>
