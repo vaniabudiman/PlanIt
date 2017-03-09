@@ -6,15 +6,19 @@ const initialState = {
     signupStatus: "",
     getUserStatus: "",
     putUserStatus: "",
-    userData: [
-        { id: 1, title: "Username", placeholder: "placeholder 1", value: "", readOnly: true },
-        { id: 2, title: "Password", placeholder: "placeholder 2", value: "" },
-        { id: 3, title: "Name", placeholder: "placeholder 3", value: "" },
-        { id: 4, title: "Email", placeholder: "placeholder 4", value: "" },
-        { id: 5, title: "Home Currency", placeholder: "placeholder 5", value: "" }
-    ],
-    originalUserData: [],
+    userData: getDefaultUserData(),
 };
+
+function getDefaultUserData (userName = "", password = "", name = "",
+                             email = "", homeCurrency = "") {
+    return [
+        { id: 1, title: "Username", placeholder: "placeholder 1", value: userName, readOnly: true },
+        { id: 2, title: "Password", placeholder: "placeholder 2", value: password },
+        { id: 3, title: "Name", placeholder: "placeholder 3", value: name },
+        { id: 4, title: "Email", placeholder: "placeholder 4", value: email },
+        { id: 5, title: "Home Currency", placeholder: "placeholder 5", value: homeCurrency }
+    ];
+}
 
 export default function (state = initialState, action) {
     var nextState = state;
@@ -48,14 +52,8 @@ export default function (state = initialState, action) {
             nextState = {
                 ...state,
                 getUserStatus: FETCH_STATUS.SUCCESS,
-                userData: [
-                    { id: 1, title: "Username", placeholder: "placeholder 1",
-                        value: action.user.userName, readOnly: true },
-                    { id: 2, title: "Password", placeholder: "placeholder 2", value: action.user.password },
-                    { id: 3, title: "Name", placeholder: "placeholder 3", value: action.user.name },
-                    { id: 4, title: "Email", placeholder: "placeholder 4", value: action.user.email },
-                    { id: 5, title: "Home Currency", placeholder: "placeholder 5", value: action.user.homeCurrency }
-                ]
+                userData: getDefaultUserData(action.user.userName, action.user.password, action.user.name,
+                    action.user.email, action.user.homeCurrency),
             };
             break;
         case Types.GET_USER_FAILED:
@@ -66,7 +64,12 @@ export default function (state = initialState, action) {
             nextState = { ...state, putUserStatus: FETCH_STATUS.ATTEMPTING };
             break;
         case Types.PUT_USER_SUCCESS:
-            nextState = { ...state, putUserStatus: FETCH_STATUS.SUCCESS };
+            nextState = {
+                ...state,
+                putUserStatus: FETCH_STATUS.SUCCESS,
+                userData: getDefaultUserData(action.user.userName, action.user.password, action.user.name,
+                    action.user.email, action.user.homeCurrency),
+            };
             break;
         case Types.PUT_USER_FAILED:
             nextState = { ...state, putUserStatus: FETCH_STATUS.FAILED };

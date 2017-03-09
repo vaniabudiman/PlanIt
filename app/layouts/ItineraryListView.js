@@ -1,5 +1,7 @@
 import React, { Component } from "react";
 import ListMapTemplate from "../templates/ListMapTemplate.js";
+import { connect } from "react-redux";
+import { getEvents } from "../actions/eventsActions.js";
 
 
 // TODO: remove these mocks
@@ -33,7 +35,14 @@ var enableCalendar = true;
 var showCalendar = true;
 
 
-export default class ItineraryListView extends Component {
+class ItineraryListView extends Component {
+
+    static propTypes = {
+        tripId: React.PropTypes.number,
+        events: React.PropTypes.array,
+        eventsGETStatus: React.PropTypes.string,
+        dispatch: React.PropTypes.func
+    }
 
     constructor (props) {
         super(props);
@@ -42,6 +51,7 @@ export default class ItineraryListView extends Component {
         //      - the items will probs be coming from server (or Realm) if offline
         //      - how we do the loading state may be different / vary depending on how data is loaded in from server/Realm
         this.state = {
+            events: this.props.events,
             items: items,   // TODO: change this to an empty list to see an example of the empty message
             loadingItinerary: false
         };
@@ -56,6 +66,38 @@ export default class ItineraryListView extends Component {
         this._handleToggleCalendar = this._handleToggleCalendar.bind(this);
         this._handleClickItem = this._handleClickItem.bind(this);
         this._handleCreateItem = this._handleCreateItem.bind(this);
+    }
+
+    componentWillMount () {
+
+        // Bind Redux action creators
+
+        // TODO: assign real tripID to fetch events
+        const tripId = "1";
+        this.props.dispatch(getEvents(tripId));
+    }
+
+    componentWillReceiveProps (nextProps) {
+        // Always update state events w/ latest events from props
+        this.setState({ events: nextProps.events });
+    }
+
+
+    componentDidMount () {
+        // TODO: remove this... just testing for now
+        alert("events for trip id: " + this.props.tripId);
+    }
+
+    formattedEvents () {
+        return this.state.events.map((event) => {
+            return {
+                title: event.eventName,
+                id: event.eventID,
+                reminderFlag: event.reminderFlag,
+                subtitle: "Begins: " + event.startDateTime,
+                caption: "Ends: " + event.endDateTime
+            };
+        });
     }
 
     // TODO: remove/edit... this is just an example on how the callback would work
@@ -127,7 +169,7 @@ export default class ItineraryListView extends Component {
 
     render () {
         return (
-            <ListMapTemplate data={this.state.items}
+            <ListMapTemplate data={this.formattedEvents()}
                 emptyListMessage={"Create a event to begin!"}
                 loadingData={this.state.loadingItinerary}
                 enableSearch={true}
@@ -152,3 +194,11 @@ export default class ItineraryListView extends Component {
         );
     }
 }
+
+export default connect((state) => {
+    // map state to props
+    return {
+        events: state.events.events,
+        eventsGETStatus: state.events.eventsGETStatus
+    };
+})(ItineraryListView);

@@ -34,11 +34,12 @@ class UserProfileView extends Component {
     }
 
     componentWillReceiveProps (nextProps) {
-        // Fetch new list of cities if a different country's list of cities is requested
-        if (nextProps.getUserStatus === FETCH_STATUS.SUCCESS ||
-            nextProps.putUserStatus === FETCH_STATUS.SUCCESS) {
+        if (nextProps.putUserStatus !== FETCH_STATUS.ATTEMPTING &&
+            (nextProps.getUserStatus === FETCH_STATUS.SUCCESS || nextProps.putUserStatus === FETCH_STATUS.SUCCESS)) {
             this.setState({ userData: nextProps.userData });
-            this.setState({ originalUserData: nextProps.userData });
+            // The JSON unparse and parse is to create a copy of nextProps.userData instead of passing by reference.
+            // Otherwise originalUserData will get updated whenever userData is updated.
+            this.setState({ originalUserData: JSON.parse(JSON.stringify(nextProps.userData)) });
         }
     }
 
@@ -47,37 +48,35 @@ class UserProfileView extends Component {
     }
 
     _handleCancel () {
-        // alert("canceling");
-        // TODO: maybe use originalUserData to revert back ...
+        this.setState({ userData: JSON.parse(JSON.stringify(this.state.originalUserData)) });
     }
 
     // TODO: remove/edit... this is just an example on how the callback would work
     _handleSave () {
-        // Make necessary calls to save this view item/details.
-        // TODO: You will likely have to do some logic to grab all the inputs from wherever the
-        //       list of input items is coming from with their new values that got set in _handleInputValueChange
-        //       below and then format things correctly to pass to the action that will dispatch to the server/realm
+        let password = this.state.userData[1].value;
+        let name = this.state.userData[2].value;
+        let email = this.state.userData[3].value;
+        let homeCurrency = this.state.userData[4].value;
         let userData = {
             userName: this.state.userData[0].value,
-            password: this.state.userData[1].value,
-            name: this.state.userData[2].value,
-            email: this.state.userData[3].value,
-            homeCurrency: this.state.userData[4].value,
+            password: password !== this.state.originalUserData[1].value ? password : null,
+            name: name !== this.state.originalUserData[2].value ? name : null,
+            email: email !== this.state.originalUserData[3].value ? email : null,
+            homeCurrency: homeCurrency !== this.state.originalUserData[4].value ? homeCurrency : null,
         };
         this.props.dispatch(putUser(userData));
     }
 
 
     _handleInputValueChange (id, value) {
-        let newItems = this.state.userData.map((input) => {
+        this.setState({ userData: this.state.userData.map((input) => {
             if (input.id === id) {
                 input.value = value;
                 return input;
             } else {
                 return input;
             }
-        });
-        this.setState({ userData: newItems });
+        }) });
     }
 
     _handleLoadUser () {
