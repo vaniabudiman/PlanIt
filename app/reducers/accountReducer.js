@@ -1,12 +1,19 @@
 import { Types } from "../actions/accountActions.js";
 import FETCH_STATUS from "../constants/fetchStatusConstants.js";
 
-
 const initialState = {
     loginStatus: "",
     signupStatus: "",
     getUserStatus: "",
     putUserStatus: "",
+    userData: [
+        { id: 1, title: "Username", placeholder: "placeholder 1", value: "", readOnly: true },
+        { id: 2, title: "Password", placeholder: "placeholder 2", value: "" },
+        { id: 3, title: "Name", placeholder: "placeholder 3", value: "" },
+        { id: 4, title: "Email", placeholder: "placeholder 4", value: "" },
+        { id: 5, title: "Home Currency", placeholder: "placeholder 5", value: "" }
+    ],
+    originalUserData: [],
 };
 
 export default function (state = initialState, action) {
@@ -38,7 +45,18 @@ export default function (state = initialState, action) {
             nextState = { ...state, getUserStatus: FETCH_STATUS.ATTEMPTING };
             break;
         case Types.GET_USER_SUCCESS:
-            nextState = { ...state, getUserStatus: FETCH_STATUS.SUCCESS };
+            nextState = {
+                ...state,
+                getUserStatus: FETCH_STATUS.SUCCESS,
+                userData: [
+                    { id: 1, title: "Username", placeholder: "placeholder 1",
+                        value: action.user.userName, readOnly: true },
+                    { id: 2, title: "Password", placeholder: "placeholder 2", value: action.user.password },
+                    { id: 3, title: "Name", placeholder: "placeholder 3", value: action.user.name },
+                    { id: 4, title: "Email", placeholder: "placeholder 4", value: action.user.email },
+                    { id: 5, title: "Home Currency", placeholder: "placeholder 5", value: action.user.homeCurrency }
+                ]
+            };
             break;
         case Types.GET_USER_FAILED:
             nextState = { ...state, getUserStatus: FETCH_STATUS.FAILED };

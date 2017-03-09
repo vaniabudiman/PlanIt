@@ -86,7 +86,8 @@ export default class PlanIt extends Component {
                         <Scene key="formView" component={FormView}
                             sceneStyle={ NavigationStyles.listViewScene } title="Form View" {...navBarProps} />
 
-                        <Scene key="userProfile" component={UserProfileView} title="User Profile" />
+                        <Scene key="userProfile" component={UserProfileView}
+                            sceneStyle={ NavigationStyles.listViewScene } title="User Profile" />
                     </Scene>
                 </RouterWithRedux>
             </Provider>
