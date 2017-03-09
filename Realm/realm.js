@@ -36,7 +36,10 @@ const BookmarkSchema = {
         locationID: "int", // do we want to change this to something that would be more useful for offline use? address?
         sharedWith: { type: "list", objectType: "User" },
         sharedFrom: "User",
-        event: "Event"
+        event: "Event",
+        name: "string",
+        address: { type: "string", optional: true },
+        type: { type: "string", optional: true },
     }
 };
 
@@ -145,12 +148,15 @@ realm.write(() => {
             bookmarkID: i,
             locationID: 12345,
             active: false,
+            name: "Bookmark Name " + i,
+            address: "Bookmark Address " + i,
+            type: "Bookmark Type " + i,
             event: {
                 eventID: i + 10,
                 eventName: "Bookmark Event " + i,
                 startDateTime: new Date(),
                 endDateTime: new Date(),
-                reminderFlag: false
+                reminderFlag: false,
             }
         }, true);
 
