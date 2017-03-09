@@ -66,7 +66,7 @@ class TripsView extends Component {
         // Bind callback handlers
         this._handleSearch = this._handleSearch.bind(this);
         this._handleRefresh = this._handleRefresh.bind(this);
-        this._handleAdd = this._handleAdd.bind(this);
+        this._handleUpdate = this._handleUpdate.bind(this);
         this._handleInfo = this._handleInfo.bind(this);
         this._handleShare = this._handleShare.bind(this);
         this._handleToggleMap = this._handleToggleMap.bind(this);
@@ -181,9 +181,9 @@ class TripsView extends Component {
                 mapProps={mapProps}
                 onRefresh={this._handleRefresh}
                 showEdit={true}
-                showShare={true}
+                //showShare={true}
                 onEdit={this._handleUpdate}
-                onShare={this._handleShare}
+                //onShare={this._handleShare}
                 onToggleMap={this._handleToggleMap}
                 onClickItem={this._handleClickItem}
                 onCreateItem={this._handleCreateItem} />
