@@ -28,7 +28,7 @@ class AttractionsView extends Component {
             searchString: ""
         };
 
-        this.requestAttractions(this.props.dispatch, this.props.city, this.props.nextPageToken);
+        this.requestAttractions(this.props.dispatch, this.props.city, "");
 
         // Bind Redux action creators
         this._handleClickItem = this._handleClickItem.bind(this);
