@@ -141,11 +141,10 @@ export function createTrip (tripData) {
             dispatch(createTripSuccess(response));
         })
         .catch(error => {
-            alert("POST /trips Failed: " + error.response.status); // TODO: remove this and do something with the fetch error
+            alert("POST Trips Failed: " + error.response.status); // TODO: remove this and do something with the fetch error
         });
     };
 }
-
 export function updateTrip (tripId, tripData) {
     return dispatch => {
         if (tripData.tripName === "") { return (alert("Please enter a trip name!")); }

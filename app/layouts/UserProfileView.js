@@ -1,58 +1,54 @@
 import React, { Component } from "react";
 import FormTemplate from "../templates/FormTemplate.js";
+import { getUser, putUser } from "../actions/accountActions.js";
+import { connect } from "react-redux";
+import FETCH_STATUS from "../constants/fetchStatusConstants.js";
 
 
-// TODO: remove these mocks
-let inputs = [
-    { id: 1, title: "Username", placeholder: "placeholder 1", value: "value 1" },
-    { id: 2, title: "Password", placeholder: "placeholder 2", value: "value 2" },
-    { id: 3, title: "Name", placeholder: "placeholder 3", value: "value 3" },
-    { id: 4, title: "Email", placeholder: "placeholder 4", value: "value 4" },
-    { id: 5, title: "Home Currency", placeholder: "placeholder 5", value: "value 5" }
-];
+class UserProfileView extends Component {
 
-
-export default class UserProfileView extends Component {
+    static propTypes = {
+        dispatch: React.PropTypes.func,
+        userData: React.PropTypes.array,
+        getUserStatus: React.PropTypes.string,
+        putUserStatus: React.PropTypes.string,
+    }
 
     constructor (props) {
         super(props);
 
-        // TODO: remove... this is just an example
-        //      - the items will probs be coming from server (or Realm) if offline
-        //      - how we do the loading state may be different / vary depending on how data is loaded in from server/Realm
         this.state = {
-            items: inputs,
-            loadingInputs: false
+            loadingInputs: false,
+            userData: [],
+            originalUserData: [],
         };
 
+        this.props.dispatch(getUser());
+
         // Bind callback handlers
+        this._handleLoadUser = this._handleLoadUser.bind(this);
         this._handleRefresh = this._handleRefresh.bind(this);
         this._handleCancel = this._handleCancel.bind(this);
         this._handleSave = this._handleSave.bind(this);
-        this._handleToggleMap = this._handleToggleMap.bind(this);
         this._handleInputValueChange = this._handleInputValueChange.bind(this);
     }
 
-    // TODO: remove/edit... this is just an example on how the callback would work
+    componentWillReceiveProps (nextProps) {
+        // Fetch new list of cities if a different country's list of cities is requested
+        if (nextProps.getUserStatus === FETCH_STATUS.SUCCESS ||
+            nextProps.putUserStatus === FETCH_STATUS.SUCCESS) {
+            this.setState({ userData: nextProps.userData });
+            this.setState({ originalUserData: nextProps.userData });
+        }
+    }
+
     _handleRefresh () {
-        // Make necessary calls to fetch & fresh data from server/Realm as necessary
-        alert("refreshing");
-        this.setState({ loadingProfile: true });
-        setTimeout(() => this.setState({ loadingProfile: false }), 1000);
+        this.props.dispatch(getUser());
     }
 
-    // TODO: remove/edit... this is just an example on how the callback would work
-    _handleLoadMore () {
-        // Make necessary calls to fetch more data from server/Realm as necessary
-        alert("loading more");
-        this.setState({ loadingProfile: true });
-        setTimeout(() => this.setState({ loadingProfile: false }), 1000);
-    }
-
-    // TODO: remove/edit... this is just an example on how the callback would work
     _handleCancel () {
-        // Make necessary calls to cancel this view item/details.
-        alert("canceling");
+        // alert("canceling");
+        // TODO: maybe use originalUserData to revert back ...
     }
 
     // TODO: remove/edit... this is just an example on how the callback would work
@@ -61,18 +57,19 @@ export default class UserProfileView extends Component {
         // TODO: You will likely have to do some logic to grab all the inputs from wherever the
         //       list of input items is coming from with their new values that got set in _handleInputValueChange
         //       below and then format things correctly to pass to the action that will dispatch to the server/realm
-        alert("saving");
+        let userData = {
+            userName: this.state.userData[0].value,
+            password: this.state.userData[1].value,
+            name: this.state.userData[2].value,
+            email: this.state.userData[3].value,
+            homeCurrency: this.state.userData[4].value,
+        };
+        this.props.dispatch(putUser(userData));
     }
 
-    // TODO: remove/edit... this is just an example on how the callback would work
-    _handleToggleMap (newMapToggleState) {
-        // Make necessary calls to do w/e you want based on this new map toggled state
-        alert("map toggled to: " + newMapToggleState);
-    }
 
-    // TODO: remove/edit... this is just an example of how the callback would work
     _handleInputValueChange (id, value) {
-        let newItems = this.state.items.map((input) => {
+        let newItems = this.state.userData.map((input) => {
             if (input.id === id) {
                 input.value = value;
                 return input;
@@ -80,20 +77,29 @@ export default class UserProfileView extends Component {
                 return input;
             }
         });
+        this.setState({ userData: newItems });
+    }
 
-        this.setState({ items: newItems });
+    _handleLoadUser () {
+        this.props.dispatch(getUser());
     }
 
     render () {
         return (
-            <FormTemplate data={this.state.items}
+            <FormTemplate data={this.state.userData}
                 onInputValueChange={this._handleInputValueChange}
-                loadingData={this.state.loadingInputs}
-                enableMap={true}
                 onRefresh={this._handleRefresh}
                 onCancel={this._handleCancel}
                 onSave={this._handleSave}
-                onToggleMap={this._handleToggleMap} />
+                loadingData={this.props.getUserStatus === FETCH_STATUS.ATTEMPTING } />
         );
     }
 }
+
+export default connect((state) => {
+    return {
+        userData: state.account.userData,
+        getUserStatus: state.account.getUserStatus,
+        putUserStatus: state.account.putUserStatus,
+    };
+})(UserProfileView);
