@@ -168,7 +168,6 @@ export default class FormTemplate extends Component {
         onSave: React.PropTypes.func,
         loadingData: React.PropTypes.bool,
         onDateSelect: React.PropTypes.func,
-        isUpdate: React.PropTypes.bool
     }
 
     static defaultProps = {

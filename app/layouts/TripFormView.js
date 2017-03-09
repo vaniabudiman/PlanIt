@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import { connect } from "react-redux";
 import FormTemplate, { Types } from "../templates/FormTemplate.js";
 import { Actions } from "react-native-router-flux";
-import { createTrip } from "../actions/tripsActions.js";
+import { createTrip, getTrips, updateTrip } from "../actions/tripsActions.js";
 import FETCH_STATUS from "../constants/fetchStatusConstants.js";
 
 /*
@@ -16,25 +16,18 @@ import FETCH_STATUS from "../constants/fetchStatusConstants.js";
 class TripFormView extends Component {
     static propTypes = {
         dispatch: React.PropTypes.func,
-        isUpdate: React.PropTypes.bool, //.isRequired,
-        tripId: React.PropTypes.number,
+        trip: React.PropTypes.object,
         tripPOSTStatus: React.PropTypes.string
     }
 
     constructor (props) {
         super(props);
 
-        let inputs = [
-            { id: 1, title: "Trip Name", value: "", type: Types.TEXT },
-            { id: 2, title: "Start Date", value: "", type: Types.DATE },
-            { id: 3, title: "End Date", value: "", type: Types.DATE },
-        ];
-
         // TODO: remove... this is just an example
         //      - the items will probs be coming from server (or Realm) if offline
         //      - how we do the loading state may be different / vary depending on how data is loaded in from server/Realm
         this.state = {
-            items: inputs,
+            items: this.formattedInputs(this.props.trip),
             loadingInputs: false,
         };
 
@@ -46,14 +39,38 @@ class TripFormView extends Component {
 
         // Bind Redux action creators
         this._createTrip = (tripData) => this.props.dispatch(createTrip(tripData));
-        //this._updateTrip = () => this.props.dispatch(updateTrip(this.state.items));
+        this._updateTrip = (tripId, tripData) => this.props.dispatch(updateTrip(tripId, tripData));
     }
 
     componentWillReceiveProps (nextProps) {
         // Fetch new list of cities if a different country's list of cities is requested
         if (nextProps.tripPOSTStatus === FETCH_STATUS.SUCCESS) {
-            Actions.newTripHome({ tripId: nextProps.tripId });
+            Actions.newTripHome({ tripId: nextProps.newTripId });
         }
+        if (nextProps.tripPUTStatus === FETCH_STATUS.SUCCESS) {
+            Actions.pop();
+        }
+    }
+
+    requestTrips (dispatch) {
+        dispatch(getTrips(this.props.trip.tripID));
+    }
+
+    // Format input fields
+    formattedInputs (trip = null) {
+        let inputs = [
+            { id: 1, title: "Trip Name", value: "", type: Types.TEXT },
+            { id: 2, title: "Start Date", value: "", type: Types.DATE },
+            { id: 3, title: "End Date", value: "", type: Types.DATE },
+        ];
+
+        if (trip) {
+            inputs[0].value = trip.tripName;
+            inputs[1].value = trip.startDate;
+            inputs[2].value = trip.endDate;
+        }
+
+        return inputs;
     }
 
     // Cancel Create/Update
@@ -76,8 +93,8 @@ class TripFormView extends Component {
             active: false
         };
 
-        if (this.props.isUpdate) {
-            //this._updateTrip();
+        if (this.props.trip) {
+            this._updateTrip(this.props.trip.id, tripData);
         }
         else {
             this._createTrip(tripData);
@@ -105,7 +122,6 @@ class TripFormView extends Component {
     }
 
     render () {
-        var title = (this.props.isUpdate) ? "Update Trip" : "Create Trip";
         return (
             <FormTemplate data={this.state.items}
                 onInputValueChange={this._handleInputValueChange}
@@ -114,9 +130,7 @@ class TripFormView extends Component {
                 onCancel={this._handleCancel}
                 onSave={this._handleSave}
                 onToggleMap={this._handleToggleMap}
-                onDateSelect={this._handleInputValueChange}
-                title={title}
-                isUpdate={this.props.isUpdate} />
+                onDateSelect={this._handleInputValueChange} />
         );
     }
 }
@@ -124,7 +138,10 @@ class TripFormView extends Component {
 export default connect((state) => {
     // mapStateToProps
     return {
-        tripId: state.trips.trip.tripID,
-        tripPOSTStatus: state.trips.tripPOSTStatus
+        trips: state.trips.trips,
+        newTripId: state.trips.trip.tripID,
+        tripPOSTStatus: state.trips.tripPOSTStatus,
+        tripsGETStatus: state.trips.tripsGETStatus,
+        tripPUTStatus: state.trips.tripPUTStatus
     };
 })(TripFormView);
