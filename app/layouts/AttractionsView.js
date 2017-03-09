@@ -12,11 +12,11 @@ class AttractionsView extends Component {
     static propTypes = {
         dispatch: React.PropTypes.func,
         city: React.PropTypes.object,
+        tripId: React.PropTypes.number,
         attractions: React.PropTypes.array,
         attractionsGETStatus: React.PropTypes.string,
         attractionsPOSTStatus: React.PropTypes.string,
         nextPageToken: React.PropTypes.string,
-        tripId: React.PropTypes.number,
     }
 
     constructor (props) {
@@ -34,8 +34,6 @@ class AttractionsView extends Component {
         this._handleRefresh = this._handleRefresh.bind(this);
         this._handleLoadMore = this._handleLoadMore.bind(this);
         this._handleSearch = this._handleSearch.bind(this);
-
-
         this._handleAdd = this._handleAdd.bind(this);
     }
 
@@ -97,7 +95,7 @@ class AttractionsView extends Component {
     _handleClickItem (item) {
         alert("clicked on attractions: " + item.title + "\n" + "tripID:" + this.props.tripId); //  TODO: remove this later
 
-        Actions.attractionDetails({ attraction: item });
+        Actions.attractionDetails({ attraction: item, tripId: this.props.tripId });
     }
 
     _handleAdd (item) {

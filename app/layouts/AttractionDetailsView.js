@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import { connect } from "react-redux";
 import FETCH_STATUS from "../constants/fetchStatusConstants.js";
 import { getAttractionDetails } from "../actions/attractionDetailsActions.js";
+import { postAttractions } from "../actions/attractionsActions.js";
 import { getTypesDisplayString } from "../utils/utils.js";
 import ItemDetailsTemplate from "../templates/ItemDetailsTemplate.js";
 
@@ -10,6 +11,7 @@ class AttractionDetailsView extends Component {
 
     static propTypes = {
         dispatch: React.PropTypes.func,
+        tripId: React.PropTypes.number,
         attraction: React.PropTypes.object,
         details: React.PropTypes.object,
         attractionDetailsGETStatus: React.PropTypes.string
@@ -64,8 +66,7 @@ class AttractionDetailsView extends Component {
     }
 
     _handleAdd () {
-        // TODO: dispatch correct action to add this attraction (item) to bookmarks
-        alert("add this as a bookmark for this trip: " + this.props.details.name);
+        this.props.dispatch(postAttractions(this.props.attraction, this.props.tripId));
     }
 
     render () {
