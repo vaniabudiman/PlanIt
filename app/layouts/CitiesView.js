@@ -12,7 +12,8 @@ class CitiesView extends Component {
         dispatch: React.PropTypes.func,
         countryId: React.PropTypes.string,
         cities: React.PropTypes.array,
-        citiesGETStatus: React.PropTypes.string
+        citiesGETStatus: React.PropTypes.string,
+        tripId: React.PropTypes.number,
     }
 
     constructor (props) {
@@ -83,7 +84,7 @@ class CitiesView extends Component {
     _handleClickItem (item) {
         alert("clicked on cities: " + item.name); //  TODO: remove this later
 
-        Actions.attractions({ city: item });
+        Actions.attractions({ city: item, tripId: this.props.tripId });
     }
 
     render () {
