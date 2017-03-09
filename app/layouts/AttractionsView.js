@@ -3,7 +3,7 @@ import { connect } from "react-redux";
 import { Actions } from "react-native-router-flux";
 import FETCH_STATUS from "../constants/fetchStatusConstants.js";
 import { getAttractions, postAttractions, clearAttractionsPageToken } from "../actions/attractionsActions.js";
-import { getTypesDisplayString, getRegionForCoordinates } from "../utils/utils.js";
+import { getTypesDisplayString, getRegionForCoordinates, isDevMode } from "../utils/utils.js";
 import ListMapTemplate from "../templates/ListMapTemplate.js";
 
 
@@ -117,7 +117,7 @@ class AttractionsView extends Component {
     }
 
     _handleClickItem (item) {
-        alert("clicked on attractions: " + item.title + "\n" + "tripID:" + this.props.tripId); //  TODO: remove this later
+        isDevMode() && alert("clicked on attractions: " + item.title + "\n" + "tripID:" + this.props.tripId); //  TODO: remove this later
 
         Actions.attractionDetails({ attraction: item, tripId: this.props.tripId });
     }
@@ -127,7 +127,7 @@ class AttractionsView extends Component {
     }
 
     _handleToggleMap (showMap) {
-        alert("map toggled to: " + showMap);
+        isDevMode() && alert("map toggled to: " + showMap);
     }
 
     render () {
@@ -135,6 +135,7 @@ class AttractionsView extends Component {
             <ListMapTemplate data={this.formattedAttractions()}
                 onClickItem={this._handleClickItem}
                 enableMap={true}
+                showMap={true}
                 onToggleMap={this._handleToggleMap}
                 mapProps={{ region: this.calculateMapViewPort() }}
                 mapMarkers={this.formattedAttractionMarkers()}

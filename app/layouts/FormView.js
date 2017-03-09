@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 import FormTemplate, { Types } from "../templates/FormTemplate.js";
+import { isDevMode } from "../utils/utils.js";
 
 
 /*
@@ -61,7 +62,7 @@ export default class FormView extends Component {
     // TODO: remove/edit... this is just an example on how the callback would work
     _handleRefresh () {
         // Make necessary calls to fetch & fresh data from server/Realm as necessary
-        alert("refreshing");
+        isDevMode() && alert("refreshing");
         this.setState({ loadingTrips: true });
         setTimeout(() => this.setState({ loadingTrips: false }), 1000);
     }
@@ -69,7 +70,7 @@ export default class FormView extends Component {
     // TODO: remove/edit... this is just an example on how the callback would work
     _handleLoadMore () {
         // Make necessary calls to fetch more data from server/Realm as necessary
-        alert("loading more");
+        isDevMode() && alert("loading more");
         this.setState({ loadingTrips: true });
         setTimeout(() => this.setState({ loadingTrips: false }), 1000);
     }
@@ -92,7 +93,7 @@ export default class FormView extends Component {
     // TODO: remove/edit... this is just an example on how the callback would work
     _handleToggleMap (newMapToggleState) {
         // Make necessary calls to do w/e you want based on this new map toggled state
-        alert("map toggled to: " + newMapToggleState);
+        isDevMode() && alert("map toggled to: " + newMapToggleState);
     }
 
     // TODO: remove/edit... this is just an example of how the callback would work

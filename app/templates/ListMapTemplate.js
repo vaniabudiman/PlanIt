@@ -380,7 +380,7 @@ export default class ListMapTemplate extends Component {
         if (this.props.showDelete) {
             icons.push(
                 <TouchableOpacity key={"icon-trash-" + item.id} onPress={this.props.onDelete.bind(null, item)}>
-                    <Icon name="trash" style={ListViewStyles.optionIcons} size={16} />
+                    <Icon name="trash" style={ListViewStyles.optionIcons} size={20} />
                 </TouchableOpacity>
             );
         }
@@ -388,28 +388,28 @@ export default class ListMapTemplate extends Component {
         if (this.props.showEdit) {
             icons.push(
                 <TouchableOpacity key={"icon-edit-" + item.id} onPress={this.props.onEdit.bind(null, item)}>
-                    <Icon name="edit" style={ListViewStyles.optionIcons} size={16} />
+                    <Icon name="edit" style={ListViewStyles.optionIcons} size={20} />
                 </TouchableOpacity>
             );
         }
         if (this.props.showAdd) {
             icons.push(
                 <TouchableOpacity key={"icon-add-" + item.id} onPress={this.props.onAdd.bind(null, item)}>
-                    <Icon name="plus" style={ListViewStyles.optionIcons} size={16} />
+                    <Icon name="plus" style={ListViewStyles.optionIcons} size={20} />
                 </TouchableOpacity>
             );
         }
         if (this.props.showInfo) {
             icons.push(
                 <TouchableOpacity key={"icon-info-" + item.id} onPress={this.props.onInfo.bind(null, item)}>
-                    <Icon name="info-circle" style={ListViewStyles.optionIcons} size={16} />
+                    <Icon name="info-circle" style={ListViewStyles.optionIcons} size={20} />
                 </TouchableOpacity>
             );
         }
         if (this.props.showShare) {
             icons.push(
                 <TouchableOpacity key={"icon-share-" + item.id} onPress={this.props.onShare.bind(null, item)}>
-                    <Icon name="share-alt" style={ListViewStyles.optionIcons} size={16} />
+                    <Icon name="share-alt" style={ListViewStyles.optionIcons} size={20} />
                 </TouchableOpacity>
             );
         }

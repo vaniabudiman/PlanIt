@@ -5,6 +5,7 @@ import FETCH_STATUS from "../constants/fetchStatusConstants.js";
 import { getBookmarks, deleteBookmark } from "../actions/bookmarksActions.js";
 import { getRegionForCoordinates } from "../utils/utils.js";
 import ListMapTemplate from "../templates/ListMapTemplate.js";
+import { isDevMode } from "../utils/utils.js";
 
 
 class BookmarksView extends Component {
@@ -113,7 +114,7 @@ class BookmarksView extends Component {
     }
 
     _handleDelete (item) {
-        alert ("delete for: " + item.id);
+        alert ("Successfully deleted Bookmark.");
 
         this.props.dispatch(deleteBookmark(item.id));
     }
@@ -121,7 +122,7 @@ class BookmarksView extends Component {
     // TODO: remove/edit... this is just an example on how the callback would work
     _handleClickItem (item) {
         // Make necessary calls to do w/e you want when clicking on item identified by id
-        alert("clicked on item: " + item.id);
+        isDevMode() && alert("clicked on item: " + item.id);
 
         Actions.attractionDetails({
             title: "Bookmark Details",
@@ -132,7 +133,7 @@ class BookmarksView extends Component {
     }
 
     _handleToggleMap (showMap) {
-        alert("toggled map: " + showMap);
+        isDevMode() && alert("toggled map: " + showMap);
     }
 
     _handleShare (item) {   // TODO: check ListMapTemplate updated to bind entire item to onShare instead of just id

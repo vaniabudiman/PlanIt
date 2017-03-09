@@ -4,6 +4,7 @@ import { Actions } from "react-native-router-flux";
 import FETCH_STATUS from "../constants/fetchStatusConstants.js";
 import { getCities } from "../actions/citiesActions.js";
 import ListMapTemplate from "../templates/ListMapTemplate.js";
+import { isDevMode } from "../utils/utils.js";
 
 
 class CitiesView extends Component {
@@ -82,7 +83,7 @@ class CitiesView extends Component {
     }
 
     _handleClickItem (item) {
-        alert("clicked on cities: " + item.title); //  TODO: remove this later
+        isDevMode() && alert("clicked on cities: " + item.title); //  TODO: remove this later
 
         Actions.attractions({ city: item, tripId: this.props.tripId });
     }

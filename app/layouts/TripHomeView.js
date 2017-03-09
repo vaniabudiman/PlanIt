@@ -4,6 +4,7 @@ import Icon from "react-native-vector-icons/FontAwesome";
 import { ListView, GridRow, Tile, Title, TouchableOpacity } from "@shoutem/ui";
 import { $white } from "../styles/GlobalStyles.js";
 import TripHomeTiles from "../data/TripHomeTiles.js";
+import { isDevMode } from "../utils/utils.js";
 
 
 export default class TripHomeView extends Component {
@@ -14,7 +15,7 @@ export default class TripHomeView extends Component {
 
     componentDidMount () {
         // TODO: remove this... just testing for now
-        alert("trips home for trip id: " + this.props.tripId);
+        isDevMode() && alert("trips home for trip id: " + this.props.tripId);
     }
 
     constructor (props) {
