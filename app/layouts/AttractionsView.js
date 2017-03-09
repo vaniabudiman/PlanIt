@@ -3,6 +3,7 @@ import { connect } from "react-redux";
 import { Actions } from "react-native-router-flux";
 import FETCH_STATUS from "../constants/fetchStatusConstants.js";
 import { getAttractions, clearAttractionsPageToken } from "../actions/attractionsActions.js";
+import { getTypesDisplayString } from "../utils/utils.js";
 import ListMapTemplate from "../templates/ListMapTemplate.js";
 
 
@@ -50,19 +51,13 @@ class AttractionsView extends Component {
         dispatch(getAttractions(city, nextPageToken, query));
     }
 
-    getTypesDisplayString (types) {
-        // Reformat google's types (https://developers.google.com/places/web-service/supported_types)
-        // into string suitable for displaying
-        return types.map((type) => type.replace(/_/g, " ")).join(", ");
-    }
-
     formattedAttractions () {
         return this.state.attractions.map((attraction) => {
             return {
                 id: attraction.place_id,
                 title: attraction.name,
                 subtitle: attraction.vicinity || attraction.formatted_address, // nearby vs. text search
-                caption: this.getTypesDisplayString(attraction.types),
+                caption: getTypesDisplayString(attraction.types),
                 lat: attraction.location ? attraction.location.lat : null,
                 lon: attraction.location ? attraction.location.lon : null,
                 icon: attraction.icon
