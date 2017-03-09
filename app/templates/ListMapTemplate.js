@@ -312,6 +312,7 @@ export default class ListMapTemplate extends Component {
                 <MapView style={{ flex: 1 }} {...this.props.mapProps}>
                     {this.props.mapMarkers.map(marker => (
                         <MapView.Marker
+                            key={marker.id}
                             coordinate={marker.latlng}
                             title={marker.title}
                             description={marker.description}

@@ -6,14 +6,16 @@ import ListMapTemplate from "../templates/ListMapTemplate.js";
 
 
 // TODO: remove this mock OR edit it (adding necessary props from the MapView api) to suite the bookmarks view's needs
-// var mapProps = {
-//     // TODO: for the map enabled views it will be best if we can do someting like this to get a descent default
-//     //       location centering & scaling (per locations... e.g. bookmarks/bookmars/etc.)
-//     latitude: 37.78825,
-//     longitude: -122.4324,
-//     latitudeDelta: 0.015,
-//     longitudeDelta: 0.0121
-// };
+var mapProps = {
+    // TODO: for the map enabled views it will be best if we can do someting like this to get a descent default
+    //       location centering & scaling (per locations... e.g. bookmarks/bookmars/etc.)
+    region: {
+        latitude: -33.866891,
+        longitude: 151.200814,
+        latitudeDelta: 0.015,
+        longitudeDelta: 0.0121
+    }
+};
 
 
 class BookmarksView extends Component {
@@ -40,7 +42,7 @@ class BookmarksView extends Component {
         this._handleRefresh = this._handleRefresh.bind(this);
         this._handleInfo = this._handleInfo.bind(this);
         this._handleShare = this._handleShare.bind(this);
-
+        this._handleToggleMap = this._handleToggleMap.bind(this);
         this._handleClickItem = this._handleClickItem.bind(this);
     }
 
@@ -71,6 +73,7 @@ class BookmarksView extends Component {
     formattedBookmarkMarkers () {
         return this.state.bookmarks.map((bookmark) => {
             return {
+                id: bookmark.bookmarkID,
                 latlng: {
                     latitude: bookmark.lat,
                     longitude: bookmark.lon
@@ -120,6 +123,10 @@ class BookmarksView extends Component {
         // TODO: go to attraction details page
     }
 
+    _handleToggleMap (showMap) {
+        alert("toggled map");
+    }
+
     _handleShare (item) {   // TODO: check ListMapTemplate updated to bind entire item to onShare instead of just id
         // Make necessary calls to share the item identified by id
         alert("share: " + item && item.id);
@@ -137,7 +144,8 @@ class BookmarksView extends Component {
                 enableSearch={true}
                 onSearch={this._handleSearch}
                 enableMap={true}
-
+                onToggleMap={this._handleToggleMap}
+                mapProps={mapProps}
                 mapMarkers={this.formattedBookmarkMarkers()}
                 onRefresh={this._handleRefresh}
                 showInfo={true}
