@@ -3,7 +3,7 @@ import { Actions } from "react-native-router-flux";
 import ListMapTemplate from "../templates/ListMapTemplate.js";
 import realm from "../../Realm/realm.js";
 import { connect } from "react-redux";
-import { getTrips } from "../actions/tripsActions";
+import { getTrips } from "../actions/tripsActions.js";
 import FETCH_STATUS from "../constants/fetchStatusConstants.js";
 
 
