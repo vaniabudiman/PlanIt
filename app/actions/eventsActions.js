@@ -14,7 +14,7 @@ function getEventsAttempt () {
 
 function getEventsSuccess (response) {
     return {
-        events: response,
+        events: response.events,
         type: Types.GET_EVENTS_SUCCESS
     };
 }
