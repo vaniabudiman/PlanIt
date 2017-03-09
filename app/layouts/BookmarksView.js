@@ -1,46 +1,21 @@
 import React, { Component } from "react";
 import { connect } from "react-redux";
+import FETCH_STATUS from "../constants/fetchStatusConstants.js";
 import { getBookmarks } from "../actions/bookmarksActions.js";
 import ListMapTemplate from "../templates/ListMapTemplate.js";
-
-
-// TODO: remove these mocks
-let items = [{ id: "1", title: "bookmark1", description: "description to bookmark1" },
-            { id: "2", title: "bookmark2", description: "description to bookmark2" },
-            { id: "3", title: "bookmark3", description: "description to bookmark2" }];
-
 
 
 // TODO: remove this mock OR edit it (adding necessary props from the MapView api) to suite the bookmarks view's needs
 var mapProps = {
     // TODO: for the map enabled views it will be best if we can do someting like this to get a descent default
     //       location centering & scaling (per locations... e.g. bookmarks/bookmars/etc.)
-    latitude: 37.78825,
-    longitude: -122.4324,
-    latitudeDelta: 0.015,
-    longitudeDelta: 0.0121
-};
-
-// mapMarkers is just an example of the valid format of markers in ordder
-// for them to be rendered on the map
-var mapMarkers = [
-    {
-        latlng: {
-            latitude: 37.78825,
-            longitude: -122.4324
-        },
-        title: "title",
-        description: "desc"
-    },
-    {
-        latlng: {
-            latitude: 37.79825,
-            longitude: -122.4324
-        },
-        title: "title",
-        description: "desc"
+    region: {
+        latitude: -33.866891,
+        longitude: 151.200814,
+        latitudeDelta: 0.015,
+        longitudeDelta: 0.0121
     }
-];
+};
 
 
 class BookmarksView extends Component {
@@ -55,141 +30,129 @@ class BookmarksView extends Component {
     constructor (props) {
         super(props);
 
-        // TODO: remove... this is just an example
-        //      - the items will probs be coming from server (or Realm) if offline
-        //      - how we do the loading state may be different / vary depending on how data is loaded in from server/Realm
         this.state = {
-            items: items,   // TODO: change this to an empty list to see an example of the empty message
             bookmarks: this.props.bookmarks,
-            loadingBookmarks: false
+            searchString: ""
         };
+
+        this.requestBookmarks(this.props.dispatch, this.props.tripId);
 
         // Bind callback handlers
         this._handleSearch = this._handleSearch.bind(this);
         this._handleRefresh = this._handleRefresh.bind(this);
-        this._handleAdd = this._handleAdd.bind(this);
         this._handleInfo = this._handleInfo.bind(this);
         this._handleShare = this._handleShare.bind(this);
         this._handleToggleMap = this._handleToggleMap.bind(this);
         this._handleClickItem = this._handleClickItem.bind(this);
-        this._handleCreateItem = this._handleCreateItem.bind(this);
-    }
-
-    componentWillMount () {
-
-        // Bind Redux action creators
-
-        // TODO: assign real tripID to fetch bookmarks
-        const tripId = "1";
-        this.props.dispatch(getBookmarks(tripId));
     }
 
     componentWillReceiveProps (nextProps) {
+        if (nextProps.tripId && (this.props.tripId !== nextProps.tripId)) {
+            this.requestBookmarks(nextProps.dispatch, nextProps.tripId);
+        }
+
         // Always update state bookmarks w/ latest bookmarks from props
         this.setState({ bookmarks: nextProps.bookmarks });
     }
 
-    componentDidMount () {
-        // TODO: remove this... just testing for now
-        alert("bookmarks for trip id: " + this.props.tripId);
+    requestBookmarks (dispatch, tripId) {
+        dispatch(getBookmarks(tripId));
     }
 
-    // TODO: remove/edit... this is just an example on how the callback would work
-    _handleSearch (str) {
-        let newItems = items.filter(function (item) {
-            return item.title.toLowerCase().indexOf(str.toLowerCase()) !== -1;
+    formattedBookmarks () {
+        return this.state.bookmarks.map((bookmark) => {
+            return {
+                title: bookmark.name,
+                id: bookmark.placeID,
+                subtitle: bookmark.address,
+                caption: bookmark.type
+            };
         });
-
-        this.setState({ items: newItems });
     }
 
-    // TODO: remove/edit... this is just an example on how the callback would work
+    formattedBookmarkMarkers () {
+        return this.state.bookmarks.map((bookmark) => {
+            return {
+                id: bookmark.bookmarkID,
+                latlng: {
+                    latitude: bookmark.lat,
+                    longitude: bookmark.lon
+                },
+                title: bookmark.name,
+                description: bookmark.address
+            };
+        });
+    }
+
+    _handleSearch (str) {
+        str = str.trim().toLowerCase();
+
+        if (str === "") {
+            // empty search value, so return all current bookmarks from props
+            this.setState({ bookmarks: this.props.bookmarks, searchString: str });
+        } else {
+            let matchedBookmarks = this.state.bookmarks.filter((bookmark) => {
+                // Match on bookmark "name", address, & "types"
+                return (bookmark.name.toLowerCase().indexOf(str) !== -1) ||
+                    (bookmark.address.toLowerCase().indexOf(str) !== -1) ||
+                    (bookmark.type.toLowerCase().indexOf(str) !== -1);
+            });
+            this.setState({ bookmarks: matchedBookmarks, searchString: str });
+        }
+    }
+
     _handleRefresh () {
-        // Make necessary calls to fetch & fresh data from server/Realm as necessary
-        alert("refreshing");
-        this.setState({ loadingBookmarks: true });
-        setTimeout(() => this.setState({ loadingBookmarks: false }), 1000);
+        // Just fire off another fetch to refresh
+        this.requestBookmarks(this.props.dispatch, this.props.tripId);
+
+        this.setState({ searchString: "" });
     }
 
-    // TODO: remove/edit... this is just an example on how the callback would work
-    _handleLoadMore () {
-        // Make necessary calls to fetch more data from server/Realm as necessary
-        alert("loading more");
-        this.setState({ loadingBookmarks: true });
-        setTimeout(() => this.setState({ loadingBookmarks: false }), 1000);
-    }
-
-    // TODO: remove/edit... this is just an example on how the callback would work
-    _handleAdd (id) {
-        // Make necessary calls to add the item identified by id
-        alert("adding: " + id);
-    }
-
-    // TODO: remove/edit... this is just an example on how the callback would work
-    _handleInfo (id) {
+    _handleInfo (item) {    // TODO: check ListMapTemplate updated to bind entire item to onInfo instead of just id
         // Make necessary calls to get/navigate to info on item identified by id
-        alert("info for: " + id);
-    }
+        alert("info for: " + item && item.id);
 
-    // TODO: remove/edit... this is just an example on how the callback would work
-    _handleShare (id) {
-        // Make necessary calls to share the item identified by id
-        alert("share: " + id);
+        // TODO: go to attraction details page
     }
 
     // TODO: remove/edit... this is just an example on how the callback would work
     _handleClickItem (item) {
         // Make necessary calls to do w/e you want when clicking on item identified by id
         alert("clicked on item: " + item.id);
+
+        // TODO: go to attraction details page
     }
 
-     // TODO: remove/edit... this is just an example on how the callback would work
-    _handleCreateItem () {
-        // Make necessary calls to navigate to item creation screen
-        alert("create an item");
+    _handleToggleMap (showMap) {
+        alert("toggled map");
     }
 
-    // TODO: remove/edit... this is just an example on how the callback would work
-    _handleToggleMap (newMapToggleState) {
-        // Make necessary calls to do w/e you want based on this new map toggled state
-        alert("map toggled to: " + newMapToggleState);
-    }
+    _handleShare (item) {   // TODO: check ListMapTemplate updated to bind entire item to onShare instead of just id
+        // Make necessary calls to share the item identified by id
+        alert("share: " + item && item.id);
 
-    formattedBookmarkMarkers () {
-        return this.state.bookmarks.map((bookmark) => {
-            return {
-                latlng: {
-                    latitude: bookmark.lat,
-                    longitude: bookmark.lon
-                },
-                title: "Bookmark ID: " + bookmark.bookmarkID,
-                description: "Trip ID: " + bookmark.tripID
-            };
-        });
+        // TODO: implement in sprint 2
     }
-
-    // TODO: remove mapMarkers in the render function and pass in formattedBookmarkMarkers() instead for the mapMarkers attribute
 
     render () {
         return (
-            <ListMapTemplate data={this.state.items}
-                emptyListMessage={"Create a bookmark to begin!"}
-                loadingData={this.state.loadingBookmarks}
+            <ListMapTemplate data={this.formattedBookmarks()}
+                emptyListMessage={
+                    this.props.bookmarksGETStatus !== FETCH_STATUS.ATTEMPTING
+                        ? "You don't have any bookmarks for this trip yet. Start browsing and create one!" : ""}
+                loadingData={this.props.bookmarksGETStatus === FETCH_STATUS.ATTEMPTING}
                 enableSearch={true}
                 onSearch={this._handleSearch}
                 enableMap={true}
+                onToggleMap={this._handleToggleMap}
                 mapProps={mapProps}
-                mapMarkers={mapMarkers}
+                mapMarkers={this.formattedBookmarkMarkers()}
                 onRefresh={this._handleRefresh}
-                showAdd={true}
                 showInfo={true}
                 showShare={true}
-                onAdd={this._handleAdd}
                 onInfo={this._handleInfo}
                 onShare={this._handleShare}
-                onToggleMap={this._handleToggleMap}
-                onClickItem={this._handleClickItem}
-                onCreateItem={this._handleCreateItem} />
+                onClickItem={this._handleClickItem} />
         );
     }
 }
@@ -197,7 +160,7 @@ class BookmarksView extends Component {
 export default connect((state) => {
     // map state to props
     return {
-        bookmark: state.events.bookmarks,
+        bookmarks: state.bookmarks.bookmarks,
         bookmarksGETStatus: state.bookmarks.bookmarksGETStatus
     };
 })(BookmarksView);
