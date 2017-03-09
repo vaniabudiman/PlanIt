@@ -99,6 +99,9 @@ export function postAttractions (attraction, tripID) {
             lat: attraction.lat,
             lon: attraction.lon,
             placeID: attraction.id,
+            name: attraction.title,
+            address: attraction.subtitle,
+            type: attraction.type,
         };
         fetch(apiURL + "bookmarks", {
             method: "POST",
