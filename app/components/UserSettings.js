@@ -1,8 +1,13 @@
 import React from "react";
 import Icon from "react-native-vector-icons/FontAwesome";
 import { Actions } from "react-native-router-flux";
+import { TouchableOpacity } from "@shoutem/ui";
 
 
 export default function UserSettings () {
-    return <Icon name="user" size={20} onPress={Actions.userProfile} />;
+    return (
+        <TouchableOpacity onPress={Actions.userProfile}>
+            <Icon name="user" size={20} />
+        </TouchableOpacity>
+    );
 }
