@@ -526,7 +526,7 @@ def bookmarks(bookmarkID=None):
     if request.method == POST:
         try:
             post_tripID = int(request.json['tripID'])
-            post_bookmarks = request.json['events']
+            post_bookmarks = request.json['bookmarks']
         except KeyError:
             return bad_request()
 
