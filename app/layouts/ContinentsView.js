@@ -4,6 +4,7 @@ import { Actions } from "react-native-router-flux";
 import { ListView, GridRow, Tile, Image, Title, TouchableOpacity } from "@shoutem/ui";
 import Continents from "../data/Continents.js";
 import ContinentStyles from "../styles/ContinentStyles.js";
+import { isDevMode } from "../utils/utils.js";
 
 export default class ContinentsView extends Component {
 
@@ -21,7 +22,7 @@ export default class ContinentsView extends Component {
 
     componentDidMount () {
         // TODO: remove this... just testing for now
-        alert("continents for trip id: " + this.props.tripId);
+        isDevMode() && alert("continents for trip id: " + this.props.tripId);
     }
 
     _getCell (cell) {

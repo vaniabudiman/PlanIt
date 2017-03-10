@@ -95,7 +95,7 @@ export function postAttractions (attraction, tripID) {
             }
         })
         .then(response => {
-            alert("Attraction Bookmark successfully saved.");
+            alert("Attraction successfully added to Bookmarks.");
             dispatch(postAttractionsSuccess(response));
         })
         .catch(error => {

@@ -4,6 +4,7 @@ import FormTemplate, { Types } from "../templates/FormTemplate.js";
 import { Actions } from "react-native-router-flux";
 import { createTrip, getTrips, updateTrip } from "../actions/tripsActions.js";
 import FETCH_STATUS from "../constants/fetchStatusConstants.js";
+import { isDevMode } from "../utils/utils.js";
 
 /*
  * NOTE: This is a simple demo on how to use SOME of the props the FormTemplate has for implementing the Trips View
@@ -104,7 +105,7 @@ class TripFormView extends Component {
     // TODO: remove/edit... this is just an example on how the callback would work
     _handleToggleMap (newMapToggleState) {
         // Make necessary calls to do w/e you want based on this new map toggled state
-        alert("map toggled to: " + newMapToggleState);
+        isDevMode() && alert("map toggled to: " + newMapToggleState);
     }
 
     // Updates value of input that was changed
