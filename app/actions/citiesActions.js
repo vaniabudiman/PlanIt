@@ -26,7 +26,8 @@ function getCitiesFailed (error) {
 
 function buildRequestURL (countryId) {
     let rootURL = "http://api.geonames.org/searchJSON";
-    let apiKey = "&username=planitapp";
+    // let apiKey = "&username=planitapp";
+    let apiKey = "&username=nikjmartin";
 
     return rootURL +
         "?country=" + countryId +

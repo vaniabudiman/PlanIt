@@ -46,7 +46,8 @@ function buildRequestURL (lat, lon, pageToken, query) {
     let api = query ? "/textsearch" : "/nearbysearch";
     let rootURL = "https://maps.googleapis.com/maps/api/place" + api + "/json";
     // let apiKey = "AIzaSyBpbTBGgKbBpdWyPyQ8S8cFvBNc8-6KiOw";
-    let apiKey = "AIzaSyBj1cQ0SRz1mFFwN4eCsqKAGNBCH4SSLbI";
+    // let apiKey = "AIzaSyBj1cQ0SRz1mFFwN4eCsqKAGNBCH4SSLbI";
+    let apiKey = "AIzaSyC3QhzP3_zHPhxF2-u-GmKtlEc567mrjDo";
 
     // TODO: potential addition... to make these specifiable by user
     let radius = "10000";

@@ -27,7 +27,8 @@ function getAttractionDetailsFailed (error) {
 function buildRequestURL (placeId) {
     let rootURL = "https://maps.googleapis.com/maps/api/place/details/json";
     // let apiKey = "AIzaSyBpbTBGgKbBpdWyPyQ8S8cFvBNc8-6KiOw";
-    let apiKey = "AIzaSyBj1cQ0SRz1mFFwN4eCsqKAGNBCH4SSLbI";
+    // let apiKey = "AIzaSyBj1cQ0SRz1mFFwN4eCsqKAGNBCH4SSLbI";
+    let apiKey = "AIzaSyC3QhzP3_zHPhxF2-u-GmKtlEc567mrjDo";
 
     return rootURL +
         "?placeid=" + placeId +
