@@ -94,6 +94,9 @@ export function getBookmarks (tripId) {
         .then(response => { // Header response.
             if (response.status >= 200 && response.status < 300) {
                 return response.json();
+            } else if (response.status === 404) {
+                let notFoundResponse = { bookmarks: [] };
+                return notFoundResponse;
             } else {
                 const error = new Error();
                 error.response = response;
