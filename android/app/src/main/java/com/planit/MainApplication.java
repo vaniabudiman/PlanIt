@@ -4,6 +4,11 @@ import android.app.Application;
 import android.util.Log;
 
 import com.facebook.react.ReactApplication;
+import com.airbnb.android.react.maps.MapsPackage;
+import cl.json.RNSharePackage;
+import com.BV.LinearGradient.LinearGradientPackage;
+import com.oblador.vectoricons.VectorIconsPackage;
+import io.realm.react.RealmReactPackage;
 import com.facebook.react.ReactInstanceManager;
 import com.facebook.react.ReactNativeHost;
 import com.facebook.react.ReactPackage;
@@ -24,7 +29,12 @@ public class MainApplication extends Application implements ReactApplication {
     @Override
     protected List<ReactPackage> getPackages() {
       return Arrays.<ReactPackage>asList(
-          new MainReactPackage()
+          new MainReactPackage(),
+            new MapsPackage(),
+            new RNSharePackage(),
+            new LinearGradientPackage(),
+            new VectorIconsPackage(),
+            new RealmReactPackage()
       );
     }
   };

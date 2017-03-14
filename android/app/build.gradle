@@ -68,6 +68,18 @@ import com.android.build.OutputFile
 apply from: "../../node_modules/react-native/react.gradle"
 
 /**
+ * To link "react-native-vector-icons"
+ * Makes it so fonts are being copied from this module at build time
+ * so that the fonts and JS are always in sync, making upgrades painless.
+*/
+
+project.ext.vectoricons = [
+    iconFontNames: [ "FontAwesome.ttf" ] // Name of the font files to copy
+]
+ 
+apply from: "../../node_modules/react-native-vector-icons/fonts.gradle"
+
+/**
  * Set this to true to create two separate APKs instead of one:
  *   - An APK that only works on ARM devices
  *   - An APK that only works on x86 devices
@@ -96,6 +108,16 @@ android {
             abiFilters "armeabi-v7a", "x86"
         }
     }
+    signingConfigs {
+        release {
+            if (project.hasProperty('MYAPP_RELEASE_STORE_FILE')) {
+                storeFile file(MYAPP_RELEASE_STORE_FILE)
+                storePassword MYAPP_RELEASE_STORE_PASSWORD
+                keyAlias MYAPP_RELEASE_KEY_ALIAS
+                keyPassword MYAPP_RELEASE_KEY_PASSWORD
+            }
+        }
+    }
     splits {
         abi {
             reset()
@@ -108,6 +130,7 @@ android {
         release {
             minifyEnabled enableProguardInReleaseBuilds
             proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
+            signingConfig signingConfigs.release
         }
     }
     // applicationVariants are e.g. debug, release
@@ -126,6 +149,11 @@ android {
 }
 
 dependencies {
+    compile project(':react-native-maps')
+    compile project(':react-native-share')
+    compile project(':react-native-linear-gradient')
+    compile project(':react-native-vector-icons')
+    compile project(':realm')
     compile fileTree(dir: "libs", include: ["*.jar"])
     compile "com.android.support:appcompat-v7:23.0.1"
     compile "com.facebook.react:react-native:+"  // From node_modules
