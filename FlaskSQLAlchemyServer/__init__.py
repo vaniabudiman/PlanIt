@@ -387,6 +387,7 @@ def events(eventID=None):
                                         event.get('lon'),
                                         None,
                                         None,
+                                        event.get('address'),
                                         post_tripID))
         except (KeyError, ValueError) as err:
             close_session(db)
@@ -503,6 +504,13 @@ def events(eventID=None):
                 # Optional lon parameter.
                 post_lon = int(request.json['lon'])
                 event.lon = post_lon
+            except KeyError:
+                pass
+
+            try:
+                # Optional address parameter.
+                post_address = str(request.json['address'])
+                event.address = post_address
             except KeyError:
                 pass
 
@@ -735,16 +743,18 @@ if __name__ == '__main__' or __name__ == '__init__':
     event1 = Event(1, 'test',
                    to_datetime('Mon, 11 Aug 2013 15:15:15 GMT'),
                    to_datetime('Mon, 11 Aug 2013 16:16:16 GMT'),
-                   None, None, True, None, 1)
+                   None, None, True, None, None, 1)
     event2 = Event(2, 'testVancouver',
                    to_datetime('Tue, 12 Aug 2013 17:17:17 GMT'),
                    to_datetime('Tue, 12 Aug 2013 18:18:18 GMT'),
-                   49.267132, -122.968941, True, None, 1)
+                   49.267132, -122.968941, True, None,
+                   "6511 Sumas Dr Burnaby,BC V5B 2V1", 1)
     event3 = Event(3, 'testAustralia',
                    to_datetime('Tue, 12 Aug 2013 17:17:17 GMT'),
                    to_datetime('Tue, 12 Aug 2013 18:18:18 GMT'),
                    -33.870943, 151.190311, True,
-                   to_datetime('Tue, 12 Aug 2013 17:00:00 GMT'), 1)
+                   to_datetime('Tue, 12 Aug 2013 17:00:00 GMT'),
+                   "Western Distributor Pyrmont NSW 2009 Australia", 1)
     db_session.add_all([event1, event2, event3])
     # Example locations:
     bookmark1 = Bookmark(1, -33.866891, 151.200814,
