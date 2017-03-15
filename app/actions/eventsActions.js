@@ -59,6 +59,12 @@ export function getEvents (tripId) {
         });};
 }
 
+function deleteEventAttempt () {
+    return {
+        type: Types.DELETE_EVENT_ATTEMPT
+    };
+}
+
 function deleteEventSuccess (eventId) {
     return {
         eventId: eventId,

@@ -4,7 +4,8 @@ import FETCH_STATUS from "../constants/fetchStatusConstants.js";
 
 const initialState = {
     events: [],
-    eventsGETStatus: ""
+    eventsGETStatus: "",
+    eventDELETEStatus: ""
 };
 
 export default function (state = initialState, action) {
@@ -20,20 +21,20 @@ export default function (state = initialState, action) {
         case Types.GET_EVENTS_FAILED:
             nextState = { ...state, eventsGETStatus: FETCH_STATUS.FAILED };
             break;
-        case Types.DELETE_EVENTS_ATTEMPT:
-            nextState = { ...state, eventsDELETEStatus: FETCH_STATUS.ATTEMPTING };
+        case Types.DELETE_EVENT_ATTEMPT:
+            nextState = { ...state, eventDELETEStatus: FETCH_STATUS.ATTEMPTING };
             break;
-        case Types.DELETE_EVENTS_SUCCESS:
+        case Types.DELETE_EVENT_SUCCESS:
             nextState = {
                 ...state,
-                eventsDELETEStatus: FETCH_STATUS.SUCCESS,
+                eventDELETEStatus: FETCH_STATUS.SUCCESS,
                 // find & remove the deleted event from the current list of events
                 // clone to return a new array so React picks up change & re-renders the updated events list
                 events: clone(state.events).filter((event) => event.eventID !== action.eventId)
             };
             break;
-        case Types.DELETE_EVENTS_FAILED:
-            nextState = { ...state, eventsDELETEStatus: FETCH_STATUS.FAILED };
+        case Types.DELETE_EVENT_FAILED:
+            nextState = { ...state, eventDELETEStatus: FETCH_STATUS.FAILED };
             break;
         default:
             return state;
