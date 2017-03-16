@@ -46,7 +46,7 @@ class ItineraryListView extends Component {
 
     componentWillReceiveProps (nextProps) {
         if (nextProps.tripId && (this.props.tripId !== nextProps.tripId)) {
-            this.requestBookmarks(nextProps.dispatch, nextProps.tripId);
+            this.requestEvents(nextProps.dispatch, nextProps.tripId);
         }
 
         // Always update state events w/ latest events from props
@@ -86,7 +86,7 @@ class ItineraryListView extends Component {
 
     _handleRefresh () {
         // Just fire off another fetch to refresh
-        this.requestBookmarks(this.props.dispatch, this.props.tripId);
+        this.requestEvents(this.props.dispatch, this.props.tripId);
 
         this.setState({ searchString: "" });
     }
