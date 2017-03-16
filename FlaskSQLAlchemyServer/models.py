@@ -214,6 +214,7 @@ class Event(base):
     lon = Column(Integer)
     reminderFlag = Column(Boolean, nullable=False)
     reminderTime = Column(DateTime)
+    address = Column(String(VARCHAR_LEN))
     tripID = Column(Integer,
                     ForeignKey('trip.tripID',
                                ondelete=CASCADE,
@@ -231,7 +232,7 @@ class Event(base):
                                 backref='event', passive_updates=False)
 
     def __init__(self, eventID, eventName, startDateTime, endDateTime,
-                 lat, lon, reminderFlag, reminderTime, tripID):
+                 lat, lon, reminderFlag, reminderTime, address, tripID):
         self.eventID = eventID
         self.eventName = eventName
         self.startDateTime = startDateTime
@@ -243,6 +244,7 @@ class Event(base):
         else:
             self.reminderFlag = reminderFlag
         self.reminderTime = reminderTime
+        self.address = address
         self.tripID = tripID
 
     def to_dict(self):
@@ -254,6 +256,7 @@ class Event(base):
                 'lon': self.lon,
                 'reminderFlag': self.reminderFlag,
                 'reminderTime': self.reminderTime,
+                'address': self.address,
                 'tripID': self.tripID}
 
 

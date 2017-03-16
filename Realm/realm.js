@@ -55,7 +55,8 @@ const EventSchema = {
         reminderFlag: "bool",
         reminderTime: { type: "date", optional: true },
         sharedWith: { type: "list", objectType: "User" },
-        sharedFrom: "User"
+        sharedFrom: "User",
+        address: { type: "string", optional: true },
     }
 };
 
@@ -136,7 +137,8 @@ realm.write(() => {
             endDateTime: new Date(),
             reminderFlag: false,
             sharedFrom: users[0],
-            sharedWith: [users[1], users[2], users[3]]
+            sharedWith: [users[1], users[2], users[3]],
+            address: "Event Address 1234 " + i,
         }, true);
 
         trips[i-1].events.push(event);

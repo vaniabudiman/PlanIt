@@ -1,7 +1,8 @@
 import React, { Component } from "react";
 import ListMapTemplate from "../templates/ListMapTemplate.js";
 import { connect } from "react-redux";
-import { getEvents } from "../actions/eventsActions.js";
+import FETCH_STATUS from "../constants/fetchStatusConstants.js";
+import { getEvents, deleteEvent } from "../actions/eventsActions.js";
 import { isDevMode } from "../utils/utils.js";
 
 
@@ -21,6 +22,7 @@ class ItineraryListView extends Component {
         tripId: React.PropTypes.number,
         events: React.PropTypes.array,
         eventsGETStatus: React.PropTypes.string,
+        eventDELETEStatus: React.PropTypes.string,
         dispatch: React.PropTypes.func
     }
 
@@ -38,12 +40,13 @@ class ItineraryListView extends Component {
         // Bind callback handlers
         this._handleSearch = this._handleSearch.bind(this);
         this._handleRefresh = this._handleRefresh.bind(this);
+        this._handleDelete = this._handleDelete.bind(this);
         this._handleClickItem = this._handleClickItem.bind(this);
     }
 
     componentWillReceiveProps (nextProps) {
         if (nextProps.tripId && (this.props.tripId !== nextProps.tripId)) {
-            this.requestBookmarks(nextProps.dispatch, nextProps.tripId);
+            this.requestEvents(nextProps.dispatch, nextProps.tripId);
         }
 
         // Always update state events w/ latest events from props
@@ -83,9 +86,15 @@ class ItineraryListView extends Component {
 
     _handleRefresh () {
         // Just fire off another fetch to refresh
-        this.requestBookmarks(this.props.dispatch, this.props.tripId);
+        this.requestEvents(this.props.dispatch, this.props.tripId);
 
         this.setState({ searchString: "" });
+    }
+
+    _handleDelete (item) {
+        alert ("Successfully deleted Event.");
+
+        this.props.dispatch(deleteEvent(item.id));
     }
 
     // TODO: remove/edit... this is just an example on how the callback would work
@@ -104,12 +113,17 @@ class ItineraryListView extends Component {
         return (
             <ListMapTemplate data={this.formattedEvents()}
                 emptyListMessage={"Create a event to begin!"}
-                loadingData={this.state.loadingItinerary}
+                loadingData={
+                    (this.props.eventsGETStatus === FETCH_STATUS.ATTEMPTING) ||
+                    (this.props.eventDELETEStatus === FETCH_STATUS.ATTEMPTING)
+                }
                 enableSearch={true}
                 onSearch={this._handleSearch}
                 enableCalendar={enableCalendar}
                 calendarProps={calendarProps}
                 showCalendar={false}
+                showDelete={true}
+                onDelete={this._handleDelete}
                 onRefresh={this._handleRefresh}
                 onToggleCalendar={this._handleToggleCalendar}
                 onClickItem={this._handleClickItem} />
@@ -121,6 +135,7 @@ export default connect((state) => {
     // map state to props
     return {
         events: state.events.events,
-        eventsGETStatus: state.events.eventsGETStatus
+        eventsGETStatus: state.events.eventsGETStatus,
+        eventDELETEStatus: state.events.eventDELETEStatus
     };
 })(ItineraryListView);
