@@ -5,7 +5,6 @@ from os import urandom
 from datetime import datetime
 from socket import gethostname
 from flask import Flask, session, request, make_response, jsonify
-from flask import render_template  # TODO: remove along with index()
 from flask_mail import Mail, Message
 from smtplib import SMTPException
 from sqlalchemy.orm import sessionmaker, scoped_session
@@ -100,17 +99,6 @@ def print_database():
     print('VVVVVVVVVVVVV')
     print(view_database().replace('<br/>', '\n'))
     print('^^^^^^^^^^^^^')
-
-
-@app.route(VER_PATH + '/')
-def index():
-    """ /:{version}/
-    Route for local testing. For graphical HTML view at hosted address.
-    """
-    if session.get(KEY__LOGGED_IN):
-        return 'Logged in. <a href="' + VER_PATH + '/logout">Logout</a>'
-    else:
-        return render_template('login.html')
 
 
 @app.route(VER_PATH + '/users', methods=[POST, GET], strict_slashes=False)
