@@ -376,6 +376,7 @@ def events(eventID=None):
                                         None,
                                         None,
                                         event.get('address'),
+                                        event.get('shared'),
                                         post_tripID))
         except (KeyError, ValueError) as err:
             close_session(db)
@@ -557,10 +558,11 @@ def bookmarks(bookmarkID=None):
                              bookmark['lon'],
                              bookmark['placeID'],
                              bookmark['name'],
-                             bookmark.get('address', None),
-                             bookmark.get('type', None),
+                             bookmark.get('address'),
+                             bookmark.get('type'),
+                             bookmark.get('shared'),
                              post_tripID,
-                             bookmark.get('eventID', None)))
+                             bookmark.get('eventID')))
         except KeyError as ke:
             close_session(db)
             return bad_request(ke)
@@ -731,28 +733,28 @@ if __name__ == '__main__' or __name__ == '__init__':
     event1 = Event(1, 'test',
                    to_datetime('Mon, 11 Aug 2013 15:15:15 GMT'),
                    to_datetime('Mon, 11 Aug 2013 16:16:16 GMT'),
-                   None, None, True, None, None, 1)
+                   None, None, True, None, None, False, 1)
     event2 = Event(2, 'testVancouver',
                    to_datetime('Tue, 12 Aug 2013 17:17:17 GMT'),
                    to_datetime('Tue, 12 Aug 2013 18:18:18 GMT'),
                    49.267132, -122.968941, True, None,
-                   "6511 Sumas Dr Burnaby,BC V5B 2V1", 1)
+                   "6511 Sumas Dr Burnaby,BC V5B 2V1", False, 1)
     event3 = Event(3, 'testAustralia',
                    to_datetime('Tue, 12 Aug 2013 17:17:17 GMT'),
                    to_datetime('Tue, 12 Aug 2013 18:18:18 GMT'),
                    -33.870943, 151.190311, True,
                    to_datetime('Tue, 12 Aug 2013 17:00:00 GMT'),
-                   "Western Distributor Pyrmont NSW 2009 Australia", 1)
+                   "Western Distributor Pyrmont NSW 2009 Australia", False, 1)
     db_session.add_all([event1, event2, event3])
     # Example locations:
     bookmark1 = Bookmark(1, -33.866891, 151.200814,
                          '45a27fd8d56c56dc62afc9b49e1d850440d5c403',
                          'oneName', 'oneAddress', 'oneType',
-                         1, None)
+                         False, 1, None)
     bookmark2 = Bookmark(2, -33.870943, 151.190311,
                          '30bee58f819b6c47bd24151802f25ecf11df8943',
                          'twoName', 'twoAddress', 'twoType',
-                         1, 3)
+                         False, 1, 3)
     db_session.add_all([bookmark1, bookmark2])
     db_session.commit()
     print_database()
