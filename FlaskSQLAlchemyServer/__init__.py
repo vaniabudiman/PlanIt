@@ -1026,6 +1026,10 @@ if __name__ == '__main__' or __name__ == '__init__':
                          'twoName', 'twoAddress', 'twoType',
                          False, 1, 3)
     db_session.add_all([bookmark1, bookmark2])
+    p1 = Permissions(2, PermissionsEnum.EVENT, False, 'user2', None)
+    p2 = Permissions(3, PermissionsEnum.EVENT, True, 'user2', 2)
+    p3 = Permissions(2, PermissionsEnum.BOOKMARK, True, 'user2', 2)
+    db_session.add_all([p1, p2, p3])
     db_session.commit()
     print_database()
 
