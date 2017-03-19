@@ -629,6 +629,17 @@ def bookmarks(bookmarkID=None):
                     return make_response('Trip not found.', 404)
                 bookmark_list = db.query(Bookmark).filter(
                     Bookmark.tripID == post_tripID).all()
+
+                # Get shared bookmarks through permissions.
+                perms = db.query(Permissions).filter(and_(
+                    Permissions.toTrip == post_tripID,
+                    Permissions.type == PermissionsEnum.BOOKMARK,
+                    Permissions.toUser == session.get(KEY__USERNAME))).all()
+                shared_bookmarks = [db.query(Bookmark).filter(
+                    Bookmark.bookmarkID == p.permissionID).first() for p in
+                                    perms]
+                bookmark_list += shared_bookmarks
+
                 if len(bookmark_list) == 0:
                     return make_response(
                         'No Bookmarks found for the given Trip.', 404)
@@ -655,8 +666,15 @@ def bookmarks(bookmarkID=None):
                     return make_response(
                         'Trip associated to given Bookmark not found.', 404)
                 if trip.userName != session.get(KEY__USERNAME):
-                    return make_response(
-                        'User not authorized to view this Bookmark.', 401)
+                    # Check if the user has shared permission instead.
+                    perm = db.query(Permissions).filter(and_(
+                        Permissions.permissionID == post_bookmarkID,
+                        Permissions.type == PermissionsEnum.BOOKMARK,
+                        Permissions.toUser == session.get(
+                            KEY__USERNAME))).first()
+                    if perm is None:
+                        return make_response(
+                            'User not authorized to view this Bookmark.', 401)
                 return make_response(jsonify({'bookmark': bookmark.to_dict()}),
                                      200)
             finally:
@@ -679,10 +697,25 @@ def bookmarks(bookmarkID=None):
 
         if request.method == DELETE:
             if userName != curr_userName:
+                # Check to see if a permission should be deleted instead.
+                perm = db.query(Permissions).filter(and_(
+                    Permissions.permissionID == bookmarkID,
+                    Permissions.type == PermissionsEnum.BOOKMARK,
+                    Permissions.toUser == curr_userName)).first()
+                if perm is not None:
+                    db.delete(perm)
+                    close_session(db)
+                    return make_response(
+                        'Shared Bookmark Permission deleted successfully', 200)
+
                 close_session(db)
                 return make_response('User not authorized to delete Bookmark.',
                                      401)
             db.delete(bookmark)
+            # Delete corresponding shared permissions.
+            db.query(Permissions).filter(and_(
+                Permissions.permissionID == bookmarkID,
+                Permissions.type == PermissionsEnum.BOOKMARK)).delete()
             close_session(db)
             return make_response('Bookmark deleted successfully', 200)
     return bad_request()
