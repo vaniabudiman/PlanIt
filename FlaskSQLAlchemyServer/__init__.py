@@ -5,16 +5,16 @@ from os import urandom
 from datetime import datetime
 from socket import gethostname
 from flask import Flask, session, request, make_response, jsonify
-from flask import render_template  # TODO: remove along with index()
 from flask_mail import Mail, Message
 from smtplib import SMTPException
+from sqlalchemy import and_
 from sqlalchemy.orm import sessionmaker, scoped_session
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.sql import func
 # Our defined modules.
 from base import base, engine
 from models import DT_FORMAT
-from models import User, Trip, Event, Bookmark
+from models import User, Trip, Event, Bookmark, Permissions, PermissionsEnum
 
 # Versioning.
 VERSION = 'v1'
@@ -100,17 +100,6 @@ def print_database():
     print('VVVVVVVVVVVVV')
     print(view_database().replace('<br/>', '\n'))
     print('^^^^^^^^^^^^^')
-
-
-@app.route(VER_PATH + '/')
-def index():
-    """ /:{version}/
-    Route for local testing. For graphical HTML view at hosted address.
-    """
-    if session.get(KEY__LOGGED_IN):
-        return 'Logged in. <a href="' + VER_PATH + '/logout">Logout</a>'
-    else:
-        return render_template('login.html')
 
 
 @app.route(VER_PATH + '/users', methods=[POST, GET], strict_slashes=False)
@@ -388,6 +377,7 @@ def events(eventID=None):
                                         None,
                                         None,
                                         event.get('address'),
+                                        event.get('shared'),
                                         post_tripID))
         except (KeyError, ValueError) as err:
             close_session(db)
@@ -415,6 +405,16 @@ def events(eventID=None):
                     return make_response('Trip not found.', 404)
                 event_list = db.query(Event).filter(
                     Event.tripID == post_tripID).all()
+
+                # Get shared events through permissions.
+                perms = db.query(Permissions).filter(and_(
+                    Permissions.toTrip == post_tripID,
+                    Permissions.type == PermissionsEnum.EVENT,
+                    Permissions.toUser == session.get(KEY__USERNAME))).all()
+                shared_events = [db.query(Event).filter(
+                    Event.eventID == p.permissionID).first() for p in perms]
+                event_list += shared_events
+
                 if len(event_list) == 0:
                     return make_response('No Events found for the given Trip.',
                                          404)
@@ -441,8 +441,15 @@ def events(eventID=None):
                     return make_response(
                         'Trip associated to given Event not found.', 404)
                 if trip.userName != session.get(KEY__USERNAME):
-                    return make_response(
-                        'User not authorized to view this Event.', 401)
+                    # Check if the user has shared permission instead.
+                    perm = db.query(Permissions).filter(and_(
+                        Permissions.permissionID == post_eventID,
+                        Permissions.type == PermissionsEnum.EVENT,
+                        Permissions.toUser == session.get(
+                            KEY__USERNAME))).first()
+                    if perm is None:
+                        return make_response(
+                            'User not authorized to view this Event.', 401)
                 return make_response(jsonify({'event': event.to_dict()}), 200)
             finally:
                 close_session(db)
@@ -463,9 +470,15 @@ def events(eventID=None):
 
         if request.method == PUT:
             if userName != curr_userName:
-                close_session(db)
-                return make_response('User not authorized to edit Event.',
-                                     401)
+                # Check to see if user has write permissions.
+                perm = db.query(Permissions).filter(and_(
+                    Permissions.permissionID == eventID,
+                    Permissions.type == PermissionsEnum.EVENT,
+                    Permissions.toUser == curr_userName)).first()
+                if perm is None or not perm.writeFlag:
+                    close_session(db)
+                    return make_response('User not authorized to edit Event.',
+                                         401)
             try:
                 # Optional eventName parameter.
                 post_eventName = str(request.json['eventName'])
@@ -519,10 +532,25 @@ def events(eventID=None):
             return make_response(jsonify(ret_dict), 200)
         elif request.method == DELETE:
             if userName != curr_userName:
+                # Check to see if a permission should be deleted instead.
+                perm = db.query(Permissions).filter(and_(
+                    Permissions.permissionID == eventID,
+                    Permissions.type == PermissionsEnum.EVENT,
+                    Permissions.toUser == curr_userName)).first()
+                if perm is not None:
+                    db.delete(perm)
+                    close_session(db)
+                    return make_response(
+                        'Shared Event Permission deleted successfully', 200)
+
                 close_session(db)
                 return make_response('User not authorized to delete Event.',
                                      401)
             db.delete(event)
+            # Delete corresponding shared permissions.
+            db.query(Permissions).filter(and_(
+                Permissions.permissionID == eventID,
+                Permissions.type == PermissionsEnum.EVENT)).delete()
             close_session(db)
             return make_response('Event deleted successfully', 200)
     return bad_request()
@@ -569,10 +597,11 @@ def bookmarks(bookmarkID=None):
                              bookmark['lon'],
                              bookmark['placeID'],
                              bookmark['name'],
-                             bookmark.get('address', None),
-                             bookmark.get('type', None),
+                             bookmark.get('address'),
+                             bookmark.get('type'),
+                             bookmark.get('shared'),
                              post_tripID,
-                             bookmark.get('eventID', None)))
+                             bookmark.get('eventID')))
         except KeyError as ke:
             close_session(db)
             return bad_request(ke)
@@ -600,6 +629,17 @@ def bookmarks(bookmarkID=None):
                     return make_response('Trip not found.', 404)
                 bookmark_list = db.query(Bookmark).filter(
                     Bookmark.tripID == post_tripID).all()
+
+                # Get shared bookmarks through permissions.
+                perms = db.query(Permissions).filter(and_(
+                    Permissions.toTrip == post_tripID,
+                    Permissions.type == PermissionsEnum.BOOKMARK,
+                    Permissions.toUser == session.get(KEY__USERNAME))).all()
+                shared_bookmarks = [db.query(Bookmark).filter(
+                    Bookmark.bookmarkID == p.permissionID).first() for p in
+                                    perms]
+                bookmark_list += shared_bookmarks
+
                 if len(bookmark_list) == 0:
                     return make_response(
                         'No Bookmarks found for the given Trip.', 404)
@@ -626,8 +666,15 @@ def bookmarks(bookmarkID=None):
                     return make_response(
                         'Trip associated to given Bookmark not found.', 404)
                 if trip.userName != session.get(KEY__USERNAME):
-                    return make_response(
-                        'User not authorized to view this Bookmark.', 401)
+                    # Check if the user has shared permission instead.
+                    perm = db.query(Permissions).filter(and_(
+                        Permissions.permissionID == post_bookmarkID,
+                        Permissions.type == PermissionsEnum.BOOKMARK,
+                        Permissions.toUser == session.get(
+                            KEY__USERNAME))).first()
+                    if perm is None:
+                        return make_response(
+                            'User not authorized to view this Bookmark.', 401)
                 return make_response(jsonify({'bookmark': bookmark.to_dict()}),
                                      200)
             finally:
@@ -650,12 +697,225 @@ def bookmarks(bookmarkID=None):
 
         if request.method == DELETE:
             if userName != curr_userName:
+                # Check to see if a permission should be deleted instead.
+                perm = db.query(Permissions).filter(and_(
+                    Permissions.permissionID == bookmarkID,
+                    Permissions.type == PermissionsEnum.BOOKMARK,
+                    Permissions.toUser == curr_userName)).first()
+                if perm is not None:
+                    db.delete(perm)
+                    close_session(db)
+                    return make_response(
+                        'Shared Bookmark Permission deleted successfully', 200)
+
                 close_session(db)
                 return make_response('User not authorized to delete Bookmark.',
                                      401)
             db.delete(bookmark)
+            # Delete corresponding shared permissions.
+            db.query(Permissions).filter(and_(
+                Permissions.permissionID == bookmarkID,
+                Permissions.type == PermissionsEnum.BOOKMARK)).delete()
             close_session(db)
             return make_response('Bookmark deleted successfully', 200)
+    return bad_request()
+
+
+@app.route(VER_PATH + '/share', methods=[POST, GET], strict_slashes=False)
+@app.route(VER_PATH + '/share/<int:permissionID>', methods=[PUT, DELETE])
+def share(permissionID=None):
+    if request.method == POST:
+        try:
+            post_userNames = request.json['userName']
+            post_tripID = int(request.json['tripID'])
+            post_writeFlag = request.json['writeFlag']
+            post_bookmarkID = request.json.get('bookmarkID', None)
+            post_eventID = request.json.get('eventID', None)
+        except KeyError:
+            return bad_request()
+
+        db = create_db_session()
+        try:
+            trip = db.query(Trip).filter(Trip.tripID == post_tripID).first()
+            if trip is None:
+                return make_response('Trip not found.', 404)
+            if trip.userName != session.get(KEY__USERNAME):
+                return make_response(
+                    'User not authorized to share events or bookmarks.', 401)
+            for u in post_userNames:
+                user = db.query(User).filter(User.userName == u).first()
+                if user is None:
+                    return make_response('User not found.', 404)
+        finally:
+            close_session(db)
+
+        # Sharing a bookmark.
+        if post_bookmarkID is not None:
+            db = create_db_session()
+            try:
+                bookmark = db.query(Bookmark).filter(
+                    Bookmark.bookmarkID == post_bookmarkID).first()
+                if bookmark is None:
+                    return make_response('Bookmark not found.', 404)
+                if bookmark.tripID != post_tripID:
+                    return make_response('Bookmark not found for given Trip',
+                                         404)
+                perms = [Permissions(post_bookmarkID, PermissionsEnum.BOOKMARK,
+                                     post_writeFlag, u, None)
+                         for u in post_userNames]
+                db.add_all(perms)
+                bookmark.shared = True
+                db.commit()
+                return make_response('Bookmark successfully shared.', 201)
+            except IntegrityError:
+                db.rollback()
+                return make_response('Conflict - Bookmark already shared.', 409)
+            finally:
+                close_session(db)
+
+        # Sharing an event.
+        if post_eventID is not None:
+            db = create_db_session()
+            try:
+                event = db.query(Event).filter(
+                    Event.eventID == post_eventID).first()
+                if event is None:
+                    return make_response('Event not found.', 404)
+                if event.tripID != post_tripID:
+                    return make_response('Event not found for given Trip', 404)
+                perms = [Permissions(post_eventID, PermissionsEnum.EVENT,
+                                     post_writeFlag, u, None)
+                         for u in post_userNames]
+                db.add_all(perms)
+                event.shared = True
+                db.commit()
+                return make_response('Event successfully shared.', 201)
+            except IntegrityError:
+                db.rollback()
+                return make_response('Conflict - Event already shared.', 409)
+            finally:
+                close_session(db)
+
+        # Sharing all bookmarks and events of a trip.
+        db = create_db_session()
+        try:
+            perms = []
+            # Add trip events to the permissions list.
+            trip_events = db.query(Event).filter(
+                Event.tripID == post_tripID).all()
+            for userName in post_userNames:
+                perms += [Permissions(e.eventID, PermissionsEnum.EVENT,
+                                      post_writeFlag, userName, None)
+                          for e in trip_events]
+            # Add trip bookmarks to the permissions list.
+            trip_bookmarks = db.query(Bookmark).filter(
+                Bookmark.tripID == post_tripID).all()
+            for userName in post_userNames:
+                perms += [Permissions(b.bookmarkID, PermissionsEnum.BOOKMARK,
+                                      post_writeFlag, userName, None)
+                          for b in trip_bookmarks]
+
+            if not perms:
+                return make_response(
+                    'No Events or Bookmarks found in the trip to share.', 404)
+            db.add_all(perms)
+            for e in trip_events:
+                e.shared = True
+            for b in trip_bookmarks:
+                b.shared = True
+            db.commit()
+            return make_response(
+                'Trip Events and Bookmarks successfully shared.', 201)
+        except IntegrityError:
+            db.rollback()
+            return make_response(
+                'Conflict - Some Events or Bookmarks already shared.', 409)
+        finally:
+            close_session(db)
+    elif request.method == GET:
+        post_toUser = request.args.get('toUser', None)
+        if post_toUser is not None:
+            db = create_db_session()
+            try:
+                curr_userName = session.get(KEY__USERNAME)
+                if post_toUser != curr_userName:
+                    return make_response(
+                        'User not authorized to view shared objects.', 401)
+                perms = db.query(Permissions).filter(
+                    Permissions.toUser == post_toUser).all()
+                if perms is None:
+                    return make_response(
+                        'No unaccepted permissions found for given user.', 404)
+                ret_dict = {'events': [], 'bookmarks': []}
+                for p in perms:
+                    if p.type == PermissionsEnum.EVENT:
+                        e = db.query(Event).filter(
+                            Event.eventID == p.permissionID).first()
+                        if e is None:
+                            continue
+                        else:
+                            ret_dict['events'].append(e.to_dict())
+                    elif p.type == PermissionsEnum.BOOKMARK:
+                        b = db.query(Bookmark).filter(
+                            Bookmark.bookmarkID == p.permissionID).first()
+                        if b is None:
+                            continue
+                        else:
+                            ret_dict['bookmarks'].append(b.to_dict())
+                    else:
+                        return bad_request()
+                return make_response(jsonify(ret_dict), 200)
+            finally:
+                close_session(db)
+        return bad_request()
+    elif permissionID:
+        curr_userName = session.get(KEY__USERNAME)
+        try:
+            post_type = PermissionsEnum(str(request.json['type']))
+        except (KeyError, ValueError) as err:
+            return bad_request(err)
+
+        db = create_db_session()
+        perm = db.query(Permissions).filter(and_(
+            Permissions.permissionID == permissionID,
+            Permissions.type == post_type,
+            Permissions.toUser == curr_userName)).first()
+        if perm is None:
+            close_session(db)
+            return make_response('Permission not found.', 404)
+
+        if request.method == PUT:
+            try:
+                # Required toTrip parameter.
+                post_toTrip = int(request.json['toTrip'])
+                perm.toTrip = post_toTrip
+                db.commit()
+                return make_response('Shared object added to trip.', 200)
+            except KeyError:
+                return bad_request()
+            finally:
+                close_session(db)
+        elif request.method == DELETE:
+            try:
+                db.delete(perm)
+                perms = db.query(Permissions).filter(and_(
+                    Permissions.permissionID == permissionID,
+                    Permissions.type == post_type)).all()
+                if not perms:
+                    # Set shared to false if no more permissions exist for it.
+                    if post_type == PermissionsEnum.EVENT:
+                        event = db.query(Event).filter(
+                            Event.eventID == permissionID).first()
+                        event.shared = False
+                    elif post_type == PermissionsEnum.BOOKMARK:
+                        bookmark = db.query(Bookmark).filter(
+                            Bookmark.bookmarkID == permissionID).first()
+                        bookmark.shared = False
+                    else:
+                        return bad_request()
+                return make_response('Permission deleted successfully', 200)
+            finally:
+                close_session(db)
     return bad_request()
 
 
@@ -743,29 +1003,33 @@ if __name__ == '__main__' or __name__ == '__init__':
     event1 = Event(1, 'test',
                    to_datetime('Mon, 11 Aug 2013 15:15:15 GMT'),
                    to_datetime('Mon, 11 Aug 2013 16:16:16 GMT'),
-                   None, None, True, None, None, 1)
+                   None, None, True, None, None, False, 1)
     event2 = Event(2, 'testVancouver',
                    to_datetime('Tue, 12 Aug 2013 17:17:17 GMT'),
                    to_datetime('Tue, 12 Aug 2013 18:18:18 GMT'),
                    49.267132, -122.968941, True, None,
-                   "6511 Sumas Dr Burnaby,BC V5B 2V1", 1)
+                   "6511 Sumas Dr Burnaby,BC V5B 2V1", False, 1)
     event3 = Event(3, 'testAustralia',
                    to_datetime('Tue, 12 Aug 2013 17:17:17 GMT'),
                    to_datetime('Tue, 12 Aug 2013 18:18:18 GMT'),
                    -33.870943, 151.190311, True,
                    to_datetime('Tue, 12 Aug 2013 17:00:00 GMT'),
-                   "Western Distributor Pyrmont NSW 2009 Australia", 1)
+                   "Western Distributor Pyrmont NSW 2009 Australia", False, 1)
     db_session.add_all([event1, event2, event3])
     # Example locations:
     bookmark1 = Bookmark(1, -33.866891, 151.200814,
                          '45a27fd8d56c56dc62afc9b49e1d850440d5c403',
                          'oneName', 'oneAddress', 'oneType',
-                         1, None)
+                         False, 1, None)
     bookmark2 = Bookmark(2, -33.870943, 151.190311,
                          '30bee58f819b6c47bd24151802f25ecf11df8943',
                          'twoName', 'twoAddress', 'twoType',
-                         1, 3)
+                         False, 1, 3)
     db_session.add_all([bookmark1, bookmark2])
+    p1 = Permissions(2, PermissionsEnum.EVENT, False, 'user2', None)
+    p2 = Permissions(3, PermissionsEnum.EVENT, True, 'user2', 2)
+    p3 = Permissions(2, PermissionsEnum.BOOKMARK, True, 'user2', 2)
+    db_session.add_all([p1, p2, p3])
     db_session.commit()
     print_database()
 
