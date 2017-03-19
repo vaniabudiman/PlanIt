@@ -155,12 +155,16 @@ export default class ItemDetailsTemplate extends Component {
         showMap: React.PropTypes.bool,
         onToggleMap: React.PropTypes.func,
         showAdd: React.PropTypes.bool,
+        addButtonText: React.PropTypes.string,
         onAdd: React.PropTypes.func,
         showShare: React.PropTypes.bool,
+        shareButtonText: React.PropTypes.string,
         onShare: React.PropTypes.func,
         showDelete: React.PropTypes.bool,
+        deleteButtonText: React.PropTypes.string,
         onDelete: React.PropTypes.func,
         showEdit: React.PropTypes.bool,
+        editButtonText: React.PropTypes.string,
         onEdit: React.PropTypes.func,
         loadingData: React.PropTypes.bool
     }
@@ -239,7 +243,7 @@ export default class ItemDetailsTemplate extends Component {
             buttons.push(
                 <Button key="button-add" styleName="full-width muted" onPress={this.props.onAdd}>
                     <Icon name="plus" style={{ marginRight: 5 }} />
-                    <Text>ADD</Text>
+                    <Text>{ this.props.addButtonText || "ADD" }</Text>
                 </Button>
             );
         }
@@ -247,7 +251,7 @@ export default class ItemDetailsTemplate extends Component {
             buttons.push(
                 <Button key="button-delete" styleName="full-width muted" onPress={this.props.onDelete}>
                     <Icon name="trash-o" style={{ marginRight: 5 }} />
-                    <Text>DELETE</Text>
+                    <Text>{ this.props.deleteButtonText || "DELETE" }</Text>
                 </Button>
             );
         }
@@ -255,7 +259,7 @@ export default class ItemDetailsTemplate extends Component {
             buttons.push(
                 <Button key="button-edit" styleName="full-width muted" onPress={this.props.onEdit}>
                     <Icon name="pencil" style={{ marginRight: 5 }} />
-                    <Text>EDIT</Text>
+                    <Text>{ this.props.editButtonText || "EDIT" }</Text>
                 </Button>
             );
         }
@@ -263,7 +267,7 @@ export default class ItemDetailsTemplate extends Component {
             buttons.push(
                 <Button key="button-share" styleName="full-width muted" onPress={this.props.onShare}>
                     <Icon name="share-alt" style={{ marginRight: 5 }} />
-                    <Text>SHARE</Text>
+                    <Text>{ this.props.shareButtonText || "SHARE" }</Text>
                 </Button>
             );
         }

@@ -33,6 +33,7 @@ class BookmarksView extends Component {
         this._handleRefresh = this._handleRefresh.bind(this);
         this._handleDelete = this._handleDelete.bind(this);
         this._handleShare = this._handleShare.bind(this);
+        this._handleAdd = this._handleAdd.bind(this);
         this._handleToggleMap = this._handleToggleMap.bind(this);
         this._handleClickItem = this._handleClickItem.bind(this);
     }
@@ -57,7 +58,9 @@ class BookmarksView extends Component {
                 id: bookmark.bookmarkID,
                 placeId: bookmark.placeID,
                 subtitle: bookmark.address,
-                caption: bookmark.type
+                caption: bookmark.type,
+                lat: bookmark.lat.toString(),
+                lon: bookmark.lon.toString()
             };
         });
     }
@@ -119,6 +122,17 @@ class BookmarksView extends Component {
         this.props.dispatch(deleteBookmark(item.id));
     }
 
+    _handleAdd (item) {
+        Actions.eventForm({ 
+            address: item.subtitle, 
+            tripId: this.props.tripId, 
+            title: "Create Event", 
+            lat: item.lat.toString(), 
+            lon: item.lon.toString(),
+            name: item.title 
+        });
+    }
+
     // TODO: remove/edit... this is just an example on how the callback would work
     _handleClickItem (item) {
         // Make necessary calls to do w/e you want when clicking on item identified by id
@@ -128,7 +142,8 @@ class BookmarksView extends Component {
             title: "Bookmark Details",
             tripId: this.props.tripId,
             attraction: { id: item.placeId }, // just add id for placeId in call to leverage the same view
-            allowCreate: false
+            allowCreate: true,
+            isBookmark: true
         });
     }
 
@@ -162,6 +177,8 @@ class BookmarksView extends Component {
                 onRefresh={this._handleRefresh}
                 showDelete={true}
                 onDelete={this._handleDelete}
+                showAdd={true}
+                onAdd={this._handleAdd}
                 showShare={false}
                 onShare={this._handleShare}
                 onClickItem={this._handleClickItem} />

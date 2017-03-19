@@ -3,8 +3,9 @@ import { connect } from "react-redux";
 import FETCH_STATUS from "../constants/fetchStatusConstants.js";
 import { getAttractionDetails } from "../actions/attractionDetailsActions.js";
 import { postAttractions } from "../actions/attractionsActions.js";
-import { getTypesDisplayString } from "../utils/utils.js";
+import { getTypesDisplayString, getPriceLevelString } from "../utils/utils.js";
 import ItemDetailsTemplate from "../templates/ItemDetailsTemplate.js";
+import { Actions } from "react-native-router-flux";
 
 
 class AttractionDetailsView extends Component {
@@ -16,7 +17,8 @@ class AttractionDetailsView extends Component {
         details: React.PropTypes.object,
         attractionDetailsGETStatus: React.PropTypes.string,
         attractionsPOSTStatus: React.PropTypes.string,
-        allowCreate: React.PropTypes.bool
+        allowCreate: React.PropTypes.bool,
+        isBookmark: React.PropTypes.bool
     }
 
     static defaultProps = {
@@ -47,24 +49,24 @@ class AttractionDetailsView extends Component {
         dispatch(getAttractionDetails(placeId));
     }
 
+    
+
     formattedAttractionDetails () {
         if (!this.props.details) {
             return [];
         }
 
         return [
-            { id: 1, title: "Attraction name", description: this.props.details.name },
-            { id: 2, title: "Location address", description: this.props.details.formatted_address },
-            { id: 3, title: "Contact #", description: this.props.details.international_phone_number },
-            { id: 4, title: "Tags/Categories", description: getTypesDisplayString(this.props.details.types) },
-            { id: 5, title: "Average user rating",
+            { id: 1, title: "Name", description: this.props.details.name },
+            { id: 2, title: "Address", description: this.props.details.formatted_address },
+            { id: 3, title: "Phone", description: this.props.details.international_phone_number },
+            { id: 4, title: "Tags", description: getTypesDisplayString(this.props.details.types) },
+            { id: 5, title: "Average Rating",
                 description: this.props.details.rating
-                                ? this.props.details.rating.toString()
-                                : "Unavailable" },
-            { id: 6, title: "Costliness on a scale of 0 (free) to 4 (very expensive)",
-                description: this.props.details.price_level
-                                ? this.props.details.price_level.toString()
-                                : "Unavailable" }
+                                ? this.props.details.rating.toString() + "/5"
+                                : "N/A" },
+            { id: 6, title: "Price Level",
+                description: getPriceLevelString(this.props.details.price_level)}
 
             // { id: __, title: "Business website (if applicable)", description: TODO },
             // { id: __, title: "Hours of operation & current open status", description: TODO}
@@ -77,14 +79,26 @@ class AttractionDetailsView extends Component {
     }
 
     _handleAdd () {
-        this.props.dispatch(postAttractions(this.props.attraction, this.props.tripId));
+        if (this.props.isBookmark) {
+            Actions.eventForm({ 
+                address: this.props.details.formatted_address || this.props.details.vicinity, 
+                lat: this.props.details.geometry.location.lat.toString(),
+                lon: this.props.details.geometry.location.lng.toString(),
+                name: this.props.details.name,
+                tripId: this.props.tripId, 
+                title: "Create Event" });
+        } else {
+            this.props.dispatch(postAttractions(this.props.attraction, this.props.tripId));
+        }
     }
 
     render () {
+        let addText = this.props.isBookmark ? "CREATE EVENT" : "ADD BOOKMARK";
         return (
             <ItemDetailsTemplate data={this.formattedAttractionDetails()}
                 onRefresh={this._handleRefresh}
                 showAdd={this.props.allowCreate}
+                addButtonText={addText}
                 onAdd={this._handleAdd}
                 loadingData={
                     (this.props.attractionDetailsGETStatus === FETCH_STATUS.ATTEMPTING) ||

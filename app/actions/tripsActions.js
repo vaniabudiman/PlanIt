@@ -80,6 +80,14 @@ function buildGETRequestURL (tripID) {
     return rootURL + queryString;
 }
 
+function buildPOSTRequestURL () {
+    return apiURL + "trips";
+}
+
+function buildPUTRequestURL (tripID) {
+    return apiURL + "trips/" + tripID;
+}
+
 export function getTrips (tripID = null) {
     return dispatch => {
         dispatch(getTripsAttempt());
@@ -114,7 +122,7 @@ export function createTrip (tripData) {
         if (tripData.startDate === "") { return (alert("Please enter a start date!")); }
         if (tripData.endDate === "") { return (alert("Please enter an end date!")); }
         dispatch(createTripAttempt());
-        fetch(apiURL + "trips", {
+        fetch(buildPOSTRequestURL(), {
             method: "POST",
             headers: {
                 Accept: "application/json",
@@ -145,13 +153,14 @@ export function createTrip (tripData) {
         });
     };
 }
+
 export function updateTrip (tripId, tripData) {
     return dispatch => {
         if (tripData.tripName === "") { return (alert("Please enter a trip name!")); }
         if (tripData.startDate === "") { return (alert("Please enter a start date!")); }
         if (tripData.endDate === "") { return (alert("Please enter an end date!")); }
         dispatch(updateTripAttempt());
-        fetch(apiURL + "trips/" + tripId, {
+        fetch(buildPUTRequestURL(tripId), {
             method: "PUT",
             headers: {
                 Accept: "application/json",

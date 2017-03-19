@@ -22,6 +22,14 @@ export default function (state = initialState, action) {
         case Types.GET_EVENTS_FAILED:
             nextState = { ...state, eventsGETStatus: FETCH_STATUS.FAILED };
             break;
+        case Types.CREATE_EVENT_ATTEMPT:
+            nextState = { ...state, eventPOSTStatus: FETCH_STATUS.ATTEMPTING };
+            break;
+        case Types.CREATE_EVENT_SUCCESS:
+            nextState = { ...state, eventPOSTStatus: FETCH_STATUS.SUCCESS, event: action.event };
+            break;
+        case Types.CREATE_EVENT_FAILED:
+            nextState = { ...state, eventPOSTStatus: FETCH_STATUS.FAILED };
         case Types.DELETE_EVENT_ATTEMPT:
             nextState = { ...state, eventDELETEStatus: FETCH_STATUS.ATTEMPTING };
             break;
