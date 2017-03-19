@@ -7,13 +7,14 @@ from socket import gethostname
 from flask import Flask, session, request, make_response, jsonify
 from flask_mail import Mail, Message
 from smtplib import SMTPException
+from sqlalchemy import and_
 from sqlalchemy.orm import sessionmaker, scoped_session
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.sql import func
 # Our defined modules.
 from base import base, engine
 from models import DT_FORMAT
-from models import User, Trip, Event, Bookmark
+from models import User, Trip, Event, Bookmark, Permissions, PermissionsEnum
 
 # Versioning.
 VERSION = 'v1'
@@ -404,6 +405,16 @@ def events(eventID=None):
                     return make_response('Trip not found.', 404)
                 event_list = db.query(Event).filter(
                     Event.tripID == post_tripID).all()
+
+                # Get shared events through permissions.
+                perms = db.query(Permissions).filter(and_(
+                    Permissions.toTrip == post_tripID,
+                    Permissions.type == PermissionsEnum.EVENT,
+                    Permissions.toUser == session.get(KEY__USERNAME))).all()
+                shared_events = [db.query(Event).filter(
+                    Event.eventID == p.permissionID).first() for p in perms]
+                event_list += shared_events
+
                 if len(event_list) == 0:
                     return make_response('No Events found for the given Trip.',
                                          404)
@@ -430,8 +441,15 @@ def events(eventID=None):
                     return make_response(
                         'Trip associated to given Event not found.', 404)
                 if trip.userName != session.get(KEY__USERNAME):
-                    return make_response(
-                        'User not authorized to view this Event.', 401)
+                    # Check if the user has shared permission instead.
+                    perm = db.query(Permissions).filter(and_(
+                        Permissions.permissionID == post_eventID,
+                        Permissions.type == PermissionsEnum.EVENT,
+                        Permissions.toUser == session.get(
+                            KEY__USERNAME))).first()
+                    if perm is None:
+                        return make_response(
+                            'User not authorized to view this Event.', 401)
                 return make_response(jsonify({'event': event.to_dict()}), 200)
             finally:
                 close_session(db)
@@ -452,9 +470,15 @@ def events(eventID=None):
 
         if request.method == PUT:
             if userName != curr_userName:
-                close_session(db)
-                return make_response('User not authorized to edit Event.',
-                                     401)
+                # Check to see if user has write permissions.
+                perm = db.query(Permissions).filter(and_(
+                    Permissions.permissionID == eventID,
+                    Permissions.type == PermissionsEnum.EVENT,
+                    Permissions.toUser == curr_userName)).first()
+                if perm is None or not perm.writeFlag:
+                    close_session(db)
+                    return make_response('User not authorized to edit Event.',
+                                         401)
             try:
                 # Optional eventName parameter.
                 post_eventName = str(request.json['eventName'])
@@ -508,10 +532,25 @@ def events(eventID=None):
             return make_response(jsonify(ret_dict), 200)
         elif request.method == DELETE:
             if userName != curr_userName:
+                # Check to see if a permission should be deleted instead.
+                perm = db.query(Permissions).filter(and_(
+                    Permissions.permissionID == eventID,
+                    Permissions.type == PermissionsEnum.EVENT,
+                    Permissions.toUser == curr_userName)).first()
+                if perm is not None:
+                    db.delete(perm)
+                    close_session(db)
+                    return make_response(
+                        'Shared Event Permission deleted successfully', 200)
+
                 close_session(db)
                 return make_response('User not authorized to delete Event.',
                                      401)
             db.delete(event)
+            # Delete corresponding shared permissions.
+            db.query(Permissions).filter(and_(
+                Permissions.permissionID == eventID,
+                Permissions.type == PermissionsEnum.EVENT)).delete()
             close_session(db)
             return make_response('Event deleted successfully', 200)
     return bad_request()
