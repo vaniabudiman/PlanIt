@@ -13,7 +13,7 @@ import {
     Divider,
     Row,
     TouchableOpacity } from "@shoutem/ui";
-import { DatePickerAndroid } from "react-native";
+import { DatePickerAndroid, TimePickerAndroid } from "react-native";
 
 
 /**
@@ -24,7 +24,9 @@ import { DatePickerAndroid } from "react-native";
 */
 export const Types = {
     TEXT: "text",
-    DATE: "date"
+    DATE: "date",
+    TIME: "time",
+    TEXTAREA: "textarea"
 };
 
 /**
@@ -153,7 +155,7 @@ export default class FormTemplate extends Component {
             title: React.PropTypes.string,
             placeholder: React.PropTypes.string,
             value: React.PropTypes.string,
-            type: React.PropTypes.oneOf([Types.TEXT, Types.DATE])
+            type: React.PropTypes.oneOf([Types.TEXT, Types.DATE, Types.TIME, Types.TEXTAREA])
         })).isRequired,
         onInputValueChange: React.PropTypes.func.isRequired,
         onRefresh: React.PropTypes.func,
@@ -168,6 +170,7 @@ export default class FormTemplate extends Component {
         onSave: React.PropTypes.func,
         loadingData: React.PropTypes.bool,
         onDateSelect: React.PropTypes.func,
+        onTimeSelect: React.PropTypes.func
     }
 
     static defaultProps = {
@@ -188,7 +191,7 @@ export default class FormTemplate extends Component {
 
         // Bind callback handlers
         this._handleToggleMap = this._handleToggleMap.bind(this);
-        this._showPicker = this._showPicker.bind(this);
+        this._showDatePicker = this._showDatePicker.bind(this);
     }
 
     _handleToggleMap () {
@@ -196,7 +199,7 @@ export default class FormTemplate extends Component {
         this.setState({ showMap: newMapToggleState }, () => this.props.onToggleMap(newMapToggleState));
     }
 
-    _showPicker = async (itemId, options) => {
+    _showDatePicker = async (itemId, options) => {
         try {
             const { action, year, month, day } = await DatePickerAndroid.open(options);
             if (action !== DatePickerAndroid.dismissedAction) {
@@ -206,6 +209,30 @@ export default class FormTemplate extends Component {
         } catch ({ code, message }) {
             // TODO: implement catch block
         }
+    }
+
+    _showTimePicker = async (itemId, options) => {
+        try {
+            const { action, minute, hour } = await TimePickerAndroid.open(options);
+            if (action !== TimePickerAndroid.dismissedAction) {
+                var time = this._formatTime(hour, minute);
+                this.props.onTimeSelect(itemId, time);
+            }
+        } catch ({ code, message }) {
+            // TODO: implement catch block
+        }
+    }
+
+    /**
+     * Returns e.g. '3:05'.
+     */
+    _formatTime (hour, minute) {
+        let time = new Date();
+        time.setHours(hour);
+        time.setMinutes(minute);
+        time.setSeconds(0);
+        let timeString = time.toTimeString();
+        return timeString;
     }
 
     renderMapToggle () {
@@ -236,14 +263,61 @@ export default class FormTemplate extends Component {
         switch (item.type) {
             // TODO: other types (as necessary in future)
             case "date": {
-                let value = (item.value === "") ? "Pick a Date" : item.value;
+                // If passing in prefilled value, pass in string w/ format "YEAR,MONTH,DAY"
+                let value = "Pick a Date"; // default value if not prefilled
+                let dateValues = item.value.split(",");
+                if (dateValues.length === 3) { // setting prefilled value
+                    let date = new Date(dateValues[0], dateValues[1], dateValues[2]);
+                    value = date.toDateString();
+                } else if (dateValues[0] !== "") { // setting value from datepicker
+                    value = dateValues[0];
+                }
+                
                 content = (
                     <View>
                         <Subtitle>{item.title}</Subtitle>
                         <TouchableOpacity
-                            onPress={() => this._showPicker(item.id, { date: new Date() })}>
+                            onPress={() => this._showDatePicker(item.id, { date: new Date(value) })}>
                             <Text>{value}</Text>
                         </TouchableOpacity>
+                        <Divider styleName="line" />
+                    </View>
+                );
+                break;
+            }
+            case "time": {
+                // If passing in prefilled value, pass in string w/ format "HOUR,MINUTE"
+                let value = "Pick a Time"; // default value if not prefilled
+                let time = {};
+                let timeValues = item.value.split(",");
+                if (timeValues.length === 2) { // setting prefilled value
+                    time = { hour: parseInt(timeValues[0]), minute: parseInt(timeValues[1]) };
+                    value = this._formatTime(timeValues[0], timeValues[1]);
+                } else if (timeValues[0] !== "") { // setting value from timepicker
+                    value = timeValues[0];
+                }
+                
+                content = (
+                    <View>
+                        <Subtitle>{item.title}</Subtitle>
+                        <TouchableOpacity
+                            onPress={() => this._showTimePicker(item.id, time)}>
+                            <Text>{value}</Text>
+                        </TouchableOpacity>
+                        <Divider styleName="line" />
+                    </View>
+                );
+                break;
+            }
+            case "textarea": { // a multiline version of a textinput with no character limit
+                content = (
+                    <View>
+                        <Subtitle>{item.title}</Subtitle>
+                        <TextInput placeholder={item.placeholder}
+                            value={item.value}
+                            multiline={true}
+                            editable={!item.readOnly}
+                            onChangeText={this.props.onInputValueChange.bind(null, item.id)} />
                         <Divider styleName="line" />
                     </View>
                 );
@@ -256,7 +330,7 @@ export default class FormTemplate extends Component {
                         <TextInput placeholder={item.placeholder}
                             value={item.value}
                             multiline={false}
-                            maxLength={40}
+                            maxLength={100}
                             editable={!item.readOnly}
                             onChangeText={this.props.onInputValueChange.bind(null, item.id)} />
                         <Divider styleName="line" />

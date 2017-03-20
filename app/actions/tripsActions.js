@@ -7,6 +7,9 @@ export const Types = {
     CREATE_TRIP_ATTEMPT: "CREATE_TRIP_ATTEMPT",
     CREATE_TRIP_SUCCESS: "CREATE_TRIP_SUCCESS",
     CREATE_TRIP_FAILED: "CREATE_TRIP_FAILED",
+    DELETE_TRIP_ATTEMPT: "DELETE_TRIP_ATTEMPT",
+    DELETE_TRIP_SUCCESS: "DELETE_TRIP_SUCCESS",
+    DELETE_TRIP_FAILED: "DELETE_TRIP_FAILED",
     UPDATE_TRIP_ATTEMPT: "UPDATE_TRIP_ATTEMPT",
     UPDATE_TRIP_SUCCESS: "UPDATE_TRIP_SUCCESS",
     UPDATE_TRIP_FAILED: "UPDATE_TRIP_FAILED"
@@ -53,6 +56,26 @@ function createTripFailed (error) {
     };
 }
 
+function deleteTripAttempt () {
+    return {
+        type: Types.DELETE_TRIP_ATTEMPT
+    };
+}
+
+function deleteTripSuccess (tripId) {
+    return {
+        tripId: tripId,
+        type: Types.DELETE_TRIP_SUCCESS
+    };
+}
+
+function deleteTripFailed (error) {
+    return {
+        error,
+        type: Types.DELETE_TRIP_FAILED
+    };
+}
+
 function updateTripAttempt () {
     return {
         type: Types.UPDATE_TRIP_ATTEMPT
@@ -78,6 +101,14 @@ function buildGETRequestURL (tripID) {
     let queryString = tripID ? "?tripID=" + tripID : "";
 
     return rootURL + queryString;
+}
+
+function buildPOSTRequestURL () {
+    return apiURL + "trips";
+}
+
+function buildPUTRequestURL (tripID) {
+    return apiURL + "trips/" + tripID;
 }
 
 export function getTrips (tripID = null) {
@@ -114,7 +145,7 @@ export function createTrip (tripData) {
         if (tripData.startDate === "") { return (alert("Please enter a start date!")); }
         if (tripData.endDate === "") { return (alert("Please enter an end date!")); }
         dispatch(createTripAttempt());
-        fetch(apiURL + "trips", {
+        fetch(buildPOSTRequestURL(), {
             method: "POST",
             headers: {
                 Accept: "application/json",
@@ -145,13 +176,14 @@ export function createTrip (tripData) {
         });
     };
 }
+
 export function updateTrip (tripId, tripData) {
     return dispatch => {
         if (tripData.tripName === "") { return (alert("Please enter a trip name!")); }
         if (tripData.startDate === "") { return (alert("Please enter a start date!")); }
         if (tripData.endDate === "") { return (alert("Please enter an end date!")); }
         dispatch(updateTripAttempt());
-        fetch(apiURL + "trips/" + tripId, {
+        fetch(buildPUTRequestURL(tripId), {
             method: "PUT",
             headers: {
                 Accept: "application/json",
@@ -181,4 +213,34 @@ export function updateTrip (tripId, tripData) {
             throw (error); // TODO: remove this and do something with the fetch error
         });
     };
+}
+
+export function deleteTrip (tripId) {
+    if (!tripId) {
+        return alert ("No trip was selected to delete.");
+    }
+
+    return dispatch => {
+        dispatch(deleteTripAttempt());
+
+        fetch(apiURL + "trips/" + tripId, {
+            method: "DELETE",
+            headers: {
+                Accept: "application/json",
+                "Content-Type": "application/json",
+            },
+        })
+        .then(response => { // Header response.
+            if (response.status >= 200 && response.status < 300) {
+                dispatch(deleteTripSuccess(tripId));
+            } else {
+                const error = new Error();
+                error.response = response;
+                dispatch(deleteTripFailed(error));
+                throw error;
+            }
+        })
+        .catch(error => {
+            alert("Request Failed: ", error); // TODO: remove this and do something with the fetch error
+        });};
 }

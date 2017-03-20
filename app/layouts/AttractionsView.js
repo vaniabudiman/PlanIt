@@ -58,8 +58,8 @@ class AttractionsView extends Component {
                 title: attraction.name,
                 subtitle: attraction.vicinity || attraction.formatted_address, // nearby vs. text search
                 caption: getTypesDisplayString(attraction.types),
-                lat: attraction.geometry.location.lat,
-                lon: attraction.geometry.location.lng,
+                lat: attraction.geometry.location.lat.toString(),
+                lon: attraction.geometry.location.lng.toString(),
                 icon: attraction.icon
             };
         });

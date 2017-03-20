@@ -3,7 +3,7 @@ import { Actions } from "react-native-router-flux";
 import ListMapTemplate from "../templates/ListMapTemplate.js";
 //import realm from "../../Realm/realm.js";
 import { connect } from "react-redux";
-import { getTrips } from "../actions/tripsActions.js";
+import { getTrips, deleteTrip } from "../actions/tripsActions.js";
 import FETCH_STATUS from "../constants/fetchStatusConstants.js";
 
 
@@ -37,6 +37,7 @@ class TripsView extends Component {
         dispatch: React.PropTypes.func,
         trips: React.PropTypes.array,
         tripsGETStatus: React.PropTypes.string,
+        tripDELETEStatus: React.PropTypes.string,
         refresh: React.PropTypes.bool
     }
 
@@ -54,6 +55,7 @@ class TripsView extends Component {
         this._handleSearch = this._handleSearch.bind(this);
         this._handleRefresh = this._handleRefresh.bind(this);
         this._handleUpdate = this._handleUpdate.bind(this);
+        this._handleDelete = this._handleDelete.bind(this);
         this._handleShare = this._handleShare.bind(this);
         this._handleClickItem = this._handleClickItem.bind(this);
         this._handleCreateItem = this._handleCreateItem.bind(this);
@@ -62,6 +64,11 @@ class TripsView extends Component {
     componentWillReceiveProps (nextProps) {
         if (nextProps.refresh) {
             this.requestTrips(nextProps.dispatch);
+        }
+
+        if (this.props.tripDELETEStatus === FETCH_STATUS.ATTEMPTING &&
+            nextProps.tripDELETEStatus === FETCH_STATUS.SUCCESS) {
+            alert("Trip deleted successfully!");
         }
 
         this.setState({ trips: nextProps.trips });
@@ -109,6 +116,10 @@ class TripsView extends Component {
         this.setState({ searchString: "" });
     }
 
+    _handleDelete (item) {
+        this.props.dispatch(deleteTrip(item.id));
+    }
+
     // Take user to trip update form (creation w/ prefill)
     _handleUpdate (trip) {
         Actions.tripForm({ trip: trip, title: "Update Trip" });
@@ -142,6 +153,8 @@ class TripsView extends Component {
                 //showShare={true}
                 onEdit={this._handleUpdate}
                 //onShare={this._handleShare}
+                showDelete={true}
+                onDelete={this._handleDelete}
                 onClickItem={this._handleClickItem}
                 onCreateItem={this._handleCreateItem}
                 searchString={this.state.searchString} />
@@ -153,6 +166,7 @@ export default connect((state) => {
     return {
         trips: state.trips.trips,
         tripsGETStatus: state.trips.tripsGETStatus,
+        tripDELETEStatus: state.trips.tripDELETEStatus,
         refresh: state.trips.refresh
     };
 })(TripsView);

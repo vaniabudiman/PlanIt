@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import { Actions } from "react-native-router-flux";
 import ListMapTemplate from "../templates/ListMapTemplate.js";
 import { connect } from "react-redux";
 import FETCH_STATUS from "../constants/fetchStatusConstants.js";
@@ -23,7 +24,8 @@ class ItineraryListView extends Component {
         events: React.PropTypes.array,
         eventsGETStatus: React.PropTypes.string,
         eventDELETEStatus: React.PropTypes.string,
-        dispatch: React.PropTypes.func
+        dispatch: React.PropTypes.func,
+        refresh: React.PropTypes.bool
     }
 
     constructor (props) {
@@ -42,10 +44,12 @@ class ItineraryListView extends Component {
         this._handleRefresh = this._handleRefresh.bind(this);
         this._handleDelete = this._handleDelete.bind(this);
         this._handleClickItem = this._handleClickItem.bind(this);
+        this._handleCreateItem = this._handleCreateItem.bind(this);
+        this._handleUpdate = this._handleUpdate.bind(this);
     }
 
     componentWillReceiveProps (nextProps) {
-        if (nextProps.tripId && (this.props.tripId !== nextProps.tripId)) {
+        if ((nextProps.tripId && (this.props.tripId !== nextProps.tripId)) || nextProps.refresh) {
             this.requestEvents(nextProps.dispatch, nextProps.tripId);
         }
 
@@ -63,8 +67,9 @@ class ItineraryListView extends Component {
                 title: event.eventName,
                 id: event.eventID,
                 reminderFlag: event.reminderFlag,
-                subtitle: "Begins: " + event.startDateTime,
-                caption: "Ends: " + event.endDateTime
+                subtitle: "Begins: " + new Date(event.startDateTime + " UTC"),  // datetimes stored as UTC in DB - need to convert to local
+                caption: "Ends: " + new Date(event.endDateTime + " UTC"),
+                event: event
             };
         });
     }
@@ -109,6 +114,16 @@ class ItineraryListView extends Component {
         isDevMode() && alert("calendar toggled to: " + newCalendarToggleState);
     }
 
+    // Take user to event creation form
+    _handleCreateItem () {
+        Actions.eventForm({ tripId: this.props.tripId, name: "" });
+    }
+
+    // Take user to event update form (creation w/ prefill)
+    _handleUpdate (event) {
+        Actions.eventForm({ tripId: this.props.tripId, event: event, title: "Update Event" });
+    }
+
     _handleDateSelect (date) {
         this.setState({ events: this.props.events }, () => this.filterEventsByDate(date));
     }
@@ -138,7 +153,10 @@ class ItineraryListView extends Component {
                 onDelete={this._handleDelete}
                 onRefresh={this._handleRefresh}
                 onToggleCalendar={this._handleToggleCalendar}
-                onClickItem={this._handleClickItem} />
+                onClickItem={this._handleClickItem}
+                onCreateItem={this._handleCreateItem}
+                showEdit={true}
+                onEdit={this._handleUpdate} />
         );
     }
 }
@@ -148,6 +166,7 @@ export default connect((state) => {
     return {
         events: state.events.events,
         eventsGETStatus: state.events.eventsGETStatus,
-        eventDELETEStatus: state.events.eventDELETEStatus
+        eventDELETEStatus: state.events.eventDELETEStatus,
+        refresh: state.events.refresh
     };
 })(ItineraryListView);

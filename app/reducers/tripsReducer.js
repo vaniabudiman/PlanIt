@@ -1,13 +1,13 @@
 import { Types } from "../actions/tripsActions.js";
 import FETCH_STATUS from "../constants/fetchStatusConstants.js";
 
-
 const initialState = {
     trip: {},
     trips: [],
     tripsGETStatus: "",
     tripPOSTStatus: "",
     tripPUTStatus: "",
+    tripDELETEStatus: "",
     refresh: false
 };
 
@@ -28,10 +28,19 @@ export default function (state = initialState, action) {
             nextState = { ...state, tripPOSTStatus: FETCH_STATUS.ATTEMPTING };
             break;
         case Types.CREATE_TRIP_SUCCESS:
-            nextState = { ...state, tripPOSTStatus: FETCH_STATUS.SUCCESS, trip: action.trip };
+            nextState = { ...state, tripPOSTStatus: FETCH_STATUS.SUCCESS, trip: action.trip, refresh: true };
             break;
         case Types.CREATE_TRIP_FAILED:
             nextState = { ...state, tripPOSTStatus: FETCH_STATUS.FAILED };
+            break;
+        case Types.DELETE_TRIP_ATTEMPT:
+            nextState = { ...state, tripDELETEStatus: FETCH_STATUS.ATTEMPTING };
+            break;
+        case Types.DELETE_TRIP_SUCCESS:
+            nextState = { ...state, tripDELETEStatus: FETCH_STATUS.SUCCESS, refresh: true };
+            break;
+        case Types.DELETE_TRIP_FAILED:
+            nextState = { ...state, tripDELETEStatus: FETCH_STATUS.FAILED };
             break;
         case Types.UPDATE_TRIP_ATTEMPT:
             nextState = { ...state, tripPUTStatus: FETCH_STATUS.ATTEMPTING };

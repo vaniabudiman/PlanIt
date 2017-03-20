@@ -197,7 +197,9 @@ export default class ListMapTemplate extends Component {
         data: React.PropTypes.arrayOf(React.PropTypes.shape({
             id: React.PropTypes.oneOfType([React.PropTypes.number, React.PropTypes.string]),
             title: React.PropTypes.string,
-            subtitle: React.PropTypes.string
+            subtitle: React.PropTypes.string,
+            lat: React.PropTypes.string,
+            lon: React.PropTypes.string
         })).isRequired,
         emptyListMessage: React.PropTypes.string,
         onRefresh: React.PropTypes.func,
@@ -425,7 +427,7 @@ export default class ListMapTemplate extends Component {
                 <TouchableOpacity onPress={this.props.onClickItem.bind(null, item)}>
                     <Row>
                         <View styleName="horizontal space-between">
-                            <View styleName="vertical" style={{ flex: 8 }}>
+                            <View styleName="vertical" style={{ flex: 5 }}>
                                 <Title>{item.title}</Title>
                                 <Subtitle>{item.subtitle}</Subtitle>
                                 <Caption>{item.caption}</Caption>
