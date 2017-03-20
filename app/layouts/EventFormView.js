@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import { connect } from "react-redux";
 import FormTemplate, { Types } from "../templates/FormTemplate.js";
 import { Actions } from "react-native-router-flux";
-import { createEvent } from "../actions/eventsActions.js";
+import { createEvent, updateEvent } from "../actions/eventsActions.js";
 import FETCH_STATUS from "../constants/fetchStatusConstants.js";
 import { isDevMode } from "../utils/utils.js";
 
@@ -10,12 +10,13 @@ class EventFormView extends Component {
     static propTypes = {
         dispatch: React.PropTypes.func,
         event: React.PropTypes.object,
-        eventPOSTStatus: React.PropTypes.string,
         tripId: React.PropTypes.number,
         address: React.PropTypes.string,
         lat: React.PropTypes.string,
         lon: React.PropTypes.string,
-        name: React.PropTypes.string
+        name: React.PropTypes.string,
+        eventPOSTStatus: React.PropTypes.string,
+        eventPUTStatus: React.PropTypes.string
     }
 
     constructor (props) {
@@ -34,16 +35,18 @@ class EventFormView extends Component {
 
         // Bind Redux action creators
         this._createEvent = (eventData) => this.props.dispatch(createEvent(eventData));
-        //this._updateEvent = (eventId, eventData) => this.props.dispatch(updateEvent(eventId, eventData));
+        this._updateEvent = (eventId, eventData) => this.props.dispatch(updateEvent(eventId, eventData));
     }
 
     componentWillReceiveProps (nextProps) {
         // Fetch new list of cities if a different country's list of cities is requested
-        if (nextProps.eventPOSTStatus === FETCH_STATUS.SUCCESS) {
+        if (this.props.eventPOSTStatus === FETCH_STATUS.ATTEMPTING &&
+            nextProps.eventPOSTStatus === FETCH_STATUS.SUCCESS) {
             alert("Event created successfully!");
             Actions.pop();
         }
-        if (nextProps.eventPUTStatus === FETCH_STATUS.SUCCESS) {
+        if (this.props.eventPUTStatus === FETCH_STATUS.ATTEMPTING &&
+            nextProps.eventPUTStatus === FETCH_STATUS.SUCCESS) {
             alert("Event updated successfully!");
             Actions.pop();
         }
@@ -54,17 +57,38 @@ class EventFormView extends Component {
         let inputs = [
             { id: 1, title: "Event Name", value: this.props.name || "", type: Types.TEXT },
             { id: 2, title: "Address", value: this.props.address || "", type: Types.TEXT },
-            { id: 3, title: "Start Date", value: "", type: Types.DATE },
-            { id: 4, title: "Start Time", value: "", type: Types.TIME },
-            { id: 5, title: "End Date", value: "", type: Types.DATE },
-            { id: 6, title: "End Time", value: "", type: Types.TIME },
-            { id: 7, title: "Notes", value: "", type: Types.TEXTAREA }
+            { id: 3, title: "Notes", value: "", type: Types.TEXTAREA },
+            { id: 4, title: "Start Date", value: "", type: Types.DATE },
+            { id: 5, title: "Start Time", value: "", type: Types.TIME },
+            { id: 6, title: "End Date", value: "", type: Types.DATE },
+            { id: 7, title: "End Time", value: "", type: Types.TIME },
+            
         ];
 
         if (event) {
-            inputs[0].value = event.eventName;
-            inputs[1].value = event.startDate;
-            inputs[2].value = event.endDate;
+
+            let startDateTime = new Date(event.event.startDateTime + " UTC"),
+                endDateTime = new Date(event.event.endDateTime + " UTC");
+
+            let startYear = startDateTime.getFullYear(),
+                startMonth = startDateTime.getMonth(),
+                startDay = startDateTime.getDate(),
+                startHour = startDateTime.getHours(),
+                startMinute = startDateTime.getMinutes(),
+                endYear = endDateTime.getFullYear(),
+                endMonth = endDateTime.getMonth(),
+                endDay = endDateTime.getDate(),
+                endHour = endDateTime.getHours(),
+                endMinute = endDateTime.getMinutes();
+
+            inputs[0].value = event.event.eventName;
+            inputs[1].value = event.event.address;
+            inputs[2].value = event.event.notes;
+            inputs[3].value = startYear + "," + startMonth + "," + startDay;
+            inputs[4].value = startHour + "," + startMinute;
+            inputs[5].value = endYear + "," + endMonth + "," + endDay;
+            inputs[6].value = endHour + "," + endMinute;
+            
         }
 
         return inputs;
@@ -84,30 +108,66 @@ class EventFormView extends Component {
         //       below and then format things correctly to pass to the action that will dispatch to the server/realm
 
 
-        let startDate = new Date(this.state.items[2].value),
-            startTime = this.state.items[3].value,
-            endDate = new Date(this.state.items[4].value),
-            endTime = this.state.items[5].value;
+        let startDateString = this.state.items[3].value,
+            startTimeString = this.state.items[4].value,
+            endDateString = this.state.items[5].value,
+            endTimeString = this.state.items[6].value;
 
-        if (startDate === "" || startTime === "") {
+        if (startDateString === "" || startTimeString === "") {
             alert("Please enter a start date and time!");
             return;
         }
 
-        let startParts = startTime.match(/^(\d+)\:(\d+)\:(\d+)/),
-            startHour = startParts[1],
-            startMinute = startParts[2],
-            startSecond = startParts[3];
+        let startDate,
+            splitStartDate = startDateString.split(",");
 
-        if (endDate === "" || endTime === "") {
+        if (splitStartDate.length === 3) {
+            startDate = new Date(splitStartDate[0], splitStartDate[1], splitStartDate[2]);
+        } else {
+            startDate = new Date(startDateString);
+        }
+
+        let startHour, startMinute, startSecond,
+            splitStartTime = startTimeString.split(",");
+
+        if (splitStartTime.length === 2) {
+            startHour = splitStartTime[0];
+            startMinute = splitStartTime[1];
+            startSecond = 0;
+        } else {
+            let startParts = startTimeString.match(/^(\d+)\:(\d+)\:(\d+)/);
+            startHour = startParts[1];
+            startMinute = startParts[2];
+            startSecond = startParts[3];
+        }
+
+        if (endDateString === "" || endTimeString === "") {
             alert("Please enter an end date and time!");
             return;
         }
 
-        let endParts = endTime.match(/^(\d+)\:(\d+)\:(\d+)/),
-            endHour = endParts[1],
-            endMinute = endParts[2],
+        let endDate,
+            splitEndDate = endDateString.split(",");
+
+        if (splitEndDate.length === 3) {
+            endDate = new Date(splitEndDate[0], splitEndDate[1], splitEndDate[2]);
+        } else {
+            endDate = new Date(endDateString);
+        }
+
+        let endHour, endMinute, endSecond,
+            splitEndTime = endTimeString.split(",");
+            
+        if (splitEndTime.length === 2) {
+            endHour = splitEndTime[0];
+            endMinute = splitEndTime[1];
+            endSecond = 0;
+        } else {
+            let endParts = endTimeString.match(/^(\d+)\:(\d+)\:(\d+)/);
+            endHour = endParts[1];
+            endMinute = endParts[2];
             endSecond = endParts[3];
+        }
 
         let startDateTime = new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate(),
                startHour, startMinute, startSecond),
@@ -123,11 +183,11 @@ class EventFormView extends Component {
             reminderFlag: false,
             lat: this.props.lat,
             lon: this.props.lon,
-            note: this.state.items[6]
+            note: this.state.items[2]
         };
 
         if (this.props.event) {
-            this._updateEvent(this.props.event.id, eventData);
+            this._updateEvent(this.props.event.event.eventID, eventData);
         }
         else {
             this._createEvent(eventData);
@@ -174,6 +234,7 @@ export default connect((state) => {
     return {
         events: state.events.events,
         newEvent: state.events.event,
-        eventPOSTStatus: state.events.eventPOSTStatus
+        eventPOSTStatus: state.events.eventPOSTStatus,
+        eventPUTStatus: state.events.eventPUTStatus
     };
 })(EventFormView);

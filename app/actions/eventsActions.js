@@ -9,7 +9,10 @@ export const Types = {
     CREATE_EVENT_FAILED: "CREATE_EVENT_FAILED",
     DELETE_EVENT_ATTEMPT: "DELETE_EVENT_ATTEMPT",
     DELETE_EVENT_SUCCESS: "DELETE_EVENT_SUCCESS",
-    DELETE_EVENT_FAILED: "DELETE_EVENT_FAILED"
+    DELETE_EVENT_FAILED: "DELETE_EVENT_FAILED",
+    UPDATE_EVENT_ATTEMPT: "UPDATE_EVENT_ATTEMPT",
+    UPDATE_EVENT_SUCCESS: "UPDATE_EVENT_SUCCESS",
+    UPDATE_EVENT_FAILED: "UPDATE_EVENT_FAILED"
 };
 
 function getEventsAttempt () {
@@ -49,6 +52,26 @@ function createEventFailed (error) {
     return {
         error,
         type: Types.CREATE_EVENT_FAILED
+    };
+}
+
+function updateEventAttempt () {
+    return {
+        type: Types.UPDATE_EVENT_ATTEMPT
+    };
+}
+
+function updateEventSuccess (response) {
+    return {
+        event: response.event,
+        type: Types.UPDATE_EVENT_SUCCESS
+    };
+}
+
+function updateEventFailed (error) {
+    return {
+        error,
+        type: Types.UPDATE_EVENT_FAILED
     };
 }
 
@@ -197,6 +220,48 @@ export function createEvent (eventData) {
         })
         .catch(error => {
             alert("POST Events Failed: " + error.response.status); // TODO: remove this and do something with the fetch error
+        });
+    };
+}
+
+export function updateEvent (eventId, eventData) {
+    return dispatch => {
+        if (eventData.eventName === "") { return (alert("Please enter an event name!")); }
+        if (eventData.startDateTime === "") { return (alert("Please enter a start date and time!")); }
+        if (eventData.endDateTime === "") { return (alert("Please enter an end date and time!")); }
+        dispatch(updateEventAttempt());
+        fetch(buildPUTRequestURL(eventId), {
+            method: "PUT",
+            headers: {
+                Accept: "application/json",
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                eventName: eventData.eventName,
+                startDateTime: eventData.startDateTime,
+                endDateTime: eventData.endDateTime,
+                reminderFlag: eventData.reminderFlag,
+                address: eventData.address,
+                lat: eventData.lat,
+                lon: eventData.lon,
+                note: eventData.note
+            }),
+        })
+        .then(response => {
+            if (response.status >= 200 && response.status < 300) {
+                return response.json();
+            } else {
+                const error = new Error();
+                error.response = response;
+                dispatch(updateEventFailed(error));
+                throw error;
+            }
+        })
+        .then(response => {
+            dispatch(updateEventSuccess(response));
+        })
+        .catch(error => {
+            alert("PUT Events Failed: " + error.response.status); // TODO: remove this and do something with the fetch error
         });
     };
 }

@@ -6,7 +6,10 @@ import { clone } from "underscore";
 const initialState = {
     events: [],
     eventsGETStatus: "",
-    eventDELETEStatus: ""
+    eventDELETEStatus: "",
+    eventPOSTStatus: "",
+    eventPUTStatus: "",
+    refresh: false
 };
 
 export default function (state = initialState, action) {
@@ -45,6 +48,15 @@ export default function (state = initialState, action) {
             break;
         case Types.DELETE_EVENT_FAILED:
             nextState = { ...state, eventDELETEStatus: FETCH_STATUS.FAILED };
+            break;
+        case Types.UPDATE_EVENT_ATTEMPT:
+            nextState = { ...state, eventPUTStatus: FETCH_STATUS.ATTEMPTING };
+            break;
+        case Types.UPDATE_EVENT_SUCCESS:
+            nextState = { ...state, eventPUTStatus: FETCH_STATUS.SUCCESS, refresh: true };
+            break;
+        case Types.UPDATE_EVENT_FAILED:
+            nextState = { ...state, eventPUTStatus: FETCH_STATUS.FAILED };
             break;
         default:
             return state;

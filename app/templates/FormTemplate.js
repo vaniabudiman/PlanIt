@@ -263,12 +263,21 @@ export default class FormTemplate extends Component {
         switch (item.type) {
             // TODO: other types (as necessary in future)
             case "date": {
-                let value = (item.value === "") ? "Pick a Date" : item.value;
+                
+                let value = "Pick a Date";
+                let dateValues = item.value.split(",");
+                if (dateValues.length === 3) {
+                    let date = new Date(dateValues[0], dateValues[1], dateValues[2]);
+                    value = date.toDateString();
+                } else if (dateValues[0] !== "") {
+                    value = dateValues[0];
+                }
+                
                 content = (
                     <View>
                         <Subtitle>{item.title}</Subtitle>
                         <TouchableOpacity
-                            onPress={() => this._showDatePicker(item.id, { date: new Date() })}>
+                            onPress={() => this._showDatePicker(item.id, { date: new Date(value) })}>
                             <Text>{value}</Text>
                         </TouchableOpacity>
                         <Divider styleName="line" />
@@ -277,12 +286,21 @@ export default class FormTemplate extends Component {
                 break;
             }
             case "time": {
-                let value = (item.value === "") ? "Pick a Time" : item.value;
+                let value = "Pick a Time";
+                let time = {};
+                let timeValues = item.value.split(",");
+                if (timeValues.length === 2) {
+                    time = { hour: parseInt(timeValues[0]), minute: parseInt(timeValues[1]) };
+                    value = this._formatTime(timeValues[0], timeValues[1]);
+                } else if (timeValues[0] !== "") {
+                    value = timeValues[0];
+                }
+                
                 content = (
                     <View>
                         <Subtitle>{item.title}</Subtitle>
                         <TouchableOpacity
-                            onPress={() => this._showTimePicker(item.id, { time: "" })}>
+                            onPress={() => this._showTimePicker(item.id, time)}>
                             <Text>{value}</Text>
                         </TouchableOpacity>
                         <Divider styleName="line" />

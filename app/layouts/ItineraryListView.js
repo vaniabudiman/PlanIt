@@ -25,6 +25,7 @@ class ItineraryListView extends Component {
         eventsGETStatus: React.PropTypes.string,
         eventDELETEStatus: React.PropTypes.string,
         dispatch: React.PropTypes.func,
+        refresh: React.PropTypes.bool
     }
 
     constructor (props) {
@@ -44,10 +45,11 @@ class ItineraryListView extends Component {
         this._handleDelete = this._handleDelete.bind(this);
         this._handleClickItem = this._handleClickItem.bind(this);
         this._handleCreateItem = this._handleCreateItem.bind(this);
+        this._handleUpdate = this._handleUpdate.bind(this);
     }
 
     componentWillReceiveProps (nextProps) {
-        if (nextProps.tripId && (this.props.tripId !== nextProps.tripId)) {
+        if ((nextProps.tripId && (this.props.tripId !== nextProps.tripId)) || nextProps.refresh) {
             this.requestEvents(nextProps.dispatch, nextProps.tripId);
         }
 
@@ -66,7 +68,8 @@ class ItineraryListView extends Component {
                 id: event.eventID,
                 reminderFlag: event.reminderFlag,
                 subtitle: "Begins: " + new Date(event.startDateTime + " UTC"),  // datetimes stored as UTC in DB - need to convert to local
-                caption: "Ends: " + new Date(event.endDateTime + " UTC")
+                caption: "Ends: " + new Date(event.endDateTime + " UTC"),
+                event: event
             };
         });
     }
@@ -116,6 +119,11 @@ class ItineraryListView extends Component {
         Actions.eventForm({ tripId: this.props.tripId, name: "" });
     }
 
+    // Take user to event update form (creation w/ prefill)
+    _handleUpdate (event) {
+        Actions.eventForm({ tripId: this.props.tripId, event: event, title: "Update Event" });
+    }
+
     render () {
         return (
             <ListMapTemplate data={this.formattedEvents()}
@@ -134,7 +142,9 @@ class ItineraryListView extends Component {
                 onRefresh={this._handleRefresh}
                 onToggleCalendar={this._handleToggleCalendar}
                 onClickItem={this._handleClickItem}
-                onCreateItem={this._handleCreateItem} />
+                onCreateItem={this._handleCreateItem}
+                showEdit={true}
+                onEdit={this._handleUpdate} />
         );
     }
 }
@@ -144,6 +154,7 @@ export default connect((state) => {
     return {
         events: state.events.events,
         eventsGETStatus: state.events.eventsGETStatus,
-        eventDELETEStatus: state.events.eventDELETEStatus
+        eventDELETEStatus: state.events.eventDELETEStatus,
+        refresh: state.events.refresh
     };
 })(ItineraryListView);

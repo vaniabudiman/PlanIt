@@ -425,7 +425,7 @@ export default class ListMapTemplate extends Component {
                 <TouchableOpacity onPress={this.props.onClickItem.bind(null, item)}>
                     <Row>
                         <View styleName="horizontal space-between">
-                            <View styleName="vertical" style={{ flex: 6 }}>
+                            <View styleName="vertical" style={{ flex: 5 }}>
                                 <Title>{item.title}</Title>
                                 <Subtitle>{item.subtitle}</Subtitle>
                                 <Caption>{item.caption}</Caption>
