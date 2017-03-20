@@ -122,6 +122,7 @@ class ItineraryListView extends Component {
     // Take user to event update form (creation w/ prefill)
     _handleUpdate (event) {
         Actions.eventForm({ tripId: this.props.tripId, event: event, title: "Update Event" });
+    }
 
     _handleDateSelect (date) {
         this.setState({ events: this.props.events }, () => this.filterEventsByDate(date));
