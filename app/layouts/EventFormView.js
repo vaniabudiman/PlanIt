@@ -44,18 +44,13 @@ class EventFormView extends Component {
             Actions.pop();
         }
         if (nextProps.eventPUTStatus === FETCH_STATUS.SUCCESS) {
-            alert("Event updated successfully!")
+            alert("Event updated successfully!");
             Actions.pop();
         }
     }
 
-    requestEvents (dispatch) {
-        dispatch(getEvents(this.props.event.eventID));
-    }
-
     // Format input fields
     formattedInputs (event = null) {
-        console.log("ADDRESS: " + this.props.address);
         let inputs = [
             { id: 1, title: "Event Name", value: this.props.name || "", type: Types.TEXT },
             { id: 2, title: "Address", value: this.props.address || "", type: Types.TEXT },
@@ -104,18 +99,19 @@ class EventFormView extends Component {
             startMinute = startParts[2],
             startSecond = startParts[3];
 
-        if (endDate === "" && endTime === "") {
-            alert("Please enter an end date and time!")
+        if (endDate === "" || endTime === "") {
+            alert("Please enter an end date and time!");
             return;
         }
+
         let endParts = endTime.match(/^(\d+)\:(\d+)\:(\d+)/),
             endHour = endParts[1],
             endMinute = endParts[2],
             endSecond = endParts[3];
 
-        let startDateTime = new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate(), 
+        let startDateTime = new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate(),
                startHour, startMinute, startSecond),
-            endDateTime = new Date(endDate.getFullYear(), endDate.getMonth(), endDate.getDate(), 
+            endDateTime = new Date(endDate.getFullYear(), endDate.getMonth(), endDate.getDate(),
                endHour, endMinute, endSecond);
 
         let eventData = {

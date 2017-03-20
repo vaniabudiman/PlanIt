@@ -123,13 +123,13 @@ class BookmarksView extends Component {
     }
 
     _handleAdd (item) {
-        Actions.eventForm({ 
-            address: item.subtitle, 
-            tripId: this.props.tripId, 
-            title: "Create Event", 
-            lat: item.lat.toString(), 
+        Actions.eventForm({
+            address: item.subtitle,
+            tripId: this.props.tripId,
+            title: "Create Event",
+            lat: item.lat.toString(),
             lon: item.lon.toString(),
-            name: item.title 
+            name: item.title
         });
     }
 

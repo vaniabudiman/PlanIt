@@ -52,7 +52,7 @@ export default class PlanIt extends Component {
                             sceneStyle={ NavigationStyles.listViewScene } title="Trips" {...navBarProps} />
                         <Scene key="tripHome" component={TripHomeView} title="Trip Homepage"
                             sceneStyle={NavigationStyles.tripHomeViewScene} {...navBarProps} />
-                            <Scene key="newTripHome" component={TripHomeView} title="Trip Homepage"
+                        <Scene key="newTripHome" component={TripHomeView} title="Trip Homepage"
                             sceneStyle={NavigationStyles.tripHomeViewScene} {...navBarProps} type="replace" />
 
                         <Scene key="continents" component={ContinentsView} title="Continents"

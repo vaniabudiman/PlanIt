@@ -17,7 +17,7 @@ export default function (state = initialState, action) {
             nextState = { ...state, eventsGETStatus: FETCH_STATUS.ATTEMPTING };
             break;
         case Types.GET_EVENTS_SUCCESS:
-            nextState = { ...state, eventsGETStatus: FETCH_STATUS.SUCCESS, events: action.events };
+            nextState = { ...state, eventsGETStatus: FETCH_STATUS.SUCCESS, events: action.events, refresh: false };
             break;
         case Types.GET_EVENTS_FAILED:
             nextState = { ...state, eventsGETStatus: FETCH_STATUS.FAILED };
@@ -26,10 +26,11 @@ export default function (state = initialState, action) {
             nextState = { ...state, eventPOSTStatus: FETCH_STATUS.ATTEMPTING };
             break;
         case Types.CREATE_EVENT_SUCCESS:
-            nextState = { ...state, eventPOSTStatus: FETCH_STATUS.SUCCESS, event: action.event };
+            nextState = { ...state, eventPOSTStatus: FETCH_STATUS.SUCCESS, event: action.event, refresh: true };
             break;
         case Types.CREATE_EVENT_FAILED:
             nextState = { ...state, eventPOSTStatus: FETCH_STATUS.FAILED };
+            break;
         case Types.DELETE_EVENT_ATTEMPT:
             nextState = { ...state, eventDELETEStatus: FETCH_STATUS.ATTEMPTING };
             break;

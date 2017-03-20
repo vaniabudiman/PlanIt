@@ -66,7 +66,7 @@ class AttractionDetailsView extends Component {
                                 ? this.props.details.rating.toString() + "/5"
                                 : "N/A" },
             { id: 6, title: "Price Level",
-                description: getPriceLevelString(this.props.details.price_level)}
+                description: getPriceLevelString(this.props.details.price_level) }
 
             // { id: __, title: "Business website (if applicable)", description: TODO },
             // { id: __, title: "Hours of operation & current open status", description: TODO}
@@ -80,12 +80,12 @@ class AttractionDetailsView extends Component {
 
     _handleAdd () {
         if (this.props.isBookmark) {
-            Actions.eventForm({ 
-                address: this.props.details.formatted_address || this.props.details.vicinity, 
+            Actions.eventForm({
+                address: this.props.details.formatted_address || this.props.details.vicinity,
                 lat: this.props.details.geometry.location.lat.toString(),
                 lon: this.props.details.geometry.location.lng.toString(),
                 name: this.props.details.name,
-                tripId: this.props.tripId, 
+                tripId: this.props.tripId,
                 title: "Create Event" });
         } else {
             this.props.dispatch(postAttractions(this.props.attraction, this.props.tripId));

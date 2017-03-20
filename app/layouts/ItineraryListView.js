@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import { Actions } from "react-native-router-flux";
 import ListMapTemplate from "../templates/ListMapTemplate.js";
 import { connect } from "react-redux";
 import FETCH_STATUS from "../constants/fetchStatusConstants.js";
@@ -23,7 +24,7 @@ class ItineraryListView extends Component {
         events: React.PropTypes.array,
         eventsGETStatus: React.PropTypes.string,
         eventDELETEStatus: React.PropTypes.string,
-        dispatch: React.PropTypes.func
+        dispatch: React.PropTypes.func,
     }
 
     constructor (props) {
@@ -42,6 +43,7 @@ class ItineraryListView extends Component {
         this._handleRefresh = this._handleRefresh.bind(this);
         this._handleDelete = this._handleDelete.bind(this);
         this._handleClickItem = this._handleClickItem.bind(this);
+        this._handleCreateItem = this._handleCreateItem.bind(this);
     }
 
     componentWillReceiveProps (nextProps) {
@@ -63,8 +65,8 @@ class ItineraryListView extends Component {
                 title: event.eventName,
                 id: event.eventID,
                 reminderFlag: event.reminderFlag,
-                subtitle: "Begins: " + event.startDateTime,
-                caption: "Ends: " + event.endDateTime
+                subtitle: "Begins: " + new Date(event.startDateTime + " UTC"),  // datetimes stored as UTC in DB - need to convert to local
+                caption: "Ends: " + new Date(event.endDateTime + " UTC")
             };
         });
     }
@@ -109,6 +111,11 @@ class ItineraryListView extends Component {
         isDevMode() && alert("calendar toggled to: " + newCalendarToggleState);
     }
 
+    // Take user to event creation form
+    _handleCreateItem () {
+        Actions.eventForm({ tripId: this.props.tripId, name: "" });
+    }
+
     render () {
         return (
             <ListMapTemplate data={this.formattedEvents()}
@@ -126,7 +133,8 @@ class ItineraryListView extends Component {
                 onDelete={this._handleDelete}
                 onRefresh={this._handleRefresh}
                 onToggleCalendar={this._handleToggleCalendar}
-                onClickItem={this._handleClickItem} />
+                onClickItem={this._handleClickItem}
+                onCreateItem={this._handleCreateItem} />
         );
     }
 }

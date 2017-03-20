@@ -226,7 +226,7 @@ export default class FormTemplate extends Component {
     /**
      * Returns e.g. '3:05'.
      */
-    _formatTime(hour, minute) {
+    _formatTime (hour, minute) {
         let time = new Date();
         time.setHours(hour);
         time.setMinutes(minute);

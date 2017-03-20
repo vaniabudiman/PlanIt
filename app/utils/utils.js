@@ -10,31 +10,31 @@ export function getTypesDisplayString (types) {
                 .join(", ");
 }
 
-export function getPriceLevelString(level) {
-        let formattedLevel;
-        switch (level) {
-            case 0:
-                formattedLevel = "Free";
-                break;
-            case 1:
-                formattedLevel = "Inexpensive";
-                break;
-            case 2:
-                formattedLevel = "Moderate";
-                break; 
-            case 3:
-                formattedLevel = "Expensive";
-                break;
-            case 4:
-                formattedLevel = "Very Expensive";
-                break;
-            default:
-                formattedLevel = "N/A"
-                break;
-        }
-
-        return formattedLevel;
+export function getPriceLevelString (level) {
+    let formattedLevel;
+    switch (level) {
+        case 0:
+            formattedLevel = "Free";
+            break;
+        case 1:
+            formattedLevel = "Inexpensive";
+            break;
+        case 2:
+            formattedLevel = "Moderate";
+            break;
+        case 3:
+            formattedLevel = "Expensive";
+            break;
+        case 4:
+            formattedLevel = "Very Expensive";
+            break;
+        default:
+            formattedLevel = "N/A";
+            break;
     }
+
+    return formattedLevel;
+}
 
 // source credit: https://github.com/airbnb/react-native-maps/issues/505
 export function getRegionForCoordinates (points) {

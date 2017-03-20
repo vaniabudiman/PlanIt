@@ -157,7 +157,9 @@ export function createEvent (eventData) {
         if (eventData.eventName === "") { return (alert("Please enter an event name!")); }
         if (eventData.startDateTime === "") { return (alert("Please enter a start date and time!")); }
         if (eventData.endDateTime === "") { return (alert("Please enter an end date and time!")); }
+        
         dispatch(createEventAttempt());
+
         let event = {
             eventName: eventData.eventName,
             startDateTime: eventData.startDateTime,
@@ -167,7 +169,8 @@ export function createEvent (eventData) {
             lat: eventData.lat,
             lon: eventData.lon,
             note: eventData.note
-        }
+        };
+
         fetch(buildPOSTRequestURL(), {
             method: "POST",
             headers: {
@@ -176,7 +179,7 @@ export function createEvent (eventData) {
             },
             body: JSON.stringify({
                 tripID: eventData.tripID,
-                events: [event]                
+                events: [event]
             }),
         })
         .then(response => {
