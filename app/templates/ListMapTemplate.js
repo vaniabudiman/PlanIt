@@ -266,6 +266,7 @@ export default class ListMapTemplate extends Component {
 
     _handleDateSelect (date) {
         this.setState({ date: date });
+        this.props.onDateSelect(date);
     }
 
     _handleToggleMap () {

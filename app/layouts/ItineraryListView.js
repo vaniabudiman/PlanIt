@@ -4,12 +4,13 @@ import { connect } from "react-redux";
 import FETCH_STATUS from "../constants/fetchStatusConstants.js";
 import { getEvents, deleteEvent } from "../actions/eventsActions.js";
 import { isDevMode } from "../utils/utils.js";
+import { filter } from "underscore";
 
 
 // TODO: remove this mock
 var calendarProps = {
-    startDate: "April 1, 2017 00:00:00",
-    endDate: "April 7, 2017 00:00:00"
+    startDate: "March 1, 2017 00:00:00",
+    endDate: "March 30, 2017 00:00:00"
 };
 
 var enableCalendar = true;
@@ -109,6 +110,17 @@ class ItineraryListView extends Component {
         isDevMode() && alert("calendar toggled to: " + newCalendarToggleState);
     }
 
+    _handleDateSelect (date) {
+        this.setState({ events: this.props.events }, () => this.filterEventsByDate(date));
+    }
+
+    filterEventsByDate (date) {
+        let filteredEvents = this.state.events.filter((event) => {
+            return new Date(event.startDateTime).toDateString() === date.toDateString();
+        });
+        this.setState({ events: filteredEvents });
+    }
+
     render () {
         return (
             <ListMapTemplate data={this.formattedEvents()}
@@ -121,6 +133,7 @@ class ItineraryListView extends Component {
                 onSearch={this._handleSearch}
                 enableCalendar={enableCalendar}
                 calendarProps={calendarProps}
+                onDateSelect={this._handleDateSelect.bind(this)}
                 showCalendar={false}
                 showDelete={true}
                 onDelete={this._handleDelete}
