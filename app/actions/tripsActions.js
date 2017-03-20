@@ -7,6 +7,9 @@ export const Types = {
     CREATE_TRIP_ATTEMPT: "CREATE_TRIP_ATTEMPT",
     CREATE_TRIP_SUCCESS: "CREATE_TRIP_SUCCESS",
     CREATE_TRIP_FAILED: "CREATE_TRIP_FAILED",
+    DELETE_TRIP_ATTEMPT: "DELETE_TRIP_ATTEMPT",
+    DELETE_TRIP_SUCCESS: "DELETE_TRIP_SUCCESS",
+    DELETE_TRIP_FAILED: "DELETE_TRIP_FAILED",
     UPDATE_TRIP_ATTEMPT: "UPDATE_TRIP_ATTEMPT",
     UPDATE_TRIP_SUCCESS: "UPDATE_TRIP_SUCCESS",
     UPDATE_TRIP_FAILED: "UPDATE_TRIP_FAILED"
@@ -50,6 +53,26 @@ function createTripFailed (error) {
     return {
         error,
         type: Types.CREATE_TRIP_FAILED
+    };
+}
+
+function deleteTripAttempt () {
+    return {
+        type: Types.DELETE_TRIP_ATTEMPT
+    };
+}
+
+function deleteTripSuccess (tripId) {
+    return {
+        tripId: tripId,
+        type: Types.DELETE_TRIP_SUCCESS
+    };
+}
+
+function deleteTripFailed (error) {
+    return {
+        error,
+        type: Types.DELETE_TRIP_FAILED
     };
 }
 
@@ -190,4 +213,34 @@ export function updateTrip (tripId, tripData) {
             throw (error); // TODO: remove this and do something with the fetch error
         });
     };
+}
+
+export function deleteTrip (tripId) {
+    if (!tripId) {
+        return alert ("No trip was selected to delete.");
+    }
+
+    return dispatch => {
+        dispatch(deleteTripAttempt());
+
+        fetch(apiURL + "trips/" + tripId, {
+            method: "DELETE",
+            headers: {
+                Accept: "application/json",
+                "Content-Type": "application/json",
+            },
+        })
+        .then(response => { // Header response.
+            if (response.status >= 200 && response.status < 300) {
+                dispatch(deleteTripSuccess(tripId));
+            } else {
+                const error = new Error();
+                error.response = response;
+                dispatch(deleteTripFailed(error));
+                throw error;
+            }
+        })
+        .catch(error => {
+            alert("Request Failed: ", error); // TODO: remove this and do something with the fetch error
+        });};
 }
