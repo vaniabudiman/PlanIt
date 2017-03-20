@@ -9,8 +9,8 @@ import { isDevMode } from "../utils/utils.js";
 
 // TODO: remove this mock
 var calendarProps = {
-    startDate: "April 1, 2017 00:00:00",
-    endDate: "April 7, 2017 00:00:00"
+    startDate: "March 1, 2017 00:00:00",
+    endDate: "March 30, 2017 00:00:00"
 };
 
 var enableCalendar = true;
@@ -122,6 +122,16 @@ class ItineraryListView extends Component {
     // Take user to event update form (creation w/ prefill)
     _handleUpdate (event) {
         Actions.eventForm({ tripId: this.props.tripId, event: event, title: "Update Event" });
+
+    _handleDateSelect (date) {
+        this.setState({ events: this.props.events }, () => this.filterEventsByDate(date));
+    }
+
+    filterEventsByDate (date) {
+        let filteredEvents = this.state.events.filter((event) => {
+            return new Date(event.startDateTime).toDateString() === date.toDateString();
+        });
+        this.setState({ events: filteredEvents });
     }
 
     render () {
@@ -136,6 +146,7 @@ class ItineraryListView extends Component {
                 onSearch={this._handleSearch}
                 enableCalendar={enableCalendar}
                 calendarProps={calendarProps}
+                onDateSelect={this._handleDateSelect.bind(this)}
                 showCalendar={false}
                 showDelete={true}
                 onDelete={this._handleDelete}
