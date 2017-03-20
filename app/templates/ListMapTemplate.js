@@ -226,7 +226,8 @@ export default class ListMapTemplate extends Component {
         loadingData: React.PropTypes.bool,
         onClickItem: React.PropTypes.func,
         onCreateItem: React.PropTypes.func,
-        searchString: React.PropTypes.string
+        searchString: React.PropTypes.string,
+        onDateSelect: React.PropTypes.func
     }
 
     static defaultProps = {

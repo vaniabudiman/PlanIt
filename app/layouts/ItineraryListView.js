@@ -4,7 +4,6 @@ import { connect } from "react-redux";
 import FETCH_STATUS from "../constants/fetchStatusConstants.js";
 import { getEvents, deleteEvent } from "../actions/eventsActions.js";
 import { isDevMode } from "../utils/utils.js";
-import { filter } from "underscore";
 
 
 // TODO: remove this mock
