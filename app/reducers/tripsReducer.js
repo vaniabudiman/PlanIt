@@ -28,7 +28,7 @@ export default function (state = initialState, action) {
             nextState = { ...state, tripPOSTStatus: FETCH_STATUS.ATTEMPTING };
             break;
         case Types.CREATE_TRIP_SUCCESS:
-            nextState = { ...state, tripPOSTStatus: FETCH_STATUS.SUCCESS, trip: action.trip };
+            nextState = { ...state, tripPOSTStatus: FETCH_STATUS.SUCCESS, trip: action.trip, refresh: true };
             break;
         case Types.CREATE_TRIP_FAILED:
             nextState = { ...state, tripPOSTStatus: FETCH_STATUS.FAILED };

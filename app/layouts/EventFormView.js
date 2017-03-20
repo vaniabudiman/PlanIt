@@ -39,7 +39,7 @@ class EventFormView extends Component {
     }
 
     componentWillReceiveProps (nextProps) {
-        // Fetch new list of cities if a different country's list of cities is requested
+        // Pop page if event was successfully created/updated && previous status was attempt
         if (this.props.eventPOSTStatus === FETCH_STATUS.ATTEMPTING &&
             nextProps.eventPOSTStatus === FETCH_STATUS.SUCCESS) {
             alert("Event created successfully!");
@@ -67,6 +67,7 @@ class EventFormView extends Component {
 
         if (event) {
 
+            // parsing start and end datetimes for individual components to pass into date/timepicker
             let startDateTime = new Date(event.event.startDateTime + " UTC"),
                 endDateTime = new Date(event.event.endDateTime + " UTC");
 
@@ -121,7 +122,7 @@ class EventFormView extends Component {
         let startDate,
             splitStartDate = startDateString.split(",");
 
-        if (splitStartDate.length === 3) {
+        if (splitStartDate.length === 3) { // handles prefilled cases where value was not changed
             startDate = new Date(splitStartDate[0], splitStartDate[1], splitStartDate[2]);
         } else {
             startDate = new Date(startDateString);
@@ -130,7 +131,7 @@ class EventFormView extends Component {
         let startHour, startMinute, startSecond,
             splitStartTime = startTimeString.split(",");
 
-        if (splitStartTime.length === 2) {
+        if (splitStartTime.length === 2) { // handles prefilled cases where value was not changed
             startHour = splitStartTime[0];
             startMinute = splitStartTime[1];
             startSecond = 0;
@@ -149,7 +150,7 @@ class EventFormView extends Component {
         let endDate,
             splitEndDate = endDateString.split(",");
 
-        if (splitEndDate.length === 3) {
+        if (splitEndDate.length === 3) { // handles prefilled cases where value was not changed
             endDate = new Date(splitEndDate[0], splitEndDate[1], splitEndDate[2]);
         } else {
             endDate = new Date(endDateString);
@@ -158,7 +159,7 @@ class EventFormView extends Component {
         let endHour, endMinute, endSecond,
             splitEndTime = endTimeString.split(",");
             
-        if (splitEndTime.length === 2) {
+        if (splitEndTime.length === 2) { // handles prefilled cases where value was not changed
             endHour = splitEndTime[0];
             endMinute = splitEndTime[1];
             endSecond = 0;

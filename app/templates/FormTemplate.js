@@ -263,13 +263,13 @@ export default class FormTemplate extends Component {
         switch (item.type) {
             // TODO: other types (as necessary in future)
             case "date": {
-                
-                let value = "Pick a Date";
+                // If passing in prefilled value, pass in string w/ format "YEAR,MONTH,DAY"
+                let value = "Pick a Date"; // default value if not prefilled
                 let dateValues = item.value.split(",");
-                if (dateValues.length === 3) {
+                if (dateValues.length === 3) { // setting prefilled value
                     let date = new Date(dateValues[0], dateValues[1], dateValues[2]);
                     value = date.toDateString();
-                } else if (dateValues[0] !== "") {
+                } else if (dateValues[0] !== "") { // setting value from datepicker
                     value = dateValues[0];
                 }
                 
@@ -286,13 +286,14 @@ export default class FormTemplate extends Component {
                 break;
             }
             case "time": {
-                let value = "Pick a Time";
+                // If passing in prefilled value, pass in string w/ format "HOUR,MINUTE"
+                let value = "Pick a Time"; // default value if not prefilled
                 let time = {};
                 let timeValues = item.value.split(",");
-                if (timeValues.length === 2) {
+                if (timeValues.length === 2) { // setting prefilled value
                     time = { hour: parseInt(timeValues[0]), minute: parseInt(timeValues[1]) };
                     value = this._formatTime(timeValues[0], timeValues[1]);
-                } else if (timeValues[0] !== "") {
+                } else if (timeValues[0] !== "") { // setting value from timepicker
                     value = timeValues[0];
                 }
                 
@@ -308,7 +309,7 @@ export default class FormTemplate extends Component {
                 );
                 break;
             }
-            case "textarea": {
+            case "textarea": { // a multiline version of a textinput with no character limit
                 content = (
                     <View>
                         <Subtitle>{item.title}</Subtitle>
