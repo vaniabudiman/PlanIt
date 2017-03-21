@@ -53,6 +53,11 @@ class ItineraryListView extends Component {
             this.requestEvents(nextProps.dispatch, nextProps.tripId);
         }
 
+        if (this.props.eventDELETEStatus === FETCH_STATUS.ATTEMPTING &&
+            nextProps.eventDELETEStatus === FETCH_STATUS.SUCCESS) {
+            alert("Event deleted successfully");
+        }
+
         // Always update state events w/ latest events from props
         this.setState({ events: nextProps.events });
     }
@@ -97,8 +102,6 @@ class ItineraryListView extends Component {
     }
 
     _handleDelete (item) {
-        alert ("Successfully deleted Event.");
-
         this.props.dispatch(deleteEvent(item.id));
     }
 

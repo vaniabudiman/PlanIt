@@ -38,13 +38,7 @@ export default function (state = initialState, action) {
             nextState = { ...state, eventDELETEStatus: FETCH_STATUS.ATTEMPTING };
             break;
         case Types.DELETE_EVENT_SUCCESS:
-            nextState = {
-                ...state,
-                eventDELETEStatus: FETCH_STATUS.SUCCESS,
-                // find & remove the deleted event from the current list of events
-                // clone to return a new array so React picks up change & re-renders the updated events list
-                events: clone(state.events).filter((event) => event.eventID !== action.eventId)
-            };
+            nextState = { ...state, eventDELETEStatus: FETCH_STATUS.SUCCESS, refresh: true };
             break;
         case Types.DELETE_EVENT_FAILED:
             nextState = { ...state, eventDELETEStatus: FETCH_STATUS.FAILED };
