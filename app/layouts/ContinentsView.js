@@ -21,8 +21,7 @@ export default class ContinentsView extends Component {
     }
 
     componentDidMount () {
-        // TODO: remove this... just testing for now
-        isDevMode() && alert("continents for trip id: " + this.props.tripId);
+        isDevMode() && alert("continents for trip id: " + this.props.tripId); // eslint-disable-line no-unused-expressions
     }
 
     _getCell (cell) {

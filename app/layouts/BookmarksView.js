@@ -136,7 +136,7 @@ class BookmarksView extends Component {
     // TODO: remove/edit... this is just an example on how the callback would work
     _handleClickItem (item) {
         // Make necessary calls to do w/e you want when clicking on item identified by id
-        isDevMode() && alert("clicked on item: " + item.id);
+        isDevMode() && alert("clicked on item: " + item.id); // eslint-disable-line no-unused-expressions
 
         Actions.attractionDetails({
             title: "Bookmark Details",
@@ -148,7 +148,7 @@ class BookmarksView extends Component {
     }
 
     _handleToggleMap (showMap) {
-        isDevMode() && alert("toggled map: " + showMap);
+        isDevMode() && alert("toggled map: " + showMap); // eslint-disable-line no-unused-expressions
     }
 
     _handleShare (item) {   // TODO: check ListMapTemplate updated to bind entire item to onShare instead of just id

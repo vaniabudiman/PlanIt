@@ -83,7 +83,7 @@ class CitiesView extends Component {
     }
 
     _handleClickItem (item) {
-        isDevMode() && alert("clicked on cities: " + item.title); //  TODO: remove this later
+        isDevMode() && alert("clicked on cities: " + item.title); // eslint-disable-line no-unused-expressions
 
         Actions.attractions({ city: item, tripId: this.props.tripId });
     }
