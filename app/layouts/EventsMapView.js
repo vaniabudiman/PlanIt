@@ -69,6 +69,10 @@ class EventsMapView extends Component {
             return event.lat && event.lon;
         });
 
+        if (eventsWithLocation.length === 0) {
+            return;
+        }
+
         return getRegionForCoordinates(eventsWithLocation.map((event) => {
             return {
                 latitude: event.lat,
