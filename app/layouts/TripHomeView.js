@@ -14,8 +14,7 @@ export default class TripHomeView extends Component {
     }
 
     componentDidMount () {
-        // TODO: remove this... just testing for now
-        isDevMode() && alert("trips home for trip id: " + this.props.tripId);
+        isDevMode() && alert("trips home for trip id: " + this.props.tripId); // eslint-disable-line no-unused-expressions
     }
 
     constructor (props) {

@@ -62,7 +62,7 @@ export function login (loginData) {
         .then(response => {
             if (response.status >= 200 && response.status < 300) {
                 dispatch(loginSuccess());
-                isDevMode() && alert("Login Success. Hello " + loginData.userName + "!");
+                isDevMode() && alert("Login Success. Hello " + loginData.userName + "!"); // eslint-disable-line no-unused-expressions
             } else {
                 const error = new Error();
                 error.response = response;

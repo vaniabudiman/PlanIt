@@ -1,6 +1,5 @@
 import { Types } from "../actions/eventsActions.js";
 import FETCH_STATUS from "../constants/fetchStatusConstants.js";
-import { clone } from "underscore";
 
 
 const initialState = {

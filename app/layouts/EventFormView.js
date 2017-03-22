@@ -198,7 +198,7 @@ class EventFormView extends Component {
     // TODO: remove/edit... this is just an example on how the callback would work
     _handleToggleMap (newMapToggleState) {
         // Make necessary calls to do w/e you want based on this new map toggled state
-        isDevMode() && alert("map toggled to: " + newMapToggleState);
+        isDevMode() && alert("map toggled to: " + newMapToggleState); // eslint-disable-line no-unused-expressions
     }
 
     // Updates value of input that was changed

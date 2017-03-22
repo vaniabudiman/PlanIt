@@ -117,7 +117,7 @@ class AttractionsView extends Component {
     }
 
     _handleClickItem (item) {
-        isDevMode() && alert("clicked on attractions: " + item.title + "\n" + "tripID:" + this.props.tripId); //  TODO: remove this later
+        isDevMode() && alert("clicked on attractions: " + item.title + "\n" + "tripID:" + this.props.tripId); // eslint-disable-line no-unused-expressions
 
         Actions.attractionDetails({ attraction: item, tripId: this.props.tripId });
     }
@@ -127,7 +127,7 @@ class AttractionsView extends Component {
     }
 
     _handleToggleMap (showMap) {
-        isDevMode() && alert("map toggled to: " + showMap);
+        isDevMode() && alert("map toggled to: " + showMap); // eslint-disable-line no-unused-expressions
     }
 
     render () {
