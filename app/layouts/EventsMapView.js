@@ -69,7 +69,6 @@ class EventsMapView extends Component {
             return event.lat && event.lon;
         });
 
-
         return getRegionForCoordinates(eventsWithLocation.map((event) => {
             return {
                 latitude: event.lat,
@@ -79,8 +78,11 @@ class EventsMapView extends Component {
     }
 
     formattedEventMarkers () {
+        let eventsWithLocation = this.state.events.filter((event) => {
+            return event.lat && event.lon;
+        });
 
-        return this.state.events.map((event) => {
+        return eventsWithLocation.map((event) => {
             return {
                 id: event.eventID,
                 latlng: {

@@ -269,7 +269,12 @@ export default class ListMapTemplate extends Component {
 
     _handleDateSelect (date) {
         this.setState({ date: date });
-        this.props.onDateSelect(date);
+        let currentMonth = this.state.date.getMonth();
+        let selectedMonth = date.getMonth();
+        if (selectedMonth === currentMonth) {
+            this.setState({ date: date });
+            this.props.onDateSelect(date);
+        }
     }
 
     _handleToggleMap () {
