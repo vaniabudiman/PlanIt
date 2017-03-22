@@ -14,7 +14,6 @@ var calendarProps = {
 };
 
 var enableCalendar = true;
-var showCalendar = true;
 
 
 class ItineraryListView extends Component {

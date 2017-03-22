@@ -6,8 +6,6 @@ import { Provider, connect } from "react-redux";
 import { Router, Scene } from "react-native-router-flux";
 import { AppRegistry } from "react-native";
 import store from "./core/store.js";
-import HomeView from "./layouts/HomeView.js";
-import FormView from "./layouts/FormView.js";
 import TripsView from "./layouts/TripsView.js";
 import { NavigationStyles } from "./styles/NavigationStyles.js";
 import UserSettings from "./components/UserSettings.js";
@@ -69,22 +67,14 @@ export default class PlanIt extends Component {
                         <Scene key="bookmarks" component={BookmarksView}
                             sceneStyle={ NavigationStyles.listViewScene } title="Bookmarks" {...navBarProps} />
 
-                        { /* TODO: remove these... testing / examples for now */ }
-                        <Scene key="home" component={HomeView} title="Home View" {...navBarProps} />
-
                         <Scene key="itinerary" component={ItineraryListView}
                             sceneStyle={ NavigationStyles.listViewScene } title="Itinerary" {...navBarProps} />
-                        <Scene key="trips" component={TripsView}
-                            sceneStyle={ NavigationStyles.listViewScene } title="Trips" {...navBarProps} />
                         <Scene key="tripForm" component={TripFormView}
                             sceneStyle={ NavigationStyles.listViewScene } title="Create Trip" {...navBarProps} />
                         <Scene key="eventForm" component={EventFormView}
                             sceneStyle={ NavigationStyles.listViewScene } title="Create Event" {...navBarProps} />
                         <Scene key="itemDetails" component={ItemDetailsView}
                             sceneStyle={ NavigationStyles.listViewScene } title="Item / Details" />
-
-                        <Scene key="formView" component={FormView}
-                            sceneStyle={ NavigationStyles.listViewScene } title="Form View" {...navBarProps} />
 
                         <Scene key="userProfile" component={UserProfileView}
                             sceneStyle={ NavigationStyles.listViewScene } title="User Profile" />
