@@ -3,24 +3,15 @@ import { Actions } from "react-native-router-flux";
 import ListMapTemplate from "../templates/ListMapTemplate.js";
 import { connect } from "react-redux";
 import FETCH_STATUS from "../constants/fetchStatusConstants.js";
-import { getEvents, deleteEvent } from "../actions/eventsActions.js";
-import { isDevMode } from "../utils/utils.js";
+import { deleteEvent } from "../actions/eventsActions.js";
+import { isDevMode, getRegionForCoordinates } from "../utils/utils.js";
 
-
-// TODO: remove this mock
-var calendarProps = {
-    startDate: "March 1, 2017 00:00:00",
-    endDate: "March 30, 2017 00:00:00"
-};
-
-var enableCalendar = true;
-
-
-class ItineraryListView extends Component {
+class EventsMapView extends Component {
 
     static propTypes = {
         tripId: React.PropTypes.number,
         events: React.PropTypes.array,
+        filteredEvents: React.PropTypes.array,
         eventsGETStatus: React.PropTypes.string,
         eventDELETEStatus: React.PropTypes.string,
         dispatch: React.PropTypes.func,
@@ -31,28 +22,22 @@ class ItineraryListView extends Component {
         super(props);
 
         this.state = {
-            events: this.props.events,
-            searchString: "",
-            loadingItinerary: false
+            events: this.props.filteredEvents,
+            searchString: ""
         };
-
-        this.requestEvents(this.props.dispatch, this.props.tripId);
 
         // Bind callback handlers
         this._handleSearch = this._handleSearch.bind(this);
         this._handleRefresh = this._handleRefresh.bind(this);
         this._handleDelete = this._handleDelete.bind(this);
+        this._handleShare = this._handleShare.bind(this);
+        this._handleToggleMap = this._handleToggleMap.bind(this);
         this._handleClickItem = this._handleClickItem.bind(this);
         this._handleCreateItem = this._handleCreateItem.bind(this);
         this._handleUpdate = this._handleUpdate.bind(this);
-        this._handleDateSelect = this._handleDateSelect.bind(this);
     }
 
     componentWillReceiveProps (nextProps) {
-        if ((nextProps.tripId && (this.props.tripId !== nextProps.tripId)) || nextProps.refresh) {
-            this.requestEvents(nextProps.dispatch, nextProps.tripId);
-        }
-
         if (this.props.eventDELETEStatus === FETCH_STATUS.ATTEMPTING &&
             nextProps.eventDELETEStatus === FETCH_STATUS.SUCCESS) {
             alert("Event deleted successfully");
@@ -60,10 +45,6 @@ class ItineraryListView extends Component {
 
         // Always update state events w/ latest events from props
         this.setState({ events: nextProps.events });
-    }
-
-    requestEvents (dispatch, tripId) {
-        dispatch(getEvents(tripId));
     }
 
     formattedEvents () {
@@ -79,12 +60,45 @@ class ItineraryListView extends Component {
         });
     }
 
+    calculateMapViewPort () {
+        if (this.state.events.length === 0) {
+            return null;
+        }
+
+        let eventsWithLocation = this.state.events.filter((event) => {
+            return event.lat && event.lon;
+        });
+
+
+        return getRegionForCoordinates(eventsWithLocation.map((event) => {
+            return {
+                latitude: event.lat,
+                longitude: event.lon
+            };
+        }));
+    }
+
+    formattedEventMarkers () {
+
+        return this.state.events.map((event) => {
+            return {
+                id: event.eventID,
+                latlng: {
+                    latitude: event.lat,
+                    longitude: event.lon
+                },
+                title: event.eventName,
+                description: event.address
+            };
+        });
+    }
+
     _handleSearch (str) {
         str = str.trim().toLowerCase();
 
         if (str === "") {
             // empty search value, so return all current events from props
-            this.setState({ events: this.props.events, searchString: str });
+            this.setState({ events: this.props.filteredEvents, searchString: str });
         } else {
             let matchedEvents = this.state.events.filter((event) => {
                 // Match on event "name", address, & "types"
@@ -95,9 +109,6 @@ class ItineraryListView extends Component {
     }
 
     _handleRefresh () {
-        // Just fire off another fetch to refresh
-        this.requestEvents(this.props.dispatch, this.props.tripId);
-
         this.setState({ searchString: "" });
     }
 
@@ -105,16 +116,18 @@ class ItineraryListView extends Component {
         this.props.dispatch(deleteEvent(item.id));
     }
 
-    // TODO: remove/edit... this is just an example on how the callback would work
+    _handleToggleMap (showMap) {
+        isDevMode() && alert("toggled map: " + showMap); // eslint-disable-line no-unused-expressions
+    }
+
     _handleClickItem (item) {
         // Make necessary calls to do w/e you want when clicking on item identified by id
         isDevMode() && alert("clicked on item: " + item.title); // eslint-disable-line no-unused-expressions
     }
 
-    // TODO: remove/edit... this is just an example on how the callback would work
-    _handleToggleCalendar (newCalendarToggleState) {
-        // Make necessary calls to do w/e you want based on this new calendar toggled state
-        isDevMode() && alert("calendar toggled to: " + newCalendarToggleState); // eslint-disable-line no-unused-expressions
+    _handleShare (item) {
+        // Make necessary calls to share the item identified by id
+        alert("share: " + item.id);
     }
 
     // Take user to event creation form
@@ -127,43 +140,24 @@ class ItineraryListView extends Component {
         Actions.eventForm({ tripId: this.props.tripId, event: event, title: "Update Event" });
     }
 
-    _handleDateSelect (date) {
-        this.filterEventsByDate(date);
-    }
-
-    filterEventsByDate (date) {
-        let filteredEvents = this.props.events.filter((event) => {
-            return new Date(event.startDateTime).toDateString() === date.toDateString();
-        });
-        this.goToSingleEventView(date, filteredEvents);
-    }
-
-    goToSingleEventView (date, events) {
-        Actions.eventsMap({
-            title: date.toDateString(),
-            tripId: this.props.tripId,
-            filteredEvents: events
-        });
-    }
-
     render () {
         return (
             <ListMapTemplate data={this.formattedEvents()}
-                emptyListMessage={"Create a event to begin!"}
-                loadingData={
-                    (this.props.eventsGETStatus === FETCH_STATUS.ATTEMPTING) ||
-                    (this.props.eventDELETEStatus === FETCH_STATUS.ATTEMPTING)
-                }
+                emptyListMessage={
+                    this.props.eventsGETStatus !== FETCH_STATUS.ATTEMPTING
+                    ? "No events for the date you have selected" : ""}
+                loadingData={(this.props.eventDELETEStatus === FETCH_STATUS.ATTEMPTING)}
                 enableSearch={true}
                 onSearch={this._handleSearch}
-                enableCalendar={enableCalendar}
-                calendarProps={calendarProps}
-                onDateSelect={this._handleDateSelect}
-                showCalendar={false}
+                enableMap={true}
+                onToggleMap={this._handleToggleMap}
+                mapProps={{ region: this.calculateMapViewPort() }}
+                mapMarkers={this.formattedEventMarkers()}
                 showDelete={true}
                 onDelete={this._handleDelete}
+                showShare={false}
+                onShare={this._handleShare}
                 onRefresh={this._handleRefresh}
-                onToggleCalendar={this._handleToggleCalendar}
                 onClickItem={this._handleClickItem}
                 onCreateItem={this._handleCreateItem}
                 showEdit={true}
@@ -173,11 +167,10 @@ class ItineraryListView extends Component {
 }
 
 export default connect((state) => {
-    // map state to props
+    // Map state to props
     return {
         events: state.events.events,
-        eventsGETStatus: state.events.eventsGETStatus,
         eventDELETEStatus: state.events.eventDELETEStatus,
         refresh: state.events.refresh
     };
-})(ItineraryListView);
+})(EventsMapView);
