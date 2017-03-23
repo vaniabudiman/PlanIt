@@ -133,7 +133,7 @@ class ItineraryListView extends Component {
 
     filterEventsByDate (date) {
         let filteredEvents = this.props.events.filter((event) => {
-            return new Date(event.startDateTime).toDateString() === date.toDateString();
+            return new Date(event.startDateTime + " UTC").toDateString() === date.toDateString();
         });
         this.goToSingleEventView(date, filteredEvents);
     }
