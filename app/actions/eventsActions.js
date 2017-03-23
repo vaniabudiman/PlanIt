@@ -4,6 +4,9 @@ export const Types = {
     GET_EVENTS_ATTEMPT: "GET_EVENTS_ATTEMPT",
     GET_EVENTS_SUCCESS: "GET_EVENTS_SUCCESS",
     GET_EVENTS_FAILED: "GET_EVENTS_FAILED",
+    GET_EVENT_DETAILS_ATTEMPT: "GET_EVENT_DETAILS_ATTEMPT",
+    GET_EVENT_DETAILS_SUCCESS: "GET_EVENT_DETAILS_SUCCESS",
+    GET_EVENT_DETAILS_FAILED: "GET_EVENT_DETAILS_FAILED",
     CREATE_EVENT_ATTEMPT: "CREATE_EVENT_ATTEMPT",
     CREATE_EVENT_SUCCESS: "CREATE_EVENT_SUCCESS",
     CREATE_EVENT_FAILED: "CREATE_EVENT_FAILED",
@@ -32,6 +35,26 @@ function getEventsFailed (error) {
     return {
         error,
         type: Types.GET_EVENTS_FAILED
+    };
+}
+
+function getEventDetailsAttempt () {
+    return {
+        type: Types.GET_EVENT_DETAILS_ATTEMPT
+    };
+}
+
+function getEventDetailsSuccess (response) {
+    return {
+        event: response.event,
+        type: Types.GET_EVENT_DETAILS_SUCCESS
+    };
+}
+
+function getEventDetailsFailed (error) {
+    return {
+        error,
+        type: Types.GET_EVENT_DETAILS_FAILED
     };
 }
 
@@ -139,6 +162,38 @@ export function getEvents (tripId) {
         })
         .then(response => {
             dispatch(getEventsSuccess(response));
+        })
+        .catch(error => {
+            alert("Request Failed: ", error); // TODO: remove this and do something with the fetch error
+        });};
+}
+
+export function getEventDetails (eventId) {
+    return dispatch => {
+        dispatch(getEventDetailsAttempt());
+
+        fetch(buildGETRequestURL(null, eventId), {
+            method: "GET",
+            headers: {
+                Accept: "application/json",
+                "Content-Type": "application/json",
+            },
+        })
+        .then(response => { // Header response.
+            if (response.status >= 200 && response.status < 300) {
+                return response.json();
+            } else if (response.status === 404) {
+                let notFoundResponse = { event: {} };
+                return notFoundResponse;
+            } else {
+                const error = new Error();
+                error.response = response;
+                dispatch(getEventDetailsFailed(error));
+                throw error;
+            }
+        })
+        .then(response => {
+            dispatch(getEventDetailsSuccess(response));
         })
         .catch(error => {
             alert("Request Failed: ", error); // TODO: remove this and do something with the fetch error

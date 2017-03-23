@@ -24,6 +24,7 @@ import ItineraryListView from "./layouts/ItineraryListView.js";
 import TripFormView from "./layouts/TripFormView.js";
 import EventFormView from "./layouts/EventFormView.js";
 import EventsMapView from "./layouts/EventsMapView.js";
+import EventDetailsView from "./layouts/EventDetailsView.js";
 
 
 // Connect the router to the Redux store
@@ -78,6 +79,8 @@ export default class PlanIt extends Component {
                             sceneStyle={ NavigationStyles.listViewScene } title="Create Trip" {...navBarProps} />
                         <Scene key="eventForm" component={EventFormView}
                             sceneStyle={ NavigationStyles.listViewScene } title="Create Event" {...navBarProps} />
+                        <Scene key="eventDetails" component={EventDetailsView} title="Event Details"
+                            sceneStyle={NavigationStyles.listViewScene} {...navBarProps} />
                         <Scene key="itemDetails" component={ItemDetailsView}
                             sceneStyle={ NavigationStyles.listViewScene } title="Item / Details" />
 

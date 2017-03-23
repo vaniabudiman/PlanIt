@@ -4,7 +4,9 @@ import FETCH_STATUS from "../constants/fetchStatusConstants.js";
 
 const initialState = {
     events: [],
+    event: {},
     eventsGETStatus: "",
+    eventDetailsGETStatus: "",
     eventDELETEStatus: "",
     eventPOSTStatus: "",
     eventPUTStatus: "",
@@ -23,6 +25,15 @@ export default function (state = initialState, action) {
             break;
         case Types.GET_EVENTS_FAILED:
             nextState = { ...state, eventsGETStatus: FETCH_STATUS.FAILED };
+            break;
+        case Types.GET_EVENT_DETAILS_ATTEMPT:
+            nextState = { ...state, eventDetailsGETStatus: FETCH_STATUS.ATTEMPTING };
+            break;
+        case Types.GET_EVENT_DETAILS_SUCCESS:
+            nextState = { ...state, eventDetailsGETStatus: FETCH_STATUS.SUCCESS, event: action.event, refresh: false };
+            break;
+        case Types.GET_EVENT_DETAILS_FAILED:
+            nextState = { ...state, eventDetailsGETStatus: FETCH_STATUS.FAILED };
             break;
         case Types.CREATE_EVENT_ATTEMPT:
             nextState = { ...state, eventPOSTStatus: FETCH_STATUS.ATTEMPTING };
@@ -46,7 +57,7 @@ export default function (state = initialState, action) {
             nextState = { ...state, eventPUTStatus: FETCH_STATUS.ATTEMPTING };
             break;
         case Types.UPDATE_EVENT_SUCCESS:
-            nextState = { ...state, eventPUTStatus: FETCH_STATUS.SUCCESS, refresh: true };
+            nextState = { ...state, eventPUTStatus: FETCH_STATUS.SUCCESS, event: action.event, refresh: true };
             break;
         case Types.UPDATE_EVENT_FAILED:
             nextState = { ...state, eventPUTStatus: FETCH_STATUS.FAILED };

@@ -108,7 +108,7 @@ class ItineraryListView extends Component {
     // TODO: remove/edit... this is just an example on how the callback would work
     _handleClickItem (item) {
         // Make necessary calls to do w/e you want when clicking on item identified by id
-        isDevMode() && alert("clicked on item: " + item.title); // eslint-disable-line no-unused-expressions
+        Actions.eventDetails({ tripId: this.props.tripId, event: item });
     }
 
     // TODO: remove/edit... this is just an example on how the callback would work
