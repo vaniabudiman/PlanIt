@@ -10,7 +10,9 @@ import { isDevMode } from "../utils/utils.js";
 export default class TripHomeView extends Component {
 
     static propTypes = {
-        tripId: React.PropTypes.number
+        tripId: React.PropTypes.number,
+        tripStartDate: React.PropTypes.string,
+        tripEndDate: React.PropTypes.string
     }
 
     componentDidMount () {
@@ -27,11 +29,16 @@ export default class TripHomeView extends Component {
 
     getRoute (id) {
         let defaultProps = { tripId: this.props.tripId };
+        let itineraryProps = {
+            tripId: this.props.tripId,
+            tripStartDate: this.props.tripStartDate,
+            tripEndDate: this.props.tripEndDate
+        };
         let route;
 
         switch (id) {
             case "Itinerary":
-                route = () => Actions.itinerary(defaultProps);
+                route = () => Actions.itinerary(itineraryProps);
                 break;
             case "Bookmarks":
                 route = () => Actions.bookmarks(defaultProps);

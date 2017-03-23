@@ -253,7 +253,8 @@ export default class ListMapTemplate extends Component {
         this.state = {
             showMap: this.props.showMap,
             showCalendar: this.props.showCalendar,
-            date: new Date("April 1, 2017 00:00:00")
+            date: this.props.calendarProps && this.props.calendarProps.startDate
+                ? new Date(this.props.calendarProps.startDate + "UTC") : new Date("April 1, 2017 00:00:00")
         };
 
         // Bind callback handlers

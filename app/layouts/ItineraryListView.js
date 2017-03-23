@@ -7,12 +7,6 @@ import { getEvents, deleteEvent } from "../actions/eventsActions.js";
 import { isDevMode } from "../utils/utils.js";
 
 
-// TODO: remove this mock
-var calendarProps = {
-    startDate: "March 1, 2017 00:00:00",
-    endDate: "March 30, 2017 00:00:00"
-};
-
 var enableCalendar = true;
 
 
@@ -20,6 +14,8 @@ class ItineraryListView extends Component {
 
     static propTypes = {
         tripId: React.PropTypes.number,
+        tripStartDate: React.PropTypes.string,
+        tripEndDate: React.PropTypes.string,
         events: React.PropTypes.array,
         eventsGETStatus: React.PropTypes.string,
         eventDELETEStatus: React.PropTypes.string,
@@ -46,6 +42,7 @@ class ItineraryListView extends Component {
         this._handleCreateItem = this._handleCreateItem.bind(this);
         this._handleUpdate = this._handleUpdate.bind(this);
         this._handleDateSelect = this._handleDateSelect.bind(this);
+        this._handleAvailableCalendarDates = this._handleAvailableCalendarDates.bind(this);
     }
 
     componentWillReceiveProps (nextProps) {
@@ -131,6 +128,12 @@ class ItineraryListView extends Component {
         this.filterEventsByDate(date);
     }
 
+    _handleAvailableCalendarDates () {
+        // Available calendar dates will be based on the time range of the trip
+        let calendarProps = { startDate: this.props.tripStartDate, endDate: this.props.tripEndDate };
+        return calendarProps;
+    }
+
     filterEventsByDate (date) {
         let filteredEvents = this.props.events.filter((event) => {
             return new Date(event.startDateTime + " UTC").toDateString() === date.toDateString();
@@ -157,7 +160,7 @@ class ItineraryListView extends Component {
                 enableSearch={true}
                 onSearch={this._handleSearch}
                 enableCalendar={enableCalendar}
-                calendarProps={calendarProps}
+                calendarProps={this._handleAvailableCalendarDates()}
                 onDateSelect={this._handleDateSelect}
                 showCalendar={false}
                 showDelete={true}

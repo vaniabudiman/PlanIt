@@ -133,7 +133,8 @@ class TripsView extends Component {
 
     // Take user to trip homepage
     _handleClickItem (item) {
-        Actions.tripHome({ tripId: item.id, title: "Create Trip" });
+        Actions.tripHome({ tripId: item.id, title: "Trip Homepage",
+            tripStartDate: item.startDate, tripEndDate: item.endDate });
     }
 
      // Take user to trip creation form
