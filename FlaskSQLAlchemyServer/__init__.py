@@ -14,7 +14,8 @@ from sqlalchemy.sql import func
 # Our defined modules.
 from base import base, engine
 from models import DT_FORMAT
-from models import User, Trip, Event, Bookmark, Permissions, PermissionsEnum
+from models import User, Trip, Event, Bookmark
+from models import Permissions, PermissionsEnum, Transportation, TransportEnum
 
 # Versioning.
 VERSION = 'v1'
@@ -335,6 +336,298 @@ def trips(tripID=None):
             db.delete(trip)
             commit_and_close(db)
             return make_response('Event deleted successfully', 200)
+    return bad_request()
+
+
+@app.route(VER_PATH + '/transportation',
+           methods=[POST, GET], strict_slashes=False)
+@app.route(VER_PATH + '/transportation/<int:transportationID>',
+           methods=[PUT, DELETE])
+def transportation(transportationID=None):
+    if request.method == POST:
+        try:
+            post_tripID = int(request.json['tripID'])
+            post_transports = request.json['transportation']
+        except KeyError:
+            return bad_request()
+
+        db = create_db_session()
+        try:
+            trip = db.query(Trip).filter(Trip.tripID == post_tripID).first()
+            if trip is None:
+                return make_response('Trip not found.', 404)
+            if trip.userName != session.get(KEY__USERNAME):
+                return make_response(
+                    'User not authorized to add transportation this Trip.', 401)
+        finally:
+            commit_and_close(db)
+
+        if not isinstance(post_transports, list) or len(post_transports) == 0:
+            # There should be at least one Event to work with.
+            return bad_request()
+
+        db = create_db_session()
+        try:
+            max_event_id = get_max_id(db, Event.eventID)
+            max_transport_id = get_max_id(db, Transportation.transportationID)
+            event_list = []
+            transport_list = []
+            pair_list = []
+            for transport in post_transports:
+                max_event_id += 1
+                max_transport_id += 1
+                new_event = Event(
+                    max_event_id,
+                    'Transportation: ' + transport['type'],
+                    to_datetime(transport['depatureDateTime']),
+                    to_datetime(transport['arrivalDateTime']),
+                    None, None, None, None, None, None, post_tripID)
+                new_transport = Transportation(
+                    max_transport_id,
+                    TransportEnum(transport['type']),
+                    transport.get('operator'),
+                    transport.get('number'),
+                    transport.get('departureLocationID'),
+                    transport.get('arrivalLocationID'),
+                    max_event_id)
+                event_list.append(new_event)
+                transport_list.append(new_transport)
+                pair_list.append((new_event, new_transport))
+        except (KeyError, ValueError) as err:
+            commit_and_close(db)
+            return bad_request(err)
+
+        try:
+            db.add_all(event_list + transport_list)
+            db.commit()
+
+            transport_dict_list = []
+            for (e, t) in pair_list:
+                t_dict = t.to_dict()
+                e_dict = e.to_dict()
+                t_dict['departureDateTime'] = e_dict['startDateTime']
+                t_dict['arrivalDateTime'] = e_dict['endDateTime']
+                transport_dict_list += [t_dict]
+            ret_dict = {'transportation': transport_dict_list}
+            return make_response(jsonify(ret_dict), 201)
+        except IntegrityError:
+            db.rollback()
+            # This should not occur given that we auto increment max EventID.
+            # This might occur if multiple users are adding at the same time.
+            return make_response(
+                'Conflict - TransportationID/EventID taken.', 409)
+        finally:
+            commit_and_close(db)
+    elif request.method == GET:
+        post_tripID = request.args.get('tripID', None)
+        if post_tripID is not None:
+            db = create_db_session()
+            try:
+                trip = db.query(Trip).filter(Trip.tripID == post_tripID).first()
+                if trip is None:
+                    return make_response('Trip not found.', 404)
+                if trip.userName != session.get(KEY__USERNAME):
+                    return make_response(
+                        'User not authorized to view these Transportations.',
+                        401)
+                pair_list = db.query(Event, Transportation).filter(and_(
+                    Event.tripID == post_tripID,
+                    Event.eventID == Transportation.eventID)).all()
+
+                # Get shared events through permissions.
+                perm_event_list = db.query(Permissions, Event).join(
+                    Event.transportation).filter(
+                    and_(Permissions.toTrip == post_tripID,
+                         Permissions.type == PermissionsEnum.EVENT,
+                         Permissions.permissionID == Event.eventID,
+                         Permissions.toUser == session.get(
+                             KEY__USERNAME))).all()
+                eventID_list = [e.eventID for (p, e) in perm_event_list]
+                pair_list += db.query(Event, Transportation).filter(and_(
+                    Transportation.eventID in eventID_list,
+                    Event.eventID in eventID_list,
+                    Transportation.eventID == Event.eventID)).all()
+
+                transport_dict_list = []
+                for (e, t) in pair_list:
+                    t_event = t.to_dict()
+                    e_dict = e.to_dict()
+                    t_event['departureDateTime'] = e_dict['startDateTime']
+                    t_event['arrivalDateTime'] = e_dict['endDateTime']
+                    transport_dict_list += [t_event]
+
+                if len(transport_dict_list) == 0:
+                    return make_response(
+                        'No Transportations found for the given Trip.', 404)
+                return make_response(
+                    jsonify({'transportations': transport_dict_list}), 200)
+            finally:
+                commit_and_close(db)
+
+        post_transportID = request.args.get('transportationID', None)
+        if post_transportID is not None:
+            db = create_db_session()
+            try:
+                transport = db.query(Transportation).filter(
+                    Transportation.transportationID == post_transportID).first()
+                if transport is None:
+                    return make_response('Transportation not found.', 404)
+                event = db.query(Event).filter(
+                    Event.eventID == transport.eventID).first()
+                if event is None:
+                    return make_response(
+                        'Event associated to given Transportation not found.',
+                        404)
+                trip = db.query(Trip).filter(
+                    Trip.tripID == event.tripID).first()
+                if trip is None:
+                    return make_response(
+                        'Trip associated to given Transportation not found.',
+                        404)
+                if trip.userName != session.get(KEY__USERNAME):
+                    # Check if the user has shared permission instead.
+                    perm = db.query(Permissions).filter(and_(
+                        Permissions.permissionID == event.eventID,
+                        Permissions.type == PermissionsEnum.EVENT,
+                        Permissions.toUser == session.get(
+                            KEY__USERNAME))).first()
+                    if perm is None:
+                        return make_response(
+                            'User not authorized to view this Transportation.',
+                            401)
+                ret_dict = transport.to_dict()
+                event = event.to_dict()
+                ret_dict['departureDateTime'] = event['startDateTime']
+                ret_dict['arrivalDateTime'] = event['endDateTime']
+                return make_response(jsonify({'transportation': ret_dict}), 200)
+            finally:
+                commit_and_close(db)
+
+        return bad_request()
+    elif transportationID:
+        db = create_db_session()
+        try:
+            curr_userName = session.get(KEY__USERNAME)
+            transport = db.query(Transportation).filter(
+                Transportation.transportationID == transportationID).first()
+            if transport is None:
+                return make_response('Transportation not found.', 404)
+            event = db.query(Event).filter(
+                Event.eventID == transport.eventID).first()
+            if event is None:
+                return make_response(
+                    'Event associated to given Transportation not found.', 404)
+            trip = db.query(Trip).filter(Trip.tripID == event.tripID).first()
+            if trip is None:
+                return make_response(
+                    'Trip for given Transportation not found.', 404)
+            userName = trip.userName
+        finally:
+            commit_and_close(db)
+
+        db = create_db_session()
+        if request.method == PUT:
+            if userName != curr_userName:
+                # Check to see if user has write permissions.
+                perm = db.query(Permissions).filter(and_(
+                    Permissions.permissionID == event.eventID,
+                    Permissions.type == PermissionsEnum.EVENT,
+                    Permissions.toUser == curr_userName)).first()
+                if perm is None or not perm.writeFlag:
+                    commit_and_close(db)
+                    return make_response(
+                        'User not authorized to edit Transportation.', 401)
+            try:
+                # Optional type parameter.
+                post_type = str(request.json['type'])
+                transport.type = TransportEnum(post_type)
+            except ValueError as ve:
+                # Does not match a TransportEnum enum.
+                db.close()
+                return bad_request(ve)
+            except KeyError:
+                pass
+
+            try:
+                # Optional operator parameter.
+                post_operator = str(request.json['operator'])
+                transport.operator = post_operator
+            except KeyError:
+                pass
+
+            try:
+                # Optional number parameter.
+                post_number = str(request.json['number'])
+                transport.number = post_number
+            except KeyError:
+                pass
+
+            try:
+                # Optional name departureDateTime.
+                post_departureDateTime = str(request.json['departureDateTime'])
+                event.startDateTime = to_datetime(post_departureDateTime)
+            except ValueError as ve:
+                db.close()
+                return bad_request(ve)
+            except KeyError:
+                pass
+
+            try:
+                # Optional arrivalDateTime parameter.
+                post_arrivalDateTime = str(request.json['arrivalDateTime'])
+                event.endDateTime = to_datetime(post_arrivalDateTime)
+            except ValueError as ve:
+                db.close()
+                return bad_request(ve)
+            except KeyError:
+                pass
+
+            try:
+                # Optional departureLocationID parameter.
+                post_departureLocationID = int(
+                    request.json['departureLocationID'])
+                transport.departureLocationID = post_departureLocationID
+            except KeyError:
+                pass
+
+            try:
+                # Optional arrivalLocationID parameter.
+                post_arrivalLocationID = int(request.json['arrivalLocationID'])
+                transport.arrivalLocationID = post_arrivalLocationID
+            except KeyError:
+                pass
+
+            ret_dict = transport.to_dict()
+            event = event.to_dict()
+            ret_dict['departureDateTime'] = event['startDateTime']
+            ret_dict['arrivalDateTime'] = event['endDateTime']
+            commit_and_close(db)
+            return make_response(jsonify({'transportation': ret_dict}), 200)
+        elif request.method == DELETE:
+            if userName != curr_userName:
+                # Check to see if a permission should be deleted instead.
+                perm = db.query(Permissions).filter(and_(
+                    Permissions.permissionID == event.eventID,
+                    Permissions.type == PermissionsEnum.EVENT,
+                    Permissions.toUser == curr_userName)).first()
+                if perm is not None:
+                    db.delete(perm)
+                    commit_and_close(db)
+                    return make_response(
+                        'Shared Transportation Event Permission deleted successfully',
+                        200)
+
+                commit_and_close(db)
+                return make_response(
+                    'User not authorized to delete Transportation.', 401)
+            db.delete(event)
+            # Delete corresponding shared permissions.
+            db.query(Permissions).filter(and_(
+                Permissions.permissionID == event.eventID,
+                Permissions.type == PermissionsEnum.EVENT)).delete()
+            commit_and_close(db)
+            return make_response(
+                'Transportation Event deleted successfully', 200)
     return bad_request()
 
 
@@ -1027,6 +1320,13 @@ if __name__ == '__main__' or __name__ == '__init__':
     p2 = Permissions(3, PermissionsEnum.EVENT, True, 'user2', 2)
     p3 = Permissions(2, PermissionsEnum.BOOKMARK, True, 'user2', 2)
     db_session.add_all([p1, p2, p3])
+    e5 = Event(5, 'Transportation: bus',
+               to_datetime('Mon, 11 Aug 2013 15:15:15 GMT'),
+               to_datetime('Mon, 11 Aug 2013 16:16:16 GMT'),
+               None, None, True, None, None, False, 1)
+    t1 = Transportation(1, TransportEnum.BUS, None, None, None, None, 5)
+    p4 = Permissions(5, PermissionsEnum.EVENT, True, 'user2', 2)
+    db_session.add_all([e5, t1, p4])
     db_session.commit()
     print_database()
 
