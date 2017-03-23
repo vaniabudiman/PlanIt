@@ -785,7 +785,7 @@ def events(eventID=None):
                 post_startDateTime = str(request.json['startDateTime'])
                 event.startDateTime = to_datetime(post_startDateTime)
             except ValueError as ve:
-                commit_and_close(db)
+                db.close()
                 return bad_request(ve)
             except KeyError:
                 pass
@@ -795,21 +795,21 @@ def events(eventID=None):
                 post_endDateTime = str(request.json['endDateTime'])
                 event.endDateTime = to_datetime(post_endDateTime)
             except ValueError as ve:
-                commit_and_close(db)
+                db.close()
                 return bad_request(ve)
             except KeyError:
                 pass
 
             try:
                 # Optional lat parameter.
-                post_lat = int(request.json['lat'])
+                post_lat = request.json['lat']
                 event.lat = post_lat
             except KeyError:
                 pass
 
             try:
                 # Optional lon parameter.
-                post_lon = int(request.json['lon'])
+                post_lon = request.json['lon']
                 event.lon = post_lon
             except KeyError:
                 pass
@@ -1184,7 +1184,7 @@ def share(permissionID=None):
             except KeyError:
                 return bad_request()
             finally:
-                commit_and_close(db)
+                db.close()
         elif request.method == DELETE:
             try:
                 db.delete(perm)
