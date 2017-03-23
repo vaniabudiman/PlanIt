@@ -117,34 +117,36 @@ class TransportEnum(enum.Enum):
 class Transportation(base):
     __tablename__ = 'transportation'
 
-    eventID = Column(Integer,
-                     ForeignKey('event.eventID',
-                                ondelete=CASCADE,
-                                onupdate=CASCADE),
-                     primary_key=True,
-                     nullable=False)
+    transportationID   = Column(Integer, primary_key=True, unique=True)
     type     = Column(Enum(TransportEnum), nullable=False)
     operator = Column(String(VARCHAR_LEN))
     number   = Column(String(VARCHAR_LEN))
     departureLocationID = Column(Integer)
     arrivalLocationID   = Column(Integer)
+    eventID = Column(Integer,
+                     ForeignKey('event.eventID',
+                                ondelete=CASCADE,
+                                onupdate=CASCADE),
+                     nullable=False)
 
-    def __init__(self, eventID, transportType, operator,
-                 number, depLocID, arrLocID):
-        self.eventID = eventID
-        self.type = transportType
+    def __init__(self, transportationID, type, operator, number,
+                 departureLocationID, arrivalLocationID, eventID):
+        self.transportationID = transportationID
+        self.type = type
         self.operator = operator
         self.number = number
-        self.departureLocationID = depLocID
-        self.arrivalLocationID = arrLocID
+        self.departureLocationID = departureLocationID
+        self.arrivalLocationID = arrivalLocationID
+        self.eventID = eventID
 
     def to_dict(self):
-        return {'eventID': self.eventID,
-                'type': self.type,
+        return {'transportationID': self.transportationID,
+                'type': self.type.value,
                 'operator': self.operator,
                 'number': self.number,
                 'departureLocationID': self.departureLocationID,
-                'arrivalLocationID': self.arrivalLocationID}
+                'arrivalLocationID': self.arrivalLocationID,
+                'eventID': self.eventID}
 
 
 class Bookmark(base):
@@ -287,7 +289,7 @@ class Note(base):
 
     def to_dict(self):
         return {'noteID': self.noteID,
-                'noteType': self.noteType,
+                'noteType': self.noteType.value,
                 'noteContext': self.noteContext}
 
 
