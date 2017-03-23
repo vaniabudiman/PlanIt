@@ -15,6 +15,8 @@ class EventFormView extends Component {
         lat: React.PropTypes.string,
         lon: React.PropTypes.string,
         name: React.PropTypes.string,
+        tripStartDate: React.PropTypes.string,
+        tripEndDate: React.PropTypes.string,
         eventPOSTStatus: React.PropTypes.string,
         eventPUTStatus: React.PropTypes.string
     }
@@ -58,9 +60,11 @@ class EventFormView extends Component {
             { id: 1, title: "Event Name", value: this.props.name || "", type: Types.TEXT },
             { id: 2, title: "Address", value: this.props.address || "", type: Types.TEXT },
             { id: 3, title: "Notes", value: "", type: Types.TEXTAREA },
-            { id: 4, title: "Start Date", value: "", type: Types.DATE },
+            { id: 4, title: "Start Date", value: "", type: Types.DATE,
+                min: this.props.tripStartDate, max: this.props.tripEndDate },
             { id: 5, title: "Start Time", value: "", type: Types.TIME },
-            { id: 6, title: "End Date", value: "", type: Types.DATE },
+            { id: 6, title: "End Date", value: "", type: Types.DATE,
+                min: this.props.tripStartDate, max: this.props.tripEndDate },
             { id: 7, title: "End Time", value: "", type: Types.TIME },
             
         ];

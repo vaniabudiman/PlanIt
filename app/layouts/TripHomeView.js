@@ -28,8 +28,7 @@ export default class TripHomeView extends Component {
     }
 
     getRoute (id) {
-        let defaultProps = { tripId: this.props.tripId };
-        let itineraryProps = {
+        let defaultProps = {
             tripId: this.props.tripId,
             tripStartDate: this.props.tripStartDate,
             tripEndDate: this.props.tripEndDate
@@ -38,7 +37,7 @@ export default class TripHomeView extends Component {
 
         switch (id) {
             case "Itinerary":
-                route = () => Actions.itinerary(itineraryProps);
+                route = () => Actions.itinerary(defaultProps);
                 break;
             case "Bookmarks":
                 route = () => Actions.bookmarks(defaultProps);

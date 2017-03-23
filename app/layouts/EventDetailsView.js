@@ -14,7 +14,9 @@ class EventDetailsView extends Component {
         event: React.PropTypes.object,
         details: React.PropTypes.object,
         eventDetailsGETStatus: React.PropTypes.string,
-        allowUpdate: React.PropTypes.bool
+        allowUpdate: React.PropTypes.bool,
+        tripStartDate: React.PropTypes.string,
+        tripEndDate: React.PropTypes.string,
     }
 
     static defaultProps = {
@@ -78,7 +80,10 @@ class EventDetailsView extends Component {
             name: this.props.details.eventName,
             tripId: this.props.tripId,
             event: this.props.event,
-            title: "Update Event" });
+            title: "Update Event",
+            tripStartDate: this.props.tripStartDate,
+            tripEndDate: this.props.tripEndDate
+        });
     }
 
     render () {
