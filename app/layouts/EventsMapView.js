@@ -15,7 +15,9 @@ class EventsMapView extends Component {
         eventsGETStatus: React.PropTypes.string,
         eventDELETEStatus: React.PropTypes.string,
         dispatch: React.PropTypes.func,
-        refresh: React.PropTypes.bool
+        refresh: React.PropTypes.bool,
+        tripStartDate: React.PropTypes.string,
+        tripEndDate: React.PropTypes.string,
     }
 
     constructor (props) {
@@ -128,7 +130,12 @@ class EventsMapView extends Component {
 
     _handleClickItem (item) {
         // Make necessary calls to do w/e you want when clicking on item identified by id
-        isDevMode() && alert("clicked on item: " + item.title); // eslint-disable-line no-unused-expressions
+        Actions.eventDetails({
+            tripId: this.props.tripId,
+            event: item,
+            tripStartDate: this.props.tripStartDate,
+            tripEndDate: this.props.tripEndDate
+        });
     }
 
     _handleShare (item) {
@@ -138,12 +145,23 @@ class EventsMapView extends Component {
 
     // Take user to event creation form
     _handleCreateItem () {
-        Actions.eventForm({ tripId: this.props.tripId, name: "" });
+        Actions.eventForm({
+            tripId: this.props.tripId,
+            name: "",
+            tripStartDate: this.props.tripStartDate,
+            tripEndDate: this.props.tripEndDate
+        });
     }
 
     // Take user to event update form (creation w/ prefill)
     _handleUpdate (event) {
-        Actions.eventForm({ tripId: this.props.tripId, event: event, title: "Update Event" });
+        Actions.eventForm({
+            tripId: this.props.tripId,
+            event: event,
+            title: "Update Event",
+            tripStartDate: this.props.tripStartDate,
+            tripEndDate: this.props.tripEndDate
+        });
     }
 
     render () {

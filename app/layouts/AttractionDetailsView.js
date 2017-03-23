@@ -18,7 +18,9 @@ class AttractionDetailsView extends Component {
         attractionDetailsGETStatus: React.PropTypes.string,
         attractionsPOSTStatus: React.PropTypes.string,
         allowCreate: React.PropTypes.bool,
-        isBookmark: React.PropTypes.bool
+        isBookmark: React.PropTypes.bool,
+        tripStartDate: React.PropTypes.string,
+        tripEndDate: React.PropTypes.string
     }
 
     static defaultProps = {
@@ -86,7 +88,10 @@ class AttractionDetailsView extends Component {
                 lon: this.props.details.geometry.location.lng.toString(),
                 name: this.props.details.name,
                 tripId: this.props.tripId,
-                title: "Create Event" });
+                title: "Create Event",
+                tripStartDate: this.props.tripStartDate,
+                tripEndDate: this.props.tripEndDate
+            });
         } else {
             this.props.dispatch(postAttractions(this.props.attraction, this.props.tripId));
         }

@@ -263,21 +263,30 @@ export default class FormTemplate extends Component {
         switch (item.type) {
             // TODO: other types (as necessary in future)
             case "date": {
+
                 // If passing in prefilled value, pass in string w/ format "YEAR,MONTH,DAY"
                 let value = "Pick a Date"; // default value if not prefilled
                 let dateValues = item.value.split(",");
+
                 if (dateValues.length === 3) { // setting prefilled value
                     let date = new Date(dateValues[0], dateValues[1], dateValues[2]);
                     value = date.toDateString();
                 } else if (dateValues[0] !== "") { // setting value from datepicker
                     value = dateValues[0];
                 }
+
+                let minDate = new Date(item.min + " UTC"),
+                    maxDate = new Date(item.max + " UTC");
                 
                 content = (
                     <View>
                         <Subtitle>{item.title}</Subtitle>
                         <TouchableOpacity
-                            onPress={() => this._showDatePicker(item.id, { date: new Date(value) })}>
+                            onPress={() => this._showDatePicker(item.id, {
+                                date: new Date(value),
+                                minDate: minDate,
+                                maxDate: maxDate
+                            })}>
                             <Text>{value}</Text>
                         </TouchableOpacity>
                         <Divider styleName="line" />

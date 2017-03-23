@@ -105,7 +105,12 @@ class ItineraryListView extends Component {
     // TODO: remove/edit... this is just an example on how the callback would work
     _handleClickItem (item) {
         // Make necessary calls to do w/e you want when clicking on item identified by id
-        Actions.eventDetails({ tripId: this.props.tripId, event: item });
+        Actions.eventDetails({
+            tripId: this.props.tripId,
+            event: item,
+            tripStartDate: this.props.tripStartDate,
+            tripEndDate: this.props.tripEndDate
+        });
     }
 
     // TODO: remove/edit... this is just an example on how the callback would work
@@ -116,12 +121,23 @@ class ItineraryListView extends Component {
 
     // Take user to event creation form
     _handleCreateItem () {
-        Actions.eventForm({ tripId: this.props.tripId, name: "" });
+        Actions.eventForm({
+            tripId: this.props.tripId,
+            name: "",
+            tripStartDate: this.props.tripStartDate,
+            tripEndDate: this.props.tripEndDate
+        });
     }
 
     // Take user to event update form (creation w/ prefill)
     _handleUpdate (event) {
-        Actions.eventForm({ tripId: this.props.tripId, event: event, title: "Update Event" });
+        Actions.eventForm({
+            tripId: this.props.tripId,
+            event: event,
+            tripStartDate: this.props.tripStartDate,
+            tripEndDate: this.props.tripEndDate,
+            title: "Update Event"
+        });
     }
 
     _handleDateSelect (date) {
@@ -145,7 +161,9 @@ class ItineraryListView extends Component {
         Actions.eventsMap({
             title: date.toDateString(),
             tripId: this.props.tripId,
-            filteredEvents: events
+            filteredEvents: events,
+            tripStartDate: this.props.tripStartDate,
+            tripEndDate: this.props.tripEndDate
         });
     }
 

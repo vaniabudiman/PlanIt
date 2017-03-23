@@ -15,7 +15,9 @@ class BookmarksView extends Component {
         bookmarks: React.PropTypes.array,
         bookmarksGETStatus: React.PropTypes.string,
         bookmarksDELETEStatus: React.PropTypes.string,
-        dispatch: React.PropTypes.func
+        dispatch: React.PropTypes.func,
+        tripStartDate: React.PropTypes.string,
+        tripEndDate: React.PropTypes.string,
     }
 
     constructor (props) {
@@ -129,7 +131,9 @@ class BookmarksView extends Component {
             title: "Create Event",
             lat: item.lat.toString(),
             lon: item.lon.toString(),
-            name: item.title
+            name: item.title,
+            tripStartDate: this.props.tripStartDate,
+            tripEndDate: this.props.tripEndDate
         });
     }
 
@@ -143,7 +147,9 @@ class BookmarksView extends Component {
             tripId: this.props.tripId,
             attraction: { id: item.placeId }, // just add id for placeId in call to leverage the same view
             allowCreate: true,
-            isBookmark: true
+            isBookmark: true,
+            tripStartDate: this.props.tripStartDate,
+            tripEndDate: this.props.tripEndDate
         });
     }
 
