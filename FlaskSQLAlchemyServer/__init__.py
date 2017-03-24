@@ -381,14 +381,15 @@ def transportation(transportationID=None):
                     'Transportation: ' + transport['type'],
                     to_datetime(transport['depatureDateTime']),
                     to_datetime(transport['arrivalDateTime']),
-                    None, None, None, None, None, None, post_tripID)
+                    None, None, None, None, transport.get('departureAddress'),
+                    None, post_tripID)
                 new_transport = Transportation(
                     max_transport_id,
                     TransportEnum(transport['type']),
                     transport.get('operator'),
                     transport.get('number'),
-                    transport.get('departureLocationID'),
-                    transport.get('arrivalLocationID'),
+                    transport.get('departureAddress'),
+                    transport.get('arrivalAddress'),
                     max_event_id)
                 event_list.append(new_event)
                 transport_list.append(new_transport)
@@ -583,17 +584,16 @@ def transportation(transportationID=None):
                 pass
 
             try:
-                # Optional departureLocationID parameter.
-                post_departureLocationID = int(
-                    request.json['departureLocationID'])
-                transport.departureLocationID = post_departureLocationID
+                # Optional departureAddress parameter.
+                post_departureAddress = str(request.json['departureAddress'])
+                transport.departureAddress = post_departureAddress
             except KeyError:
                 pass
 
             try:
-                # Optional arrivalLocationID parameter.
-                post_arrivalLocationID = int(request.json['arrivalLocationID'])
-                transport.arrivalLocationID = post_arrivalLocationID
+                # Optional arrivalAddress parameter.
+                post_arrivalAddress = str(request.json['arrivalAddress'])
+                transport.arrivalAddress = post_arrivalAddress
             except KeyError:
                 pass
 

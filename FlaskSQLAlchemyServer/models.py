@@ -121,8 +121,8 @@ class Transportation(base):
     type     = Column(Enum(TransportEnum), nullable=False)
     operator = Column(String(VARCHAR_LEN))
     number   = Column(String(VARCHAR_LEN))
-    departureLocationID = Column(Integer)
-    arrivalLocationID   = Column(Integer)
+    departureAddress = Column(String(VARCHAR_LEN))
+    arrivalAddress   = Column(String(VARCHAR_LEN))
     eventID = Column(Integer,
                      ForeignKey('event.eventID',
                                 ondelete=CASCADE,
@@ -130,13 +130,13 @@ class Transportation(base):
                      nullable=False)
 
     def __init__(self, transportationID, type, operator, number,
-                 departureLocationID, arrivalLocationID, eventID):
+                 departureAddress, arrivalAddress, eventID):
         self.transportationID = transportationID
         self.type = type
         self.operator = operator
         self.number = number
-        self.departureLocationID = departureLocationID
-        self.arrivalLocationID = arrivalLocationID
+        self.departureAddress = departureAddress
+        self.arrivalAddress = arrivalAddress
         self.eventID = eventID
 
     def to_dict(self):
@@ -144,8 +144,8 @@ class Transportation(base):
                 'type': self.type.value,
                 'operator': self.operator,
                 'number': self.number,
-                'departureLocationID': self.departureLocationID,
-                'arrivalLocationID': self.arrivalLocationID,
+                'departureAddress': self.departureAddress,
+                'arrivalAddress': self.arrivalAddress,
                 'eventID': self.eventID}
 
 
