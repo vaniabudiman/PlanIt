@@ -12,8 +12,9 @@ import {
     Subtitle,
     Divider,
     Row,
-    TouchableOpacity } from "@shoutem/ui";
-import { DatePickerAndroid, TimePickerAndroid } from "react-native";
+    TouchableOpacity,
+     } from "@shoutem/ui";
+import { DatePickerAndroid, TimePickerAndroid, Picker } from "react-native";
 
 
 /**
@@ -26,7 +27,8 @@ export const Types = {
     TEXT: "text",
     DATE: "date",
     TIME: "time",
-    TEXTAREA: "textarea"
+    TEXTAREA: "textarea",
+    PICKER: "picker"
 };
 
 /**
@@ -155,7 +157,7 @@ export default class FormTemplate extends Component {
             title: React.PropTypes.string,
             placeholder: React.PropTypes.string,
             value: React.PropTypes.string,
-            type: React.PropTypes.oneOf([Types.TEXT, Types.DATE, Types.TIME, Types.TEXTAREA])
+            type: React.PropTypes.oneOf([Types.TEXT, Types.DATE, Types.TIME, Types.TEXTAREA, Types.PICKER])
         })).isRequired,
         onInputValueChange: React.PropTypes.func.isRequired,
         onRefresh: React.PropTypes.func,
@@ -257,6 +259,18 @@ export default class FormTemplate extends Component {
         }
     }
 
+    renderPickerItems (items) {
+        let content = [];
+
+        for (let i=0; i < items.length; i+=1) {
+            let item = items[i];
+            content.push(
+                <Picker.Item key={i} label={item} value={item} />
+            );
+        }
+        return content;
+    }
+
     renderRow (item) {
         var content;
 
@@ -327,6 +341,19 @@ export default class FormTemplate extends Component {
                             multiline={true}
                             editable={!item.readOnly}
                             onChangeText={this.props.onInputValueChange.bind(null, item.id)} />
+                        <Divider styleName="line" />
+                    </View>
+                );
+                break;
+            }
+            case "picker": {
+                content = (
+                    <View>
+                        <Subtitle>{item.title}</Subtitle>
+                        <Picker onValueChange={this.props.onInputValueChange.bind(null, item.id)}
+                            selectedValue={item.value}>
+                            {this.renderPickerItems(item.pickerItems)}
+                        </Picker>
                         <Divider styleName="line" />
                     </View>
                 );

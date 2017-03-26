@@ -170,7 +170,7 @@ class ItineraryListView extends Component {
     render () {
         return (
             <ListMapTemplate data={this.formattedEvents()}
-                emptyListMessage={"Create a event to begin!"}
+                emptyListMessage={"Create an event to begin!"}
                 loadingData={
                     (this.props.eventsGETStatus === FETCH_STATUS.ATTEMPTING) ||
                     (this.props.eventDELETEStatus === FETCH_STATUS.ATTEMPTING)

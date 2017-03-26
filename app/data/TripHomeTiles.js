@@ -18,15 +18,5 @@ export default [
         id: "Transit",
         icon: "plane",
         color: "gold"
-    },
-    {
-        id: "Currency Conversion",
-        icon: "money",
-        color: "forestgreen"
-    },
-    {
-        id: "Map",
-        icon: "location-arrow",
-        color: "mediumturquoise"
     }
 ];
