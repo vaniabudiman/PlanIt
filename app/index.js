@@ -25,6 +25,9 @@ import TripFormView from "./layouts/TripFormView.js";
 import EventFormView from "./layouts/EventFormView.js";
 import EventsMapView from "./layouts/EventsMapView.js";
 import EventDetailsView from "./layouts/EventDetailsView.js";
+import TransportationFormView from "./layouts/TransportationFormView.js";
+import TransportationView from "./layouts/TransportationView.js";
+import TransportationDetailsView from "./layouts/TransportationDetailsView.js";
 
 
 // Connect the router to the Redux store
@@ -83,6 +86,14 @@ export default class PlanIt extends Component {
                             sceneStyle={NavigationStyles.listViewScene} {...navBarProps} />
                         <Scene key="itemDetails" component={ItemDetailsView}
                             sceneStyle={ NavigationStyles.listViewScene } title="Item / Details" />
+                        <Scene key="transportation" component={TransportationView}
+                            sceneStyle={ NavigationStyles.listViewScene } title="Transportation" {...navBarProps} />
+                        <Scene key="transportationForm" component={TransportationFormView}
+                            sceneStyle={ NavigationStyles.listViewScene } title="Create Transportation"
+                            {...navBarProps} />
+                        <Scene key="transportationDetails" component={TransportationDetailsView}
+                            sceneStyle={ NavigationStyles.listViewScene } title="Transportation Details"
+                            {...navBarProps} />
 
                         <Scene key="userProfile" component={UserProfileView}
                             sceneStyle={ NavigationStyles.listViewScene } title="User Profile" />

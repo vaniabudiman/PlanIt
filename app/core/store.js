@@ -9,7 +9,8 @@ import AttractionsReducer from "../reducers/attractionsReducer.js";
 import AttractionDetailsReducer from "../reducers/attractionDetailsReducer.js";
 import EventsReducer from "../reducers/eventsReducer.js";
 import BookmarksReducer from "../reducers/bookmarksReducer.js";
-import TripsReducer from "../reducers/tripsReducer";
+import TripsReducer from "../reducers/tripsReducer.js";
+import TransportationReducer from "../reducers/transportationReducer.js";
 
 
 var createStoreWithMiddleware = applyMiddleware(
@@ -27,6 +28,7 @@ var baseReducers = {
     events: EventsReducer,
     bookmarks: BookmarksReducer,
     trips: TripsReducer,
+    transportation: TransportationReducer
 };
 
 var store = (function configureStore (initialState) {

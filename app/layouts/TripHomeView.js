@@ -5,6 +5,7 @@ import { ListView, GridRow, Tile, Title, TouchableOpacity } from "@shoutem/ui";
 import { $white } from "../styles/GlobalStyles.js";
 import TripHomeTiles from "../data/TripHomeTiles.js";
 import { isDevMode } from "../utils/utils.js";
+import { Dimensions } from "react-native";
 
 
 export default class TripHomeView extends Component {
@@ -42,17 +43,11 @@ export default class TripHomeView extends Component {
             case "Bookmarks":
                 route = () => Actions.bookmarks(defaultProps);
                 break;
-            case "Currency Conversion":
-                route = () => Actions.login(defaultProps);   // TODO: change to bookmark view when implemented
-                break;
             case "Browse":
                 route = () => Actions.continents(defaultProps);
                 break;
             case "Transit":
-                route = () => Actions.login(defaultProps);   // TODO: change to bookmark view when implemented
-                break;
-            case "Map":
-                route = () => Actions.login(defaultProps);   // TODO: change to bookmark view when implemented
+                route = () => Actions.transportation(defaultProps);   // TODO: change to bookmark view when implemented
                 break;
         }
         return route;
@@ -73,9 +68,10 @@ export default class TripHomeView extends Component {
 
     _getRow (data) {
         const cells = data.map(this._getCell);
+        let height = Dimensions.get("window").height;
 
         return (
-            <GridRow columns={2}>
+            <GridRow columns={2} style={{ height: (height * 0.42) }}>
                 {cells}
             </GridRow>
         );
