@@ -379,7 +379,7 @@ def transportation(transportationID=None):
                 new_event = Event(
                     max_event_id,
                     'Transportation: ' + transport['type'],
-                    to_datetime(transport['depatureDateTime']),
+                    to_datetime(transport['departureDateTime']),
                     to_datetime(transport['arrivalDateTime']),
                     None, None, None, None, transport.get('departureAddress'),
                     None, post_tripID)
@@ -507,26 +507,25 @@ def transportation(transportationID=None):
         return bad_request()
     elif transportationID:
         db = create_db_session()
-        try:
-            curr_userName = session.get(KEY__USERNAME)
-            transport = db.query(Transportation).filter(
-                Transportation.transportationID == transportationID).first()
-            if transport is None:
-                return make_response('Transportation not found.', 404)
-            event = db.query(Event).filter(
-                Event.eventID == transport.eventID).first()
-            if event is None:
-                return make_response(
-                    'Event associated to given Transportation not found.', 404)
-            trip = db.query(Trip).filter(Trip.tripID == event.tripID).first()
-            if trip is None:
-                return make_response(
-                    'Trip for given Transportation not found.', 404)
-            userName = trip.userName
-        finally:
-            commit_and_close(db)
+        curr_userName = session.get(KEY__USERNAME)
+        transport = db.query(Transportation).filter(
+            Transportation.transportationID == transportationID).first()
+        if transport is None:
+            db.close()
+            return make_response('Transportation not found.', 404)
+        event = db.query(Event).filter(
+            Event.eventID == transport.eventID).first()
+        if event is None:
+            db.close()
+            return make_response(
+                'Event associated to given Transportation not found.', 404)
+        trip = db.query(Trip).filter(Trip.tripID == event.tripID).first()
+        if trip is None:
+            db.close()
+            return make_response(
+                'Trip for given Transportation not found.', 404)
+        userName = trip.userName
 
-        db = create_db_session()
         if request.method == PUT:
             if userName != curr_userName:
                 # Check to see if user has write permissions.
