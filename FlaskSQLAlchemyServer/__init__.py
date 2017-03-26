@@ -711,6 +711,13 @@ def events(eventID=None):
                     Event.eventID == p.permissionID).first() for p in perms]
                 event_list += shared_events
 
+                # Functional decision to omit Transportation events.
+                transports = db.query(Transportation).all()
+                transports = [t.eventID for t in transports]
+                event_list = list(
+                    filter(lambda a: a.eventID not in transports,
+                           event_list))
+
                 if len(event_list) == 0:
                     return make_response('No Events found for the given Trip.',
                                          404)
