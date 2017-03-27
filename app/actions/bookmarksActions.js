@@ -10,24 +10,28 @@ export const Types = {
     DELETE_BOOKMARKS_FAILED: "DELETE_BOOKMARKS_FAILED"
 };
 
-function deleteBookmarkAttempt () {
+export function deleteBookmarkAttempt () {
     return {
         type: Types.DELETE_BOOKMARKS_ATTEMPT
     };
 }
 
-function deleteBookmarkSuccess (bookmarkId) {
+export function deleteBookmarkSuccess (bookmarkId) {
     return {
         bookmarkId: bookmarkId,
         type: Types.DELETE_BOOKMARKS_SUCCESS
     };
 }
 
-function deleteBookmarkFailed (error) {
+export function deleteBookmarkFailed (error) {
     return {
         error,
         type: Types.DELETE_BOOKMARKS_FAILED
     };
+}
+
+export function buildBookmarksDELETERequestURL (bookmarkId) {
+    return apiURL + "bookmarks/" + bookmarkId;
 }
 
 export function deleteBookmark (bookmarkId) {
@@ -38,7 +42,7 @@ export function deleteBookmark (bookmarkId) {
     return dispatch => {
         dispatch(deleteBookmarkAttempt());
 
-        fetch(apiURL + "bookmarks/" + bookmarkId, {
+        fetch(buildBookmarksDELETERequestURL(bookmarkId), {
             method: "DELETE",
             headers: {
                 Accept: "application/json",
@@ -60,31 +64,35 @@ export function deleteBookmark (bookmarkId) {
         });};
 }
 
-function getBookmarksAttempt () {
+export function getBookmarksAttempt () {
     return {
         type: Types.GET_BOOKMARKS_ATTEMPT
     };
 }
 
-function getBookmarksSuccess (response) {
+export function getBookmarksSuccess (response) {
     return {
         bookmarks: response.bookmarks,
         type: Types.GET_BOOKMARKS_SUCCESS
     };
 }
 
-function getBookmarksFailed (error) {
+export function getBookmarksFailed (error) {
     return {
         error,
         type: Types.GET_BOOKMARKS_FAILED
     };
 }
 
+export function buildBookmarksGETRequestURL (tripId) {
+    return apiURL + "bookmarks?tripID=" + tripId;
+}
+
 export function getBookmarks (tripId) {
     return dispatch => {
         dispatch(getBookmarksAttempt());
 
-        fetch(apiURL + "bookmarks?tripID=" + tripId, {
+        fetch(buildBookmarksGETRequestURL(tripId), {
             method: "GET",
             headers: {
                 Accept: "application/json",
@@ -111,3 +119,16 @@ export function getBookmarks (tripId) {
             alert("Request Failed: ", error); // TODO: remove this and do something with the fetch error
         });};
 }
+
+export default {
+    deleteBookmarkAttempt: deleteBookmarkAttempt,
+    deleteBookmarkSuccess: deleteBookmarkSuccess,
+    deleteBookmarkFailed: deleteBookmarkFailed,
+
+    getBookmarksAttempt: getBookmarksAttempt,
+    getBookmarksSuccess: getBookmarksSuccess,
+    getBookmarksFailed: getBookmarksFailed,
+
+    deleteBookmark: deleteBookmark,
+    getBookmarks: getBookmarks
+};
