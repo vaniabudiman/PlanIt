@@ -43,12 +43,16 @@ export function putUserAttempt () { return { type: Types.PUT_USER_ATTEMPT }; }
 export function putUserSuccess (response) { return { user: response.user, type: Types.PUT_USER_SUCCESS }; }
 export function putUserFailed (error) { return { error, type: Types.PUT_USER_FAILED }; }
 
+export function buildLoginPOSTRequestURL () {
+    return apiURL + "login";
+}
+
 export function login (loginData) {
     return dispatch => {
         if (loginData.userName === "") { return (alert("Please enter your Username!")); }
         if (loginData.password === "") { return (alert("Please enter your Password!")); }
         dispatch(loginAttempt());
-        fetch(apiURL + "login", {
+        fetch(buildLoginPOSTRequestURL(), {
             method: "POST",
             headers: {
                 Accept: "application/json",
@@ -76,6 +80,10 @@ export function login (loginData) {
     };
 }
 
+export function buildSignupPOSTRequestURL () {
+    return apiURL + "users";
+}
+
 export function signup (signupData) {
     return dispatch => {
         if (signupData.name === "") { return (alert("Please enter a Name!")); }
@@ -84,7 +92,7 @@ export function signup (signupData) {
         if (signupData.password === "") { return (alert("Please enter a Password!")); }
         if (signupData.homeCurrency === "") { return (alert("Please select a Home Currency!")); }
         dispatch(signupAttempt());
-        fetch(apiURL + "users", {
+        fetch(buildSignupPOSTRequestURL(), {
             method: "POST",
             headers: {
                 Accept: "application/json",
@@ -115,7 +123,7 @@ export function signup (signupData) {
     };
 }
 
-function buildUsersGETRequestURL (userName) {
+export function buildUsersGETRequestURL (userName) {
     let rootURL = apiURL + "users";
     let queryString = userName ? "?userName=" + userName : "";
 
@@ -151,7 +159,11 @@ export function getUser (userName = null) {
     };
 }
 
-function buildUsersPUTRequestBody (userData) {
+export function buildUsersPUTRequestURL (userName) {
+    return apiURL + "users/" + userName;
+}
+
+export function buildUsersPUTRequestBody (userData) {
     let body = {};
     if (userData.name) { body.name = userData.name; }
     if (userData.email) { body.email = userData.email; }
@@ -180,7 +192,7 @@ export function putUser (userData) {
         }
 
         dispatch(putUserAttempt());
-        fetch(apiURL + "users/" + userData.userName, {
+        fetch(buildUsersPUTRequestURL(userData.userName), {
             method: "PUT",
             headers: {
                 Accept: "application/json",

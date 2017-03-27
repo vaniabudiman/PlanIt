@@ -1,7 +1,14 @@
 import "react-native";
 import Reducer, { getDefaultUserData } from "../../app/reducers/accountReducer.js";
-import Actions from "../../app/actions/accountActions.js";
+import Actions, {
+    buildLoginPOSTRequestURL,
+    buildSignupPOSTRequestURL,
+    buildUsersGETRequestURL,
+    buildUsersPUTRequestURL,
+    buildUsersPUTRequestBody
+} from "../../app/actions/accountActions.js";
 import FETCH_STATUS from "../../app/constants/fetchStatusConstants.js";
+import { apiURL } from "../../app/config/ServerConfig.js";
 
 
 describe("Account Reducer", function () {
@@ -38,6 +45,45 @@ describe("Account Reducer", function () {
                 { id: 4, title: "Email", placeholder: "placeholder 4", value: user.email },
                 { id: 5, title: "Home Currency", placeholder: "placeholder 5", value: user.homeCurrency }
             ]);
+        });
+    });
+
+    describe("buildLoginPOSTRequestURL", function () {
+        it ("builds correct URL", function () {
+            expect(buildLoginPOSTRequestURL()).toBe(apiURL + "login");
+        });
+    });
+
+    describe("buildSignupPOSTRequestURL", function () {
+        it ("builds correct URL", function () {
+            expect(buildSignupPOSTRequestURL()).toBe(apiURL + "users");
+        });
+    });
+
+    describe("buildUsersGETRequestURL", function () {
+        it ("builds correct URL with userName provided", function () {
+            expect(buildUsersGETRequestURL(user.userName)).toBe(apiURL + "users" + "?userName=" + user.userName);
+        });
+
+        it ("builds correct URL without userName provided", function () {
+            expect(buildUsersGETRequestURL()).toBe(apiURL + "users");
+        });
+    });
+
+    describe("buildUsersPUTRequestURL", function () {
+        it("builds correct URL", function () {
+            expect(buildUsersPUTRequestURL(user.userName)).toBe(apiURL + "users/" + user.userName);
+        });
+    });
+
+    describe("buildUsersPUTRequestBody", function () {
+        it("builds correct body", function () {
+            expect(buildUsersPUTRequestBody(user)).toEqual({
+                name: user.name,
+                email: user.email,
+                password: user.password,
+                homeCurrency: user.homeCurrency
+            });
         });
     });
 
