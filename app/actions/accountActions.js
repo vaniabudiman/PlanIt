@@ -24,24 +24,24 @@ export const Types = {
 };
 
 // /login POST
-function loginAttempt () { return { type: Types.LOGIN_ATTEMPT }; }
-function loginSuccess () { return { type: Types.LOGIN_SUCCESS }; }
-function loginFailed (error) { return { error, type: Types.LOGIN_FAILED }; }
+export function loginAttempt () { return { type: Types.LOGIN_ATTEMPT }; }
+export function loginSuccess () { return { type: Types.LOGIN_SUCCESS }; }
+export function loginFailed (error) { return { error, type: Types.LOGIN_FAILED }; }
 
 // /users POST
-function signupAttempt () { return { type: Types.SIGNUP_ATTEMPT }; }
-function signupSuccess () { return { type: Types.SIGNUP_SUCCESS }; }
-function signupFailed (error) { return { error, type: Types.SIGNUP_FAILED }; }
+export function signupAttempt () { return { type: Types.SIGNUP_ATTEMPT }; }
+export function signupSuccess () { return { type: Types.SIGNUP_SUCCESS }; }
+export function signupFailed (error) { return { error, type: Types.SIGNUP_FAILED }; }
 
 // /users GET
-function getUserAttempt () { return { type: Types.GET_USER_ATTEMPT }; }
-function getUserSuccess (response) { return { user: response.user, type: Types.GET_USER_SUCCESS }; }
-function getUserFailed (error) { return { error, type: Types.GET_USER_FAILED }; }
+export function getUserAttempt () { return { type: Types.GET_USER_ATTEMPT }; }
+export function getUserSuccess (response) { return { user: response.user, type: Types.GET_USER_SUCCESS }; }
+export function getUserFailed (error) { return { error, type: Types.GET_USER_FAILED }; }
 
 // /users PUT
-function putUserAttempt () { return { type: Types.PUT_USER_ATTEMPT }; }
-function putUserSuccess (response) { return { user: response.user, type: Types.PUT_USER_SUCCESS }; }
-function putUserFailed (error) { return { error, type: Types.PUT_USER_FAILED }; }
+export function putUserAttempt () { return { type: Types.PUT_USER_ATTEMPT }; }
+export function putUserSuccess (response) { return { user: response.user, type: Types.PUT_USER_SUCCESS }; }
+export function putUserFailed (error) { return { error, type: Types.PUT_USER_FAILED }; }
 
 export function login (loginData) {
     return dispatch => {
@@ -209,3 +209,27 @@ export function putUser (userData) {
     };
 }
 
+export default {
+    Types: Types,
+    
+    loginAttempt: loginAttempt,
+    loginSuccess: loginSuccess,
+    loginFailed: loginFailed,
+
+    signupAttempt: signupAttempt,
+    signupSuccess: signupSuccess,
+    signupFailed: signupFailed,
+
+    getUserAttempt: getUserAttempt,
+    getUserSuccess: getUserSuccess,
+    getUserFailed: getUserFailed,
+
+    putUserAttempt: putUserAttempt,
+    putUserSuccess: putUserSuccess,
+    putUserFailed: putUserFailed,
+
+    login: login,
+    signup: signup,
+    getUser: getUser,
+    putUser: putUser
+};
