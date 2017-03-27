@@ -24,7 +24,7 @@ function getAttractionDetailsFailed (error) {
     };
 }
 
-function buildRequestURL (placeId) {
+export function buildRequestURL (placeId) {
     let rootURL = "https://maps.googleapis.com/maps/api/place/details/json";
     // let apiKey = "AIzaSyBpbTBGgKbBpdWyPyQ8S8cFvBNc8-6KiOw";
     // let apiKey = "AIzaSyBj1cQ0SRz1mFFwN4eCsqKAGNBCH4SSLbI";
@@ -69,3 +69,11 @@ export function getAttractionDetails (placeId) {
         });
     };
 }
+
+export default {
+    getAttractionDetailsAttempt: getAttractionDetailsAttempt,
+    getAttractionDetailsSuccess: getAttractionDetailsSuccess,
+    getAttractionDetailsFailed: getAttractionDetailsFailed,
+
+    getAttractionDetails: getAttractionDetails
+};
