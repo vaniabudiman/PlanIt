@@ -17,13 +17,13 @@ export function clearAttractionsPageToken () {
     };
 }
 
-function getAttractionsAttempt () {
+export function getAttractionsAttempt () {
     return {
         type: Types.GET_ATTRACTIONS_ATTEMPT
     };
 }
 
-function getAttractionsSuccess (response) {
+export function getAttractionsSuccess (response) {
     return {
         attractions: response.results,
         nextPageToken: response.next_page_token,
@@ -31,18 +31,18 @@ function getAttractionsSuccess (response) {
     };
 }
 
-function getAttractionsFailed (error) {
+export function getAttractionsFailed (error) {
     return {
         error,
         type: Types.GET_ATTRACTIONS_FAILED,
     };
 }
 
-function postAttractionsAttempt () { return { type: Types.POST_ATTRACTIONS_ATTEMPT }; }
-function postAttractionsSuccess () { return { type: Types.POST_ATTRACTIONS_SUCCESS }; }
-function postAttractionsFailed () { return { type: Types.POST_ATTRACTIONS_FAILED }; }
+export function postAttractionsAttempt () { return { type: Types.POST_ATTRACTIONS_ATTEMPT }; }
+export function postAttractionsSuccess () { return { type: Types.POST_ATTRACTIONS_SUCCESS }; }
+export function postAttractionsFailed () { return { type: Types.POST_ATTRACTIONS_FAILED }; }
 
-function buildRequestURL (lat, lon, pageToken, query) {
+export function buildAttractionsGETRequestURL (lat, lon, pageToken, query) {
     let api = query ? "/textsearch" : "/nearbysearch";
     let rootURL = "https://maps.googleapis.com/maps/api/place" + api + "/json";
     // let apiKey = "AIzaSyBpbTBGgKbBpdWyPyQ8S8cFvBNc8-6KiOw";
@@ -62,6 +62,10 @@ function buildRequestURL (lat, lon, pageToken, query) {
         "&pagetoken=" + pageToken;
 }
 
+export function buildAttractionsPOSTRequestURL () {
+    return apiURL + "bookmarks";
+}
+
 export function postAttractions (attraction, tripID) {
     return dispatch => {
         dispatch(postAttractionsAttempt());
@@ -73,7 +77,7 @@ export function postAttractions (attraction, tripID) {
             address: attraction.subtitle,
             type: attraction.caption || "",
         };
-        fetch(apiURL + "bookmarks", {
+        fetch(buildAttractionsPOSTRequestURL(), {
             method: "POST",
             headers: {
                 Accept: "application/json",
@@ -107,7 +111,7 @@ export function postAttractions (attraction, tripID) {
 export function getAttractions (city, pageToken, query = "") {
     return dispatch => {
         dispatch(getAttractionsAttempt());
-        fetch(buildRequestURL(city.lat, city.lon, pageToken, query), {
+        fetch(buildAttractionsGETRequestURL(city.lat, city.lon, pageToken, query), {
             method: "GET",
             headers: {
                 Accept: "application/json",
@@ -138,3 +142,15 @@ export function getAttractions (city, pageToken, query = "") {
         });
     };
 }
+
+export default {
+    clearAttractionsPageToken: clearAttractionsPageToken,
+
+    getAttractionsAttempt: getAttractionsAttempt,
+    getAttractionsSuccess: getAttractionsSuccess,
+    getAttractionsFailed: getAttractionsFailed,
+
+    postAttractionsAttempt: postAttractionsAttempt,
+    postAttractionsSuccess: postAttractionsSuccess,
+    postAttractionsFailed: postAttractionsFailed
+};
