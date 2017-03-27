@@ -4,27 +4,27 @@ export const Types = {
     GET_CITIES_FAILED: "GET_CITIES_FAILED"
 };
 
-function getCitiesAttempt () {
+export function getCitiesAttempt () {
     return {
         type: Types.GET_CITIES_ATTEMPT
     };
 }
 
-function getCitiesSuccess (response) {
+export function getCitiesSuccess (response) {
     return {
         cities: response.geonames,
         type: Types.GET_CITIES_SUCCESS
     };
 }
 
-function getCitiesFailed (error) {
+export function getCitiesFailed (error) {
     return {
         error,
         type: Types.GET_CITIES_FAILED
     };
 }
 
-function buildRequestURL (countryId) {
+export function buildRequestURL (countryId) {
     let rootURL = "http://api.geonames.org/searchJSON";
     // let apiKey = "&username=planitapp";
     let apiKey = "&username=nikjmartin";
@@ -65,3 +65,11 @@ export function getCities (countryId) {
             alert("Login Failed: " + error.response.status); // TODO: remove this and do something with the fetch error
         });};
 }
+
+export default {
+    getCitiesAttempt: getCitiesAttempt,
+    getCitiesSuccess: getCitiesSuccess,
+    getCitiesFailed: getCitiesFailed,
+
+    getCities: getCities
+};
