@@ -18,87 +18,87 @@ export const Types = {
     UPDATE_TRANSPORTATION_FAILED: "UPDATE_TRANSPORTATION_FAILED"
 };
 
-function getTransportationAttempt () {
+export function getTransportationAttempt () {
     return {
         type: Types.GET_TRANSPORTATION_ATTEMPT
     };
 }
 
-function getTransportationSuccess (response) {
+export function getTransportationSuccess (response) {
     return {
         transportations: response.transportations,
         type: Types.GET_TRANSPORTATION_SUCCESS
     };
 }
 
-function getTransportationFailed (error) {
+export function getTransportationFailed (error) {
     return {
         error,
         type: Types.GET_TRANSPORTATION_FAILED
     };
 }
 
-function getTransportationDetailsAttempt () {
+export function getTransportationDetailsAttempt () {
     return {
         type: Types.GET_TRANSPORTATION_DETAILS_ATTEMPT
     };
 }
 
-function getTransportationDetailsSuccess (response) {
+export function getTransportationDetailsSuccess (response) {
     return {
         transportation: response.transportation,
         type: Types.GET_TRANSPORTATION_DETAILS_SUCCESS
     };
 }
 
-function getTransportationDetailsFailed (error) {
+export function getTransportationDetailsFailed (error) {
     return {
         error,
         type: Types.GET_TRANSPORTATION_DETAILS_FAILED
     };
 }
 
-function createTransportationAttempt () {
+export function createTransportationAttempt () {
     return {
         type: Types.CREATE_TRANSPORTATION_ATTEMPT
     };
 }
 
-function createTransportationSuccess (response) {
+export function createTransportationSuccess (response) {
     return {
         transportation: response.transportation,
         type: Types.CREATE_TRANSPORTATION_SUCCESS
     };
 }
 
-function createTransportationFailed (error) {
+export function createTransportationFailed (error) {
     return {
         error,
         type: Types.CREATE_TRANSPORTATION_FAILED
     };
 }
 
-function updateTransportationAttempt () {
+export function updateTransportationAttempt () {
     return {
         type: Types.UPDATE_TRANSPORTATION_ATTEMPT
     };
 }
 
-function updateTransportationSuccess (response) {
+export function updateTransportationSuccess (response) {
     return {
         transportation: response.transportation,
         type: Types.UPDATE_TRANSPORTATION_SUCCESS
     };
 }
 
-function updateTransportationFailed (error) {
+export function updateTransportationFailed (error) {
     return {
         error,
         type: Types.UPDATE_TRANSPORTATION_FAILED
     };
 }
 
-function buildGETRequestURL (tripID, transportationID) {
+export function buildGETRequestURL (tripID, transportationID) {
     let rootURL = apiURL + "transportation";
     let queryString = tripID || transportationID ? "?" : "";
     queryString += tripID ? "tripID=" + tripID : "";
@@ -108,28 +108,32 @@ function buildGETRequestURL (tripID, transportationID) {
     return rootURL + queryString;
 }
 
-function buildPOSTRequestURL () {
+export function buildPOSTRequestURL () {
     return apiURL + "transportation";
 }
 
-function buildPUTRequestURL (transportationID) {
+export function buildPUTRequestURL (transportationID) {
     return apiURL + "transportation/" + transportationID;
 }
 
-function deleteTransportationAttempt () {
+export function buildDELETERequestURL (transportationID) {
+    return apiURL + "transportation/" + transportationID;
+}
+
+export function deleteTransportationAttempt () {
     return {
         type: Types.DELETE_TRANSPORTATION_ATTEMPT
     };
 }
 
-function deleteTransportationSuccess (transportationId) {
+export function deleteTransportationSuccess (transportationId) {
     return {
         transportationId: transportationId,
         type: Types.DELETE_TRANSPORTATION_SUCCESS
     };
 }
 
-function deleteTransportationFailed (error) {
+export function deleteTransportationFailed (error) {
     return {
         error,
         type: Types.DELETE_TRANSPORTATION_FAILED
@@ -177,7 +181,7 @@ export function deleteTransportation (transportationId) {
     return dispatch => {
         dispatch(deleteTransportationAttempt());
 
-        fetch(apiURL + "transportation/" + transportationId, {
+        fetch(buildDELETERequestURL(transportationId), {
             method: "DELETE",
             headers: {
                 Accept: "application/json",
@@ -319,3 +323,31 @@ export function createTransportation (transportationData) {
         });
     };
 }
+
+export default {
+    getTransportationAttempt: getTransportationAttempt,
+    getTransportationSuccess: getTransportationSuccess,
+    getTransportationFailed: getTransportationFailed,
+
+    getTransportationDetailsAttempt: getTransportationDetailsAttempt,
+    getTransportationDetailsSuccess: getTransportationDetailsSuccess,
+    getTransportationDetailsFailed: getTransportationDetailsFailed,
+
+    createTransportationAttempt: createTransportationAttempt,
+    createTransportationSuccess: createTransportationSuccess,
+    createTransportationFailed: createTransportationFailed,
+
+    updateTransportationAttempt: updateTransportationAttempt,
+    updateTransportationSuccess: updateTransportationSuccess,
+    updateTransportationFailed: updateTransportationFailed,
+
+    deleteTransportationAttempt: deleteTransportationAttempt,
+    deleteTransportationSuccess: deleteTransportationSuccess,
+    deleteTransportationFailed: deleteTransportationFailed,
+
+    getTransportationDetails: getTransportationDetails,
+    deleteTransportation: deleteTransportation,
+    updateTransportation: updateTransportation,
+    getTransportation: getTransportation,
+    createTransportation: createTransportation
+};

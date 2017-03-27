@@ -9,7 +9,7 @@ const initialState = {
     userData: getDefaultUserData(),
 };
 
-function getDefaultUserData (userName = "", password = "", name = "",
+export function getDefaultUserData (userName = "", password = "", name = "",
                              email = "", homeCurrency = "") {
     return [
         { id: 1, title: "Username", placeholder: "placeholder 1", value: userName, readOnly: true },

@@ -18,87 +18,87 @@ export const Types = {
     UPDATE_EVENT_FAILED: "UPDATE_EVENT_FAILED"
 };
 
-function getEventsAttempt () {
+export function getEventsAttempt () {
     return {
         type: Types.GET_EVENTS_ATTEMPT
     };
 }
 
-function getEventsSuccess (response) {
+export function getEventsSuccess (response) {
     return {
         events: response.events,
         type: Types.GET_EVENTS_SUCCESS
     };
 }
 
-function getEventsFailed (error) {
+export function getEventsFailed (error) {
     return {
         error,
         type: Types.GET_EVENTS_FAILED
     };
 }
 
-function getEventDetailsAttempt () {
+export function getEventDetailsAttempt () {
     return {
         type: Types.GET_EVENT_DETAILS_ATTEMPT
     };
 }
 
-function getEventDetailsSuccess (response) {
+export function getEventDetailsSuccess (response) {
     return {
         event: response.event,
         type: Types.GET_EVENT_DETAILS_SUCCESS
     };
 }
 
-function getEventDetailsFailed (error) {
+export function getEventDetailsFailed (error) {
     return {
         error,
         type: Types.GET_EVENT_DETAILS_FAILED
     };
 }
 
-function createEventAttempt () {
+export function createEventAttempt () {
     return {
         type: Types.CREATE_EVENT_ATTEMPT
     };
 }
 
-function createEventSuccess (response) {
+export function createEventSuccess (response) {
     return {
         event: response.event,
         type: Types.CREATE_EVENT_SUCCESS
     };
 }
 
-function createEventFailed (error) {
+export function createEventFailed (error) {
     return {
         error,
         type: Types.CREATE_EVENT_FAILED
     };
 }
 
-function updateEventAttempt () {
+export function updateEventAttempt () {
     return {
         type: Types.UPDATE_EVENT_ATTEMPT
     };
 }
 
-function updateEventSuccess (response) {
+export function updateEventSuccess (response) {
     return {
         event: response.event,
         type: Types.UPDATE_EVENT_SUCCESS
     };
 }
 
-function updateEventFailed (error) {
+export function updateEventFailed (error) {
     return {
         error,
         type: Types.UPDATE_EVENT_FAILED
     };
 }
 
-function buildGETRequestURL (tripID, eventID) {
+export function buildGETRequestURL (tripID, eventID) {
     let rootURL = apiURL + "events";
     let queryString = tripID || eventID ? "?" : "";
     queryString += tripID ? "tripID=" + tripID : "";
@@ -108,28 +108,32 @@ function buildGETRequestURL (tripID, eventID) {
     return rootURL + queryString;
 }
 
-function buildPOSTRequestURL () {
+export function buildPOSTRequestURL () {
     return apiURL + "events";
 }
 
-function buildPUTRequestURL (eventID) {
+export function buildPUTRequestURL (eventID) {
     return apiURL + "events/" + eventID;
 }
 
-function deleteEventAttempt () {
+export function buildDELETERequestURL (eventId) {
+    return apiURL + "events/" + eventId;
+}
+
+export function deleteEventAttempt () {
     return {
         type: Types.DELETE_EVENT_ATTEMPT
     };
 }
 
-function deleteEventSuccess (eventId) {
+export function deleteEventSuccess (eventId) {
     return {
         eventId: eventId,
         type: Types.DELETE_EVENT_SUCCESS
     };
 }
 
-function deleteEventFailed (error) {
+export function deleteEventFailed (error) {
     return {
         error,
         type: Types.DELETE_EVENT_FAILED
@@ -208,7 +212,7 @@ export function deleteEvent (eventId) {
     return dispatch => {
         dispatch(deleteEventAttempt());
 
-        fetch(apiURL + "events/" + eventId, {
+        fetch(buildDELETERequestURL(eventId), {
             method: "DELETE",
             headers: {
                 Accept: "application/json",
@@ -320,3 +324,31 @@ export function updateEvent (eventId, eventData) {
         });
     };
 }
+
+export default {
+    getEventsAttempt: getEventsAttempt,
+    getEventsSuccess: getEventsSuccess,
+    getEventsFailed: getEventsFailed,
+
+    getEventDetailsAttempt: getEventDetailsAttempt,
+    getEventDetailsSuccess: getEventDetailsSuccess,
+    getEventDetailsFailed: getEventDetailsFailed,
+
+    createEventAttempt: createEventAttempt,
+    createEventSuccess: createEventSuccess,
+    createEventFailed: createEventFailed,
+
+    updateEventAttempt: updateEventAttempt,
+    updateEventSuccess: updateEventSuccess,
+    updateEventFailed: updateEventFailed,
+
+    deleteEventAttempt: deleteEventAttempt,
+    deleteEventSuccess: deleteEventSuccess,
+    deleteEventFailed: deleteEventFailed,
+
+    getEvents: getEvents,
+    getEventDetails: getEventDetails,
+    deleteEvent: deleteEvent,
+    createEvent: createEvent,
+    updateEvent: updateEvent
+};

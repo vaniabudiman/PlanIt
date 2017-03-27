@@ -46,7 +46,7 @@ export default function (state = initialState, action) {
             nextState = { ...state, tripPUTStatus: FETCH_STATUS.ATTEMPTING };
             break;
         case Types.UPDATE_TRIP_SUCCESS:
-            nextState = { ...state, tripPUTStatus: FETCH_STATUS.SUCCESS, refresh: true };
+            nextState = { ...state, tripPUTStatus: FETCH_STATUS.SUCCESS, trip: action.trip, refresh: true };
             break;
         case Types.UPDATE_TRIP_FAILED:
             nextState = { ...state, tripPUTStatus: FETCH_STATUS.FAILED };
