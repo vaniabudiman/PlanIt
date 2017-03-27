@@ -15,13 +15,13 @@ export const Types = {
     UPDATE_TRIP_FAILED: "UPDATE_TRIP_FAILED"
 };
 
-function getTripsAttempt () {
+export function getTripsAttempt () {
     return {
         type: Types.GET_TRIPS_ATTEMPT
     };
 }
 
-function getTripsSuccess (response, tripID) {
+export function getTripsSuccess (response, tripID) {
     let resp = tripID ? [response.trip] : response.trips;
     return {
         trips: resp, // Array of trip objects. e.g. [{tripID: 1, ...},{tripID: 2, ...}]
@@ -29,86 +29,90 @@ function getTripsSuccess (response, tripID) {
     };
 }
 
-function getTripsFailed (error) {
+export function getTripsFailed (error) {
     return {
         error,
         type: Types.GET_TRIPS_FAILED
     };
 }
 
-function createTripAttempt () {
+export function createTripAttempt () {
     return {
         type: Types.CREATE_TRIP_ATTEMPT
     };
 }
 
-function createTripSuccess (response) {
+export function createTripSuccess (response) {
     return {
         trip: response.trip,
         type: Types.CREATE_TRIP_SUCCESS
     };
 }
 
-function createTripFailed (error) {
+export function createTripFailed (error) {
     return {
         error,
         type: Types.CREATE_TRIP_FAILED
     };
 }
 
-function deleteTripAttempt () {
+export function deleteTripAttempt () {
     return {
         type: Types.DELETE_TRIP_ATTEMPT
     };
 }
 
-function deleteTripSuccess (tripId) {
+export function deleteTripSuccess (tripId) {
     return {
         tripId: tripId,
         type: Types.DELETE_TRIP_SUCCESS
     };
 }
 
-function deleteTripFailed (error) {
+export function deleteTripFailed (error) {
     return {
         error,
         type: Types.DELETE_TRIP_FAILED
     };
 }
 
-function updateTripAttempt () {
+export function updateTripAttempt () {
     return {
         type: Types.UPDATE_TRIP_ATTEMPT
     };
 }
 
-function updateTripSuccess (response) {
+export function updateTripSuccess (response) {
     return {
         trip: response.trip,
         type: Types.UPDATE_TRIP_SUCCESS
     };
 }
 
-function updateTripFailed (error) {
+export function updateTripFailed (error) {
     return {
         error,
         type: Types.UPDATE_TRIP_FAILED
     };
 }
 
-function buildGETRequestURL (tripID) {
+export function buildGETRequestURL (tripID) {
     let rootURL = apiURL + "trips";
     let queryString = tripID ? "?tripID=" + tripID : "";
 
     return rootURL + queryString;
 }
 
-function buildPOSTRequestURL () {
+export function buildPOSTRequestURL () {
     return apiURL + "trips";
 }
 
-function buildPUTRequestURL (tripID) {
+export function buildPUTRequestURL (tripID) {
     return apiURL + "trips/" + tripID;
+}
+
+export function buildDELETERequestURL (tripId) {
+    return apiURL + "trips/" + tripId;
 }
 
 export function getTrips (tripID = null) {
@@ -223,7 +227,7 @@ export function deleteTrip (tripId) {
     return dispatch => {
         dispatch(deleteTripAttempt());
 
-        fetch(apiURL + "trips/" + tripId, {
+        fetch(buildDELETERequestURL(tripId), {
             method: "DELETE",
             headers: {
                 Accept: "application/json",
@@ -244,3 +248,26 @@ export function deleteTrip (tripId) {
             alert("Request Failed: ", error); // TODO: remove this and do something with the fetch error
         });};
 }
+
+export default {
+    getTripsAttempt: getTripsAttempt,
+    getTripsSuccess: getTripsSuccess,
+    getTripsFailed: getTripsFailed,
+
+    createTripAttempt: createTripAttempt,
+    createTripSuccess: createTripSuccess,
+    createTripFailed: createTripFailed,
+
+    deleteTripAttempt: deleteTripAttempt,
+    deleteTripSuccess: deleteTripSuccess,
+    deleteTripFailed: deleteTripFailed,
+
+    updateTripAttempt: updateTripAttempt,
+    updateTripSuccess: updateTripSuccess,
+    updateTripFailed: updateTripFailed,
+
+    getTrips: getTrips,
+    createTrip: createTrip,
+    updateTrip: updateTrip,
+    deleteTrip: deleteTrip
+};
