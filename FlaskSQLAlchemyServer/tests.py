@@ -517,6 +517,293 @@ class Users(TestCase):
         self.assertIn(str(HTTP_404_NOT_FOUND), rv.status)
 
 
+@unittest.skip('done')
+class Trips(TestCase):
+    tripa_tripID = 2
+    tripa_tripName = 'TripA Name'
+    tripa_active = True
+    tripa_startDate = 'Tue, 02 Mar 2017 01:01:01 GMT'
+    tripa_endDate = 'Tue, 02 Mar 2017 11:11:11 GMT'
+    tripa_userName = user2_username
+
+    tripx_tripID = 3
+    tripx_tripName = 'TripX Name'
+    tripx_active = True
+    tripx_startDate = datetime.strptime(
+        'Tue, 03 Mar 2017 01:01:01 GMT', DT_FORMAT)
+    tripx_endDate = datetime.strptime(
+        'Tue, 03 Mar 2017 11:11:11 GMT', DT_FORMAT)
+    tripx_userName = user1_username
+
+    def setUp(self):
+        # Create a new test client instance.
+        self.app = app.test_client()
+        common_setup()
+        db = create_db_session()
+        # Add a Trip and remove it so that we know that it won't exist.
+        tripx = Trip(self.tripx_tripID, self.tripx_tripName,
+                     self.tripx_active, self.tripx_startDate,
+                     self.tripx_endDate, self.tripx_userName)
+        db.add(tripx)
+        db.commit()
+        db.close()
+        db = create_db_session()
+        db.delete(tripx)
+        db.commit()
+        db.close()
+
+    def test_trips_post(self):
+        print_title('without_JSON_request')
+        trips_path = VER_PATH + '/trips'
+        rv = self.app.post(trips_path)
+        print_data(rv)
+        self.assertIn(str(HTTP_401_UNAUTHORIZED), rv.status)
+
+        print_title('without_JSON_request')
+        rv = login_helper_user2(self.app)
+        self.assertIn(str(HTTP_201_CREATED), rv.status)
+        rv = self.app.post(trips_path)
+        print_data(rv)
+        self.assertIn(str(HTTP_400_BAD_REQUEST), rv.status)
+
+        print_title('not_JSON_request')
+        tripa_dict = {Trip.KEY__ID: self.tripa_tripID,
+                      Trip.KEY__TRIPNAME: self.tripa_tripName,
+                      Trip.KEY__ACTIVE: self.tripa_active,
+                      Trip.KEY__STARTDATE: self.tripa_startDate,
+                      Trip.KEY__ENDDATE: self.tripa_endDate,
+                      Trip.KEY__USERNAME: self.tripa_userName}
+        rv = self.app.post(trips_path, data=dict(tripa_dict))
+        print_data(rv)
+        self.assertIn(str(HTTP_400_BAD_REQUEST), rv.status)
+
+        print_title('post_success')
+        rv = self.app.post(trips_path, data=json.dumps(tripa_dict),
+                           content_type='application/json')
+        print_data(rv)
+        self.assertIn(str(HTTP_201_CREATED), rv.status)
+        db = create_db_session()
+        tripa_dict[Trip.KEY__STARTDATE] = datetime.strptime(
+            tripa_dict[Trip.KEY__STARTDATE], DT_FORMAT).strftime(DT_FORMAT)
+        tripa_dict[Trip.KEY__ENDDATE] = datetime.strptime(
+            tripa_dict[Trip.KEY__ENDDATE], DT_FORMAT).strftime(DT_FORMAT)
+        self.assertEqual(tripa_dict, db.query(Trip).filter(
+            Trip.tripID == tripa_dict[Trip.KEY__ID]).first().to_dict())
+
+        print_title('without_endDate')
+        tripa_dict.pop(Trip.KEY__ID)
+        tripa_dict.pop(Trip.KEY__USERNAME)
+        tripa_dict.pop(Trip.KEY__ENDDATE)
+        rv = self.app.post(trips_path, data=json.dumps(tripa_dict),
+                           content_type='application/json')
+        print_data(rv)
+        self.assertIn(str(HTTP_400_BAD_REQUEST), rv.status)
+
+        print_title('without_startDate')
+        tripa_dict.pop(Trip.KEY__STARTDATE)
+        rv = self.app.post(trips_path, data=json.dumps(tripa_dict),
+                           content_type='application/json')
+        print_data(rv)
+        self.assertIn(str(HTTP_400_BAD_REQUEST), rv.status)
+
+        print_title('without_active')
+        tripa_dict.pop(Trip.KEY__ACTIVE)
+        rv = self.app.post(trips_path, data=json.dumps(tripa_dict),
+                           content_type='application/json')
+        print_data(rv)
+        self.assertIn(str(HTTP_400_BAD_REQUEST), rv.status)
+
+        print_title('without_tripName')
+        tripa_dict.pop(Trip.KEY__TRIPNAME)
+        rv = self.app.post(trips_path, data=json.dumps(tripa_dict),
+                           content_type='application/json')
+        print_data(rv)
+        self.assertIn(str(HTTP_400_BAD_REQUEST), rv.status)
+
+    def test_trips_get(self):
+        print_title('without_arguments')
+        rv = login_helper_user1(self.app)
+        self.assertIn(str(HTTP_201_CREATED), rv.status)
+        trips_path = VER_PATH + '/trips'
+        rv = self.app.get(trips_path)
+        print(rv.data)
+        self.assertIn(str(HTTP_200_OK), rv.status)
+        # TODO: see TODO#1
+
+        print_title('logged_in_without_arugments')
+        rv = self.app.get(trips_path)
+        print_data(rv)
+        self.assertIn(str(HTTP_200_OK), rv.status)
+        # TODO: see TODO#1
+
+        print_title('found_own')
+        rv = self.app.get(trips_path, query_string={
+            Trip.KEY__ID: trip1_tripID})
+        print_data(rv)
+        self.assertIn(str(HTTP_200_OK), rv.status)
+        # TODO: see TODO#1
+
+        print_title('not_found')
+        rv = self.app.get(trips_path, query_string={
+            Trip.KEY__ID: self.tripx_tripID})
+        print_data(rv)
+        self.assertIn(str(HTTP_404_NOT_FOUND), rv.status)
+
+        print_title('no_trips')
+        rv = login_helper_user2(self.app)
+        self.assertIn(str(HTTP_201_CREATED), rv.status)
+        rv = self.app.get(trips_path)
+        print_data(rv)
+        self.assertIn(str(HTTP_404_NOT_FOUND), rv.status)
+
+        print_title('not_authorized')
+        rv = login_helper_user1(self.app)
+        self.assertIn(str(HTTP_201_CREATED), rv.status)
+        db = create_db_session()
+        db.add(Trip(self.tripa_tripID, self.tripa_tripName, self.tripa_active,
+                    datetime.strptime(self.tripa_startDate, DT_FORMAT),
+                    datetime.strptime(self.tripa_endDate, DT_FORMAT),
+                    self.tripa_userName))
+        db.commit()
+        db.close()
+        rv = self.app.get(trips_path, query_string={
+            Trip.KEY__ID: self.tripa_tripID})
+        print_data(rv)
+        self.assertIn(str(HTTP_401_UNAUTHORIZED), rv.status)
+
+    def test_trips_put(self):
+        print_title('not_logged_in')
+        trips_path1 = VER_PATH + '/trips/' + str(trip1_tripID)
+        rv = self.app.put(trips_path1)
+        print_data(rv)
+        self.assertIn(str(HTTP_401_UNAUTHORIZED), rv.status)
+
+        print_title('nonexistent_trip')
+        rv = login_helper_user1(self.app)
+        self.assertIn(str(HTTP_201_CREATED), rv.status)
+        trips_pathx = VER_PATH + '/trips/' + str(self.tripx_tripID)
+        rv = self.app.put(trips_pathx)
+        print_data(rv)
+        self.assertIn(str(HTTP_404_NOT_FOUND), rv.status)
+
+        print_title('authorized_not_JSON')
+        rv = self.app.put(trips_path1)
+        print_data(rv)
+        self.assertIn(str(HTTP_400_BAD_REQUEST), rv.status)
+
+        print_title('authorized_without_params')
+        rv = self.app.put(trips_path1, content_type='application/json')
+        print_data(rv)
+        self.assertIn(str(HTTP_400_BAD_REQUEST), rv.status)
+
+        print_title('authorized_empty_json')
+        rv = self.app.put(trips_path1, data=json.dumps({}),
+                          content_type='application/json')
+        print_data(rv)
+        self.assertIn(str(HTTP_200_OK), rv.status)
+
+        print_title('not_owner_of_trip')
+        rv = login_helper_user2(self.app)
+        self.assertIn(str(HTTP_201_CREATED), rv.status)
+        rv = self.app.put(trips_path1, data=json.dumps({}),
+                          content_type='application/json')
+        print_data(rv)
+        self.assertIn(str(HTTP_401_UNAUTHORIZED), rv.status)
+
+        print_title('change_tripName')
+        rv = login_helper_user1(self.app)
+        self.assertIn(str(HTTP_201_CREATED), rv.status)
+        suffix = 'abc'
+        data = {Trip.KEY__TRIPNAME: trip1_tripName + suffix}
+        rv = self.app.put(trips_path1, data=json.dumps(data),
+                          content_type='application/json')
+        print_data(rv)
+        self.assertIn(str(HTTP_200_OK), rv.status)
+        db = create_db_session()
+        trip = db.query(Trip).filter(Trip.tripID == trip1_tripID).first()
+        self.assertEqual(trip.tripName, trip1_tripName + suffix)
+        db.close()
+
+        print_title('change_active')
+        data = {Trip.KEY__ACTIVE: not trip1_active}
+        rv = self.app.put(trips_path1, data=json.dumps(data),
+                          content_type='application/json')
+        print_data(rv)
+        self.assertIn(str(HTTP_200_OK), rv.status)
+        db = create_db_session()
+        trip = db.query(Trip).filter(Trip.tripID == trip1_tripID).first()
+        self.assertEqual(trip.active, not trip1_active)
+        db.close()
+
+        print_title('change_startDate')
+        data = {Trip.KEY__STARTDATE: self.tripa_startDate}
+        rv = self.app.put(trips_path1, data=json.dumps(data),
+                          content_type='application/json')
+        print_data(rv)
+        self.assertIn(str(HTTP_200_OK), rv.status)
+        db = create_db_session()
+        trip = db.query(Trip).filter(Trip.tripID == trip1_tripID).first()
+        self.assertEqual(trip.startDate,
+                         datetime.strptime(self.tripa_startDate, DT_FORMAT))
+        db.close()
+
+        print_title('change_invalid_startDate')
+        not_a_dateTime = 'a'
+        with self.assertRaises(ValueError):
+            datetime.strptime(not_a_dateTime, DT_FORMAT)
+        data = {Trip.KEY__STARTDATE: not_a_dateTime}
+        rv = self.app.put(trips_path1, data=json.dumps(data),
+                          content_type='application/json')
+        print_data(rv)
+        self.assertIn(str(HTTP_400_BAD_REQUEST), rv.status)
+
+        print_title('change_endDate')
+        data = {Trip.KEY__ENDDATE: self.tripa_endDate}
+        rv = self.app.put(trips_path1, data=json.dumps(data),
+                          content_type='application/json')
+        print_data(rv)
+        self.assertIn(str(HTTP_200_OK), rv.status)
+        db = create_db_session()
+        trip = db.query(Trip).filter(Trip.tripID == trip1_tripID).first()
+        self.assertEqual(trip.endDate,
+                         datetime.strptime(self.tripa_endDate, DT_FORMAT))
+        db.close()
+
+        print_title('change_invalid_endDate')
+        data = {Trip.KEY__ENDDATE: not_a_dateTime}
+        rv = self.app.put(trips_path1, data=json.dumps(data),
+                          content_type='application/json')
+        print_data(rv)
+        self.assertIn(str(HTTP_400_BAD_REQUEST), rv.status)
+
+    def test_trips_delete(self):
+        print_title('not_authorized_delete')
+        db = create_db_session()
+        db.add(Trip(self.tripa_tripID, self.tripa_tripName, self.tripa_active,
+                    datetime.strptime(self.tripa_startDate, DT_FORMAT),
+                    datetime.strptime(self.tripa_endDate, DT_FORMAT),
+                    self.tripa_userName))
+        db.commit()
+        db.close()
+        rv = login_helper_user1(self.app)
+        self.assertIn(str(HTTP_201_CREATED), rv.status)
+        trips_patha = VER_PATH + '/trips/' + str(self.tripa_tripID)
+        rv = self.app.delete(trips_patha)
+        self.assertIn(str(HTTP_401_UNAUTHORIZED), rv.status)
+        db = create_db_session()
+        self.assertIsNot(db.query(Trip).filter(
+            Trip.tripID == self.tripa_tripID).first(), None)
+        db.close()
+
+        print_title('delete_success')
+        trips_path1 = VER_PATH + '/trips/' + str(trip1_tripID)
+        rv = self.app.delete(trips_path1)
+        self.assertIn(str(HTTP_200_OK), rv.status)
+        db = create_db_session()
+        self.assertIs(db.query(Trip).filter(
+            Trip.tripID == trip1_tripID).first(), None)
+        db.close()
+
 
 
 if __name__ == '__main__':
