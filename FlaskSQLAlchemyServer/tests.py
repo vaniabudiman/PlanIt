@@ -6,6 +6,7 @@ from flask import session
 from flask_api.status import *
 # Json handling.
 import json
+from copy import copy
 # Verbose text handling.
 from textwrap import wrap
 
@@ -35,19 +36,19 @@ def print_title(title):
     if verbose:
         print('TEST: ' + title)
 
-
+# /users
 user1_username = 'user1'
 user1_password = 'user1Password'
 user1_name     = 'User1 Name'
 user1_email    = 'user1email.com'  # Deliberate invalid email.
 user1_currency = 'ABC'
-
 user2_username = 'user2'
 user2_password = 'user2Password'
 user2_name     = 'User2 Name'
 user2_email    = PLANIT_EMAIL
 user2_currency = 'XYZ'
 
+# /trips
 trip1_tripID = 1
 trip1_tripName = 'Trip1 Name'
 trip1_active = True
@@ -56,9 +57,9 @@ trip1_startDate = datetime.strptime(
 trip1_endDate = datetime.strptime(
     'Tue, 01 Mar 2017 11:11:11 GMT', DT_FORMAT)
 trip1_userName = user1_username
+tripx_tripID = 99
 
-tripx_tripID = trip1_tripID + 1
-
+# /transportation
 transport1_transportID = 1
 transport1_type = TransportEnum('car')
 transport1_operator = 'Transportation1Operator'
@@ -74,11 +75,34 @@ event1_endDate = datetime.strptime(
     'Tue, 06 Mar 2017 11:11:11 GMT', DT_FORMAT)
 event1_lat = -33.870943
 event1_lon = 151.190311
-event1_remFlag = True
+event1_remFlag = False
 event1_remTime = None
 event1_addr = None
-event1_shared = None
+event1_shared = False
 event1_tripID = 1
+
+# /events
+event2_eventID = 2
+event2_eventName = 'Event2 Name'
+event2_startDate = datetime.strptime(
+    'Tue, 07 Mar 2017 01:01:01 GMT', DT_FORMAT)
+event2_endDate = datetime.strptime(
+    'Tue, 08 Mar 2017 11:11:11 GMT', DT_FORMAT)
+event2_lat = 151.190311
+event2_lon = -33.870943
+event2_remFlag = False
+event2_remTime = None
+event2_addr = None
+event2_shared = False
+event2_tripID = 1
+trip2_tripID = 2
+trip2_tripName = 'Trip1 Name'
+trip2_active = True
+trip2_startDate = datetime.strptime(
+    'Tue, 01 Mar 2017 01:01:01 GMT', DT_FORMAT)
+trip2_endDate = datetime.strptime(
+    'Tue, 01 Mar 2017 11:11:11 GMT', DT_FORMAT)
+trip2_userName = user2_username
 
 
 def common_setup():
@@ -101,7 +125,13 @@ def common_setup():
                 Event(event1_eventID, event1_eventName, event1_startDate,
                       event1_endDate, event1_lat, event1_lon, event1_remFlag,
                       event1_remTime, event1_addr, event1_shared,
-                      event1_tripID)])
+                      event1_tripID),
+                Event(event2_eventID, event2_eventName, event2_startDate,
+                      event2_endDate, event2_lat, event2_lon, event2_remFlag,
+                      event2_remTime, event2_addr, event2_shared,
+                      event2_tripID),
+                Trip(trip2_tripID, trip2_tripName, trip2_active,
+                     trip2_startDate, trip2_endDate, trip2_userName)])
     db.commit()
     db.close()
 
@@ -122,7 +152,6 @@ def login_helper_user2(self_app):
                          content_type='application/json')
 
 
-@unittest.skip('done')
 class Users(TestCase):
     usera_username = 'usera'
     usera_password = 'useraPassword'
@@ -519,16 +548,15 @@ class Users(TestCase):
         self.assertIn(str(HTTP_404_NOT_FOUND), rv.status)
 
 
-@unittest.skip('done')
 class Trips(TestCase):
-    tripa_tripID = 2
+    tripa_tripID = 3
     tripa_tripName = 'TripA Name'
     tripa_active = True
     tripa_startDate = 'Tue, 02 Mar 2017 01:01:01 GMT'
     tripa_endDate = 'Tue, 02 Mar 2017 11:11:11 GMT'
     tripa_userName = user2_username
 
-    tripx_tripID = 3
+    tripx_tripID = 4
     tripx_tripName = 'TripX Name'
     tripx_active = True
     tripx_startDate = datetime.strptime(
@@ -653,6 +681,10 @@ class Trips(TestCase):
 
         print_title('no_trips')
         rv = login_helper_user2(self.app)
+        db = create_db_session()
+        db.delete(db.query(Trip).filter(Trip.tripID == trip2_tripID).first())
+        db.commit()
+        db.close()
         self.assertIn(str(HTTP_201_CREATED), rv.status)
         rv = self.app.get(trips_path)
         print_data(rv)
@@ -806,7 +838,7 @@ class Trips(TestCase):
             Trip.tripID == trip1_tripID).first(), None)
         db.close()
 
-@unittest.skip('done')
+
 class Transportations(TestCase):
     transporta_transportID = 2
     transporta_type = TransportEnum('bus')
@@ -814,7 +846,7 @@ class Transportations(TestCase):
     transporta_number = '2345'
     transporta_depAddr = 'Transportation2 Departure Address'
     transporta_arrAddr = 'Transportation2 Arrival Address'
-    transporta_eventID = 2
+    transporta_eventID = 3
     transporta_depDate = 'Tue, 07 Mar 2017 01:01:01 GMT'
     transporta_arrDate = 'Tue, 08 Mar 2017 11:11:11 GMT'
 
@@ -974,12 +1006,12 @@ class Transportations(TestCase):
 
         print_title('no_transportation_found_for_trip')
         db = create_db_session()
-        db.add(Trip(trip1_tripID + 1, 'a', True,
+        db.add(Trip(tripx_tripID, 'a', True,
                     trip1_startDate, trip1_endDate, trip1_userName))
         db.commit()
         db.close()
         rv = self.app.get(transport_path, query_string={
-            Trip.KEY__ID: trip1_tripID + 1})
+            Trip.KEY__ID: tripx_tripID})
         print_data(rv)
         self.assertIn(str(HTTP_404_NOT_FOUND), rv.status)
 
@@ -1005,12 +1037,17 @@ class Transportations(TestCase):
 
         print_title('event_not_found')
         db = create_db_session()
-        db.add(Transportation(transport1_transportID + 1, transport1_type,
-                              transport1_operator, transport1_number,
-                              transport1_depAddr, transport1_arrAddr,
-                              transport1_eventID + 1))
+        db.add(Transportation(self.transporta_transportID,
+                              self.transporta_type,
+                              self.transporta_operator,
+                              self.transporta_number,
+                              self.transporta_depAddr,
+                              self.transporta_arrAddr,
+                              self.transporta_eventID))
         db.commit()
         db.close()
+        from __init__ import print_database
+        print_database()
         rv = self.app.get(transport_path, query_string={
             Transportation.KEY__ID: transport1_transportID + 1})
         print_data(rv)
@@ -1020,7 +1057,7 @@ class Transportations(TestCase):
         db = create_db_session()
         db.delete(db.query(Trip).filter(
             Trip.tripID == trip1_tripID + 1).first())
-        db.add(Event(transport1_eventID + 1, event1_eventName,
+        db.add(Event(self.transporta_eventID, event1_eventName,
                      event1_startDate, event1_endDate, event1_lat, event1_lon,
                      event1_remFlag, event1_remTime, event1_addr,
                      event1_shared, trip1_tripID + 1))
@@ -1185,7 +1222,7 @@ class Transportations(TestCase):
                               self.transportx_number,
                               self.transportx_depAddr,
                               self.transportx_arrAddr,
-                              transport1_eventID + 1))
+                              self.transporta_eventID))
         db.commit()
         db.close()
         transport_pathx = VER_PATH + '/transportation/' + str(
@@ -1196,7 +1233,7 @@ class Transportations(TestCase):
 
         print_title('trip_not_found')
         db = create_db_session()
-        db.add(Event(transport1_eventID + 1, event1_eventName,
+        db.add(Event(self.transporta_eventID, event1_eventName,
                      event1_startDate, event1_endDate, event1_lat, event1_lon,
                      event1_remFlag, event1_remTime, event1_addr, event1_shared,
                      tripx_tripID))
@@ -1250,6 +1287,427 @@ class Transportations(TestCase):
         db.close()
 
 
+class Events(TestCase):
+    eventa_eventID = 3
+    eventa_eventName = 'EventA Name'
+    eventa_startDate = 'Tue, 11 Mar 2017 01:01:01 GMT'
+    eventa_endDate = 'Tue, 12 Mar 2017 11:11:11 GMT'
+    eventa_lat = -33.870943
+    eventa_lon = 151.190311
+    eventa_remFlag = False
+    eventa_remTime = None
+    eventa_addr = None
+    eventa_shared = False
+    eventa_tripID = 1
+
+    eventx_eventID = 4
+    eventx_eventName = 'EventX Name'
+    eventx_startDate = datetime.strptime(
+        'Tue, 13 Mar 2017 01:01:01 GMT', DT_FORMAT)
+    eventx_endDate = datetime.strptime(
+        'Tue, 14 Mar 2017 11:11:11 GMT', DT_FORMAT)
+    eventx_lat = -33.866891
+    eventx_lon = 151.200814
+    eventx_remFlag = False
+    eventx_remTime = None
+    eventx_addr = None
+    eventx_shared = False
+    eventx_tripID = 1
+
+    def setUp(self):
+        # Create a new test client instance.
+        self.app = app.test_client()
+        common_setup()
+        db = create_db_session()
+        # Add a Event and remove it so that we know that it won't exist.
+        ex = Event(self.eventx_eventID, self.eventx_eventName,
+                   self.eventx_startDate, self.eventx_endDate,
+                   self.eventx_lat, self.eventx_lon,
+                   self.eventx_remFlag, self.eventx_remTime,
+                   self.eventx_addr, self.eventx_shared,
+                   self.eventx_tripID)
+        db.add(ex)
+        db.commit()
+        db.close()
+        db = create_db_session()
+        db.delete(ex)
+        db.commit()
+        db.close()
+
+    def test_events_post(self):
+        print_title('without_JSON_request')
+        events_path = VER_PATH + '/events'
+        rv = self.app.post(events_path)
+        print_data(rv)
+        self.assertIn(str(HTTP_400_BAD_REQUEST), rv.status)
+
+        print_title('without_tripID')
+        rv = self.app.post(events_path, data=json.dumps({}),
+                           content_type='application/json')
+        print_data(rv)
+        self.assertIn(str(HTTP_400_BAD_REQUEST), rv.status)
+
+        print_title('without_events')
+        data = {Event.KEY__TRIPID: self.eventa_tripID}
+        rv = self.app.post(events_path, data=json.dumps(data),
+                           content_type='application/json')
+        print_data(rv)
+        self.assertIn(str(HTTP_400_BAD_REQUEST), rv.status)
+
+        print_title('non_existent_trip')
+        data = {Event.KEY__TRIPID: tripx_tripID,
+                'events': ''}
+        rv = self.app.post(events_path, data=json.dumps(data),
+                           content_type='application/json')
+        print_data(rv)
+        self.assertIn(str(HTTP_404_NOT_FOUND), rv.status)
+
+        print_title('not_authorized')
+        data = {Event.KEY__TRIPID: self.eventa_tripID,
+                'events': ''}
+        rv = self.app.post(events_path, data=json.dumps(data),
+                           content_type='application/json')
+        print_data(rv)
+        self.assertIn(str(HTTP_401_UNAUTHORIZED), rv.status)
+
+        print_title('empty_events')
+        rv = login_helper_user1(self.app)
+        self.assertIn(str(HTTP_201_CREATED), rv.status)
+        data['events'] = []
+        rv = self.app.post(events_path, data=json.dumps(data),
+                           content_type='application/json')
+        print_data(rv)
+        self.assertIn(str(HTTP_400_BAD_REQUEST), rv.status)
+
+        print_title('post_success')
+        eventa_dict = {Event.KEY__ID: self.eventa_eventID,
+                       Event.KEY__EVENTNAME: self.eventa_eventName,
+                       Event.KEY__STARTDATE: self.eventa_startDate,
+                       Event.KEY__ENDDATE: self.eventa_endDate,
+                       Event.KEY__LAT: self.eventa_lat,
+                       Event.KEY__LON: self.eventa_lon,
+                       Event.KEY__REMFLAG: self.eventa_remFlag,
+                       Event.KEY__REMTIME: self.eventa_remTime,
+                       Event.KEY__ADDR: self.eventa_addr,
+                       Event.KEY__SHARED: self.eventa_shared,
+                       Event.KEY__TRIPID: self.eventa_tripID}
+        data['events'] = [eventa_dict]
+        rv = self.app.post(events_path, data=json.dumps(data),
+                           content_type='application/json')
+        print_data(rv)
+        self.assertIn(str(HTTP_201_CREATED), rv.status)
+        eventa_dict[Event.KEY__STARTDATE] = \
+            datetime.strptime(eventa_dict[Event.KEY__STARTDATE],
+                              DT_FORMAT).strftime(DT_FORMAT)
+        eventa_dict[Event.KEY__ENDDATE] = \
+            datetime.strptime(eventa_dict[Event.KEY__ENDDATE],
+                              DT_FORMAT).strftime(DT_FORMAT)
+        db = create_db_session()
+        ev = db.query(Event).filter(
+            Event.eventID == self.eventa_eventID).first()
+        self.assertEqual(eventa_dict, ev.to_dict())
+        db.close()
+
+        print_title('without_eventName')
+        orig_eventa_dict = {Event.KEY__ID: self.eventa_eventID,
+                            Event.KEY__EVENTNAME: self.eventa_eventName,
+                            Event.KEY__STARTDATE: self.eventa_startDate,
+                            Event.KEY__ENDDATE: self.eventa_endDate,
+                            Event.KEY__LAT: self.eventa_lat,
+                            Event.KEY__LON: self.eventa_lon,
+                            Event.KEY__REMFLAG: self.eventa_remFlag,
+                            Event.KEY__REMTIME: self.eventa_remTime,
+                            Event.KEY__ADDR: self.eventa_addr,
+                            Event.KEY__SHARED: self.eventa_shared,
+                            Event.KEY__TRIPID: self.eventa_tripID}
+        eventa_dict = copy(orig_eventa_dict)
+        eventa_dict.pop(Event.KEY__EVENTNAME)
+        data['events'] = [eventa_dict]
+        rv = self.app.post(events_path, data=json.dumps(data),
+                           content_type='application/json')
+        print_data(rv)
+        self.assertIn(str(HTTP_400_BAD_REQUEST), rv.status)
+
+        print_title('without_startDateTime')
+        eventa_dict = copy(orig_eventa_dict)
+        eventa_dict.pop(Event.KEY__STARTDATE)
+        data['events'] = [eventa_dict]
+        rv = self.app.post(events_path, data=json.dumps(data),
+                           content_type='application/json')
+        print_data(rv)
+        self.assertIn(str(HTTP_400_BAD_REQUEST), rv.status)
+
+        print_title('with_invalid_startDateTime')
+        invalid_datetime = 'abc'
+        with self.assertRaises(ValueError):
+            datetime.strptime(invalid_datetime, DT_FORMAT)
+        eventa_dict = copy(orig_eventa_dict)
+        eventa_dict[Event.KEY__STARTDATE] = invalid_datetime
+        data['events'] = [eventa_dict]
+        rv = self.app.post(events_path, data=json.dumps(data),
+                           content_type='application/json')
+        print_data(rv)
+        self.assertIn(str(HTTP_400_BAD_REQUEST), rv.status)
+
+        print_title('without_endDateTime')
+        eventa_dict = copy(orig_eventa_dict)
+        eventa_dict.pop(Event.KEY__ENDDATE)
+        data['events'] = [eventa_dict]
+        rv = self.app.post(events_path, data=json.dumps(data),
+                           content_type='application/json')
+        print_data(rv)
+        self.assertIn(str(HTTP_400_BAD_REQUEST), rv.status)
+
+        print_title('with_invalid_endDateTime')
+        eventa_dict = copy(orig_eventa_dict)
+        eventa_dict[Event.KEY__ENDDATE] = invalid_datetime
+        data['events'] = [eventa_dict]
+        rv = self.app.post(events_path, data=json.dumps(data),
+                           content_type='application/json')
+        print_data(rv)
+        self.assertIn(str(HTTP_400_BAD_REQUEST), rv.status)
+
+    def test_events_get(self):
+        print_title('without_arguments')
+        events_path = VER_PATH + '/events'
+        rv = self.app.get(events_path)
+        print(rv.data)
+        self.assertIn(str(HTTP_400_BAD_REQUEST), rv.status)
+
+        print_title('trip_not_found')
+        rv = self.app.get(events_path, query_string={
+            Trip.KEY__ID: tripx_tripID})
+        print_data(rv)
+        self.assertIn(str(HTTP_404_NOT_FOUND), rv.status)
+
+        print_title('trip_found_but_not_authorized')
+        trip1_key_dict = {Trip.KEY__ID: trip1_tripID}
+        rv = self.app.get(events_path, query_string=trip1_key_dict)
+        print_data(rv)
+        self.assertIn(str(HTTP_401_UNAUTHORIZED), rv.status)
+
+        print_title('found_own')
+        rv = login_helper_user1(self.app)
+        self.assertIn(str(HTTP_201_CREATED), rv.status)
+        rv = self.app.get(events_path, query_string=trip1_key_dict)
+        print_data(rv)
+        self.assertIn(str(HTTP_200_OK), rv.status)
+        # TODO: see TODO#1
+
+        print_title('found_own_but_no_events_in_trip')
+        rv = login_helper_user2(self.app)
+        self.assertIn(str(HTTP_201_CREATED), rv.status)
+        trip2_key_dict = {Trip.KEY__ID: trip2_tripID}
+        rv = self.app.get(events_path, query_string=trip2_key_dict)
+        print_data(rv)
+        self.assertIn(str(HTTP_404_NOT_FOUND), rv.status)
+
+        print_title('event_not_found')
+        rv = self.app.get(events_path, query_string={
+            Event.KEY__ID: self.eventx_eventID})
+        print_data(rv)
+        self.assertIn(str(HTTP_404_NOT_FOUND), rv.status)
+
+        print_title('event_found_not_authorized')
+        event1_key_dict = {Event.KEY__ID: event1_eventID}
+        rv = self.app.get(events_path, query_string=event1_key_dict)
+        print_data(rv)
+        self.assertIn(str(HTTP_401_UNAUTHORIZED), rv.status)
+
+        print_title('event_found')
+        rv = login_helper_user1(self.app)
+        self.assertIn(str(HTTP_201_CREATED), rv.status)
+        rv = self.app.get(events_path, query_string=event1_key_dict)
+        print_data(rv)
+        self.assertIn(str(HTTP_200_OK), rv.status)
+        # TODO: see TODO#1
+
+        print_title('trip_not_found')
+        db = create_db_session()
+        db.add(Event(self.eventx_eventID, self.eventx_eventName,
+                     self.eventx_startDate, self.eventx_endDate,
+                     self.eventx_lat, self.eventx_lon,
+                     self.eventx_remFlag, self.eventx_remTime,
+                     self.eventx_addr, self.eventx_shared,
+                     tripx_tripID))
+        db.commit()
+        db.close()
+        rv = login_helper_user1(self.app)
+        self.assertIn(str(HTTP_201_CREATED), rv.status)
+        rv = self.app.get(events_path, query_string={
+            Event.KEY__ID: self.eventx_eventID})
+        print_data(rv)
+        self.assertIn(str(HTTP_404_NOT_FOUND), rv.status)
+
+    def test_events_put(self):
+        print_title('event_not_found')
+        event_pathx = VER_PATH + '/events/' + str(self.eventx_eventID)
+        rv = self.app.put(event_pathx)
+        print_data(rv)
+        self.assertIn(str(HTTP_404_NOT_FOUND), rv.status)
+
+        print_title('existing_trip_not_authorized')
+        event_path1 = VER_PATH + '/events/' + str(event1_eventID)
+        rv = self.app.put(event_path1, content_type='application/json')
+        print_data(rv)
+        self.assertIn(str(HTTP_401_UNAUTHORIZED), rv.status)
+
+        print_title('authorized_not_json')
+        rv = login_helper_user1(self.app)
+        self.assertIn(str(HTTP_201_CREATED), rv.status)
+        rv = self.app.put(event_path1, data=dict({}),
+                          content_type='application/json')
+        print_data(rv)
+        self.assertIn(str(HTTP_400_BAD_REQUEST), rv.status)
+
+        print_title('no_changes')
+        rv = self.app.put(event_path1, data=json.dumps({}),
+                          content_type='application/json')
+        print_data(rv)
+        self.assertIn(str(HTTP_200_OK), rv.status)
+
+        print_title('change_eventName')
+        suffix = 'abc'
+        data = {Event.KEY__EVENTNAME: event1_eventName + suffix}
+        rv = self.app.put(event_path1, data=json.dumps(data),
+                          content_type='application/json')
+        print_data(rv)
+        self.assertIn(str(HTTP_200_OK), rv.status)
+        db = create_db_session()
+        ev = db.query(Event).filter(Event.eventID == event1_eventID).first()
+        self.assertEqual(ev.eventName, event1_eventName + suffix)
+        db.close()
+
+        print_title('change_startDateTime')
+        data = {Event.KEY__STARTDATE: self.eventa_startDate}
+        rv = self.app.put(event_path1, data=json.dumps(data),
+                          content_type='application/json')
+        print_data(rv)
+        self.assertIn(str(HTTP_200_OK), rv.status)
+        db = create_db_session()
+        ev = db.query(Event).filter(Event.eventID == event1_eventID).first()
+        self.assertEqual(ev.startDateTime,
+                         datetime.strptime(self.eventa_startDate, DT_FORMAT))
+        db.close()
+
+        print_title('change_invalid_startDateTime')
+        with self.assertRaises(ValueError):
+            datetime.strptime(suffix, DT_FORMAT)
+        data = {Event.KEY__STARTDATE: suffix}
+        rv = self.app.put(event_path1, data=json.dumps(data),
+                          content_type='application/json')
+        print_data(rv)
+        self.assertIn(str(HTTP_400_BAD_REQUEST), rv.status)
+
+        print_title('change_endDateTime')
+        data = {Event.KEY__ENDDATE: self.eventa_endDate}
+        rv = self.app.put(event_path1, data=json.dumps(data),
+                          content_type='application/json')
+        print_data(rv)
+        self.assertIn(str(HTTP_200_OK), rv.status)
+        db = create_db_session()
+        ev = db.query(Event).filter(Event.eventID == event1_eventID).first()
+        self.assertEqual(ev.endDateTime,
+                         datetime.strptime(self.eventa_endDate, DT_FORMAT))
+        db.close()
+
+        print_title('change_invalid_endDateTime')
+        with self.assertRaises(ValueError):
+            datetime.strptime(suffix, DT_FORMAT)
+        data = {Event.KEY__ENDDATE: suffix}
+        rv = self.app.put(event_path1, data=json.dumps(data),
+                          content_type='application/json')
+        print_data(rv)
+        self.assertIn(str(HTTP_400_BAD_REQUEST), rv.status)
+
+        print_title('change_lat')
+        self.assertNotEqual(event1_lat, event2_lat)
+        data = {Event.KEY__LAT: event2_lat}
+        rv = self.app.put(event_path1, data=json.dumps(data),
+                          content_type='application/json')
+        print_data(rv)
+        self.assertIn(str(HTTP_200_OK), rv.status)
+        db = create_db_session()
+        ev = db.query(Event).filter(Event.eventID == event1_eventID).first()
+        self.assertEqual(ev.lat, event2_lat)
+        db.close()
+
+        print_title('change_lon')
+        self.assertNotEqual(event1_lon, event2_lon)
+        data = {Event.KEY__LON: event2_lon}
+        rv = self.app.put(event_path1, data=json.dumps(data),
+                          content_type='application/json')
+        print_data(rv)
+        self.assertIn(str(HTTP_200_OK), rv.status)
+        db = create_db_session()
+        ev = db.query(Event).filter(Event.eventID == event1_eventID).first()
+        self.assertEqual(ev.lon, event2_lon)
+        db.close()
+
+        print_title('change_eventName')
+        self.assertNotEqual(event1_addr, suffix)
+        data = {Event.KEY__ADDR: suffix}
+        rv = self.app.put(event_path1, data=json.dumps(data),
+                          content_type='application/json')
+        print_data(rv)
+        self.assertIn(str(HTTP_200_OK), rv.status)
+        db = create_db_session()
+        ev = db.query(Event).filter(Event.eventID == event1_eventID).first()
+        self.assertEqual(ev.address, suffix)
+        db.close()
+
+        print('trip_not_found')
+        db = create_db_session()
+        db.add(Event(self.eventx_eventID, self.eventx_eventName,
+                     self.eventx_startDate, self.eventx_endDate,
+                     self.eventx_lat, self.eventx_lon,
+                     self.eventx_remFlag, self.eventx_remTime,
+                     self.eventx_addr, self.eventx_shared,
+                     tripx_tripID))
+        db.commit()
+        db.close()
+        rv = self.app.put(event_pathx, data=json.dumps(data),
+                          content_type='application/json')
+        print_data(rv)
+        self.assertIn(str(HTTP_404_NOT_FOUND), rv.status)
+
+    def test_events_delete(self):
+        print_title('not_authorized_delete')
+        rv = login_helper_user2(self.app)
+        self.assertIn(str(HTTP_201_CREATED), rv.status)
+        events_path1 = VER_PATH + '/events/' + str(event1_eventID)
+        rv = self.app.delete(events_path1)
+        print_data(rv)
+        self.assertIn(str(HTTP_401_UNAUTHORIZED), rv.status)
+        db = create_db_session()
+        self.assertIsNot(db.query(Event).filter(
+            Event.eventID == event1_eventID).first(), None)
+        db.close()
+
+        print_title('delete_permission')
+        db = create_db_session()
+        db.add(Permissions(event1_eventID, PermissionsEnum('event'),
+                           False, user2_username, trip1_tripID))
+        db.commit()
+        db.close()
+        rv = self.app.delete(events_path1)
+        print_data(rv)
+        self.assertIn(str(HTTP_200_OK), rv.status)
+        db = create_db_session()
+        self.assertIs(db.query(Permissions).filter(
+            Permissions.permissionID == event1_eventID).first(), None)
+        db.close()
+
+        print_title('delete_success')
+        rv = login_helper_user1(self.app)
+        self.assertIn(str(HTTP_201_CREATED), rv.status)
+        rv = self.app.delete(events_path1)
+        print_data(rv)
+        self.assertIn(str(HTTP_200_OK), rv.status)
+        db = create_db_session()
+        self.assertIs(db.query(Event).filter(
+            Event.eventID == event1_eventID).first(), None)
+        db.close()
 
 
 if __name__ == '__main__':

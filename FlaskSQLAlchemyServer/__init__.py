@@ -900,7 +900,6 @@ def events(eventID=None):
                 Permissions.type == PermissionsEnum.EVENT)).delete()
             commit_and_close(db)
             return make_response('Event deleted successfully', 200)
-    return bad_request()
 
 
 @app.route(VER_PATH + '/bookmarks', methods=[POST, GET], strict_slashes=False)
