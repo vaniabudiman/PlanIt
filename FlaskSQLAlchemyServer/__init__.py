@@ -158,12 +158,16 @@ def users(userName=None):
             commit_and_close(db)
     elif request.method == GET:
         curr_userName = session.get(KEY__USERNAME)
+        if curr_userName is None:
+            return bad_request()
         get_userName = request.args.get(User.KEY__USERNAME, None)
         if get_userName is not None:
             db = create_db_session()
             try:
                 user = db.query(User).filter(
                     User.userName == get_userName).first()
+                if user is None:
+                    return make_response('User not found.', 404)
                 if get_userName == curr_userName:
                     return make_response(jsonify({'user': user.to_dict()}), 200)
                 else:
@@ -183,6 +187,8 @@ def users(userName=None):
             return make_response(jsonify(ret_dict), 200)
     elif userName:
         curr_userName = session.get(KEY__USERNAME)
+        if curr_userName is None:
+            return make_response('User not logged in', 401)
         if request.method == PUT:
             if userName != curr_userName:
                 return make_response('User not authorized to edit account.',
@@ -243,7 +249,6 @@ def users(userName=None):
             db.delete(query)
             commit_and_close(db)
             return make_response('User deleted successfully', 200)
-    return bad_request()
 
 
 @app.route(VER_PATH + '/trips', methods=[POST, GET], strict_slashes=False)
@@ -264,13 +269,9 @@ def trips(tripID=None):
             return bad_request(err)
 
         db = create_db_session()
-        try:
-            max_id = get_max_id(db, Trip.tripID)
-            trip = Trip(max_id + 1, post_tripName, post_active,
-                        post_startDate, post_endDate, curr_userName)
-        except ValueError as ve:
-            commit_and_close(db)
-            return bad_request(ve)
+        max_id = get_max_id(db, Trip.tripID)
+        trip = Trip(max_id + 1, post_tripName, post_active,
+                    post_startDate, post_endDate, curr_userName)
 
         try:
             db.add(trip)
@@ -364,7 +365,6 @@ def trips(tripID=None):
             db.delete(trip)
             commit_and_close(db)
             return make_response('Event deleted successfully', 200)
-    return bad_request()
 
 
 @app.route(VER_PATH + '/transportation',

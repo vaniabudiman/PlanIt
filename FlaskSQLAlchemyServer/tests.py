@@ -1,4 +1,5 @@
 # Unit testing module.
+import unittest
 from unittest import TestCase, main
 # Flask session and response status codes.
 from flask import session
@@ -14,10 +15,14 @@ from __init__ import VERSION, VER_PATH, KEY__USERNAME, KEY__LOGGED_IN
 from __init__ import PLANIT_EMAIL
 # Server utilities.
 from __init__ import make_version_path, create_db_session
+from datetime import datetime
 # Models.
-from models import User
+from models import DT_FORMAT
+from models import User, Trip, Event, Bookmark
+from models import Permissions, PermissionsEnum, Transportation, TransportEnum
 
 verbose = True
+app.config['TESTING'] = True
 
 
 def print_data(response):
@@ -31,13 +36,92 @@ def print_title(title):
         print('TEST: ' + title)
 
 
-class Users(TestCase):
-    user1_username = 'user1'
-    user1_password = 'user1Password'
-    user1_name     = 'User1 Name'
-    user1_email    = 'user1@email.com'
-    user1_currency = 'ABC'
+user1_username = 'user1'
+user1_password = 'user1Password'
+user1_name     = 'User1 Name'
+user1_email    = 'user1email.com'  # Deliberate invalid email.
+user1_currency = 'ABC'
 
+user2_username = 'user2'
+user2_password = 'user2Password'
+user2_name     = 'User2 Name'
+user2_email    = PLANIT_EMAIL
+user2_currency = 'XYZ'
+
+trip1_tripID = 1
+trip1_tripName = 'Trip1 Name'
+trip1_active = True
+trip1_startDate = datetime.strptime(
+    'Tue, 01 Mar 2017 01:01:01 GMT', DT_FORMAT)
+trip1_endDate = datetime.strptime(
+    'Tue, 01 Mar 2017 11:11:11 GMT', DT_FORMAT)
+trip1_userName = user1_username
+
+transport1_transportID = 1
+transport1_type = TransportEnum('car')
+transport1_operator = 'Transportation1Operator'
+transport1_number = '1234'
+transport1_depAddr = 'Transportation1 Departure Address'
+transport1_arrAddr = 'Transportation1 Arrival Address'
+transport1_eventID = 1
+event1_eventID = 1
+event1_eventName = 'Event1 Name'
+event1_startDate = datetime.strptime(
+    'Tue, 05 Mar 2017 01:01:01 GMT', DT_FORMAT)
+event1_endDate = datetime.strptime(
+    'Tue, 06 Mar 2017 11:11:11 GMT', DT_FORMAT)
+event1_lat = -33.870943
+event1_lon = 151.190311
+event1_remFlag = True
+event1_remTime = None
+event1_addr = None
+event1_shared = None
+event1_tripID = 1
+
+
+def common_setup():
+    print()
+    # Empty and recreate all tables.
+    base.metadata.drop_all(bind=engine)
+    base.metadata.create_all(bind=engine)
+    # Add entries.
+    db = create_db_session()
+    db.add_all([User(user1_username, user1_password, user1_name,
+                     user1_email, user1_currency),
+                User(user2_username, user2_password, user2_name,
+                     user2_email, user2_currency),
+                Trip(trip1_tripID, trip1_tripName, trip1_active,
+                     trip1_startDate, trip1_endDate, trip1_userName),
+                Transportation(transport1_transportID,transport1_type,
+                               transport1_operator, transport1_number,
+                               transport1_depAddr, transport1_arrAddr,
+                               transport1_eventID),
+                Event(event1_eventID, event1_eventName, event1_startDate,
+                      event1_endDate, event1_lat, event1_lon, event1_remFlag,
+                      event1_remTime, event1_addr, event1_shared,
+                      event1_tripID)])
+    db.commit()
+    db.close()
+
+
+def login_helper_user1(self_app):
+    data = json.dumps({User.KEY__USERNAME: user1_username,
+                       User.KEY__PASSWORD: user1_password})
+    login_path = VER_PATH + '/login'
+    return self_app.post(login_path, data=data,
+                         content_type='application/json')
+
+
+def login_helper_user2(self_app):
+    data = json.dumps({User.KEY__USERNAME: user2_username,
+                       User.KEY__PASSWORD: user2_password})
+    login_path = VER_PATH + '/login'
+    return self_app.post(login_path, data=data,
+                         content_type='application/json')
+
+
+@unittest.skip('done')
+class Users(TestCase):
     usera_username = 'usera'
     usera_password = 'useraPassword'
     usera_name     = 'Usera Name'
@@ -51,23 +135,17 @@ class Users(TestCase):
     userx_currency = 'GHI'
 
     def setUp(self):
-        print()
-        app.config['TESTING'] = True
         # Create a new test client instance.
         self.app = app.test_client()
-        # Empty and recreate all tables.
-        base.metadata.drop_all(bind=engine)
-        base.metadata.create_all(bind=engine)
-        # Add users.
+        common_setup()
         db = create_db_session()
-        db.add(User(self.user1_username, self.user1_password, self.user1_name,
-                    self.user1_email, self.user1_currency))
-        db.commit()
         # Add a user and remove it so that we know that it won't exist.
         userx = User(self.userx_username, self.userx_password, self.userx_name,
                      self.userx_email, self.userx_currency)
         db.add(userx)
         db.commit()
+        db.close()
+        db = create_db_session()
         db.delete(userx)
         db.commit()
         db.close()
@@ -90,8 +168,8 @@ class Users(TestCase):
         self.assertIn(str(HTTP_400_BAD_REQUEST), rv.status)
 
         print_title('not_JSON_request')
-        user1 = {User.KEY__USERNAME: self.user1_username,
-                 User.KEY__PASSWORD: self.user1_password}
+        user1 = {User.KEY__USERNAME: user1_username,
+                 User.KEY__PASSWORD: user1_password}
         rv = self.app.post(login_path, data=dict(user1))
         print_data(rv)
         self.assertIn(str(HTTP_400_BAD_REQUEST), rv.status)
@@ -116,38 +194,36 @@ class Users(TestCase):
         print_data(rv)
         self.assertIn(str(HTTP_400_BAD_REQUEST), rv.status)
 
-        print_title("not_logged_in")
+        print_title('not_logged_in')
         with self.app as client:
             client.get()
             self.assertNotIn(KEY__USERNAME, session)
             self.assertNotIn(KEY__LOGGED_IN, session)
 
         print_title('login_success')
-        data = json.dumps(user1)
-        rv = self.app.post(login_path, data=data,
-                           content_type='application/json')
+        rv = login_helper_user1(self.app)
         print_data(rv)
         self.assertIn(str(HTTP_201_CREATED), rv.status)
 
-        print_title("is_logged_in")
+        print_title('is_logged_in')
         with self.app as client:
             client.get()
             self.assertIn(KEY__USERNAME, session)
-            self.assertEqual(session[KEY__USERNAME], self.user1_username)
+            self.assertEqual(session[KEY__USERNAME], user1_username)
             self.assertIn(KEY__LOGGED_IN, session)
             self.assertTrue(session[KEY__LOGGED_IN])
 
         print_title('login_wrong_password')
-        data = json.dumps({User.KEY__USERNAME: self.user1_username,
-                           User.KEY__PASSWORD: self.user1_password + 'a'})
+        data = json.dumps({User.KEY__USERNAME: user1_username,
+                           User.KEY__PASSWORD: user1_password + 'a'})
         rv = self.app.post(login_path, data=data,
                            content_type='application/json')
         print_data(rv)
         self.assertIn(str(HTTP_401_UNAUTHORIZED), rv.status)
 
         print_title('login_wrong_username')
-        data = json.dumps({User.KEY__USERNAME: self.user1_username + 'a',
-                           User.KEY__PASSWORD: self.user1_password})
+        data = json.dumps({User.KEY__USERNAME: user1_username + 'a',
+                           User.KEY__PASSWORD: user1_password})
         rv = self.app.post(login_path, data=data,
                            content_type='application/json')
         print_data(rv)
@@ -160,6 +236,287 @@ class Users(TestCase):
                            content_type='application/json')
         print_data(rv)
         self.assertIn(str(HTTP_401_UNAUTHORIZED), rv.status)
+
+    def test_logout(self):
+        print_title('without_version_path')
+        rv = self.app.post('/logout')
+        print_data(rv)
+        self.assertIn(str(HTTP_404_NOT_FOUND), rv.status)
+
+        print_title('empty_session')
+        with self.app as client:
+            client.get()
+            self.assertNotIn(KEY__USERNAME, session)
+            self.assertNotIn(KEY__LOGGED_IN, session)
+
+        print_title('still_empty_session_after_logout')
+        logout_path = VER_PATH + '/logout'
+        rv = self.app.post(logout_path)
+        self.assertIn(str(HTTP_200_OK), rv.status)
+        with self.app as client:
+            client.get()
+            self.assertNotIn(KEY__USERNAME, session)
+            self.assertNotIn(KEY__LOGGED_IN, session)
+
+        print_title('logout_success')
+        rv = login_helper_user1(self.app)
+        self.assertIn(str(HTTP_201_CREATED), rv.status)
+        with self.app as client:
+            client.get()
+            self.assertEquals(session[KEY__USERNAME], user1_username)
+            self.assertTrue(session[KEY__LOGGED_IN])
+        rv = self.app.post(logout_path)
+        print_data(rv)
+        self.assertIn(str(HTTP_200_OK), rv.status)
+        with self.app as client:
+            client.get()
+            self.assertNotIn(KEY__USERNAME, session)
+            self.assertNotIn(KEY__LOGGED_IN, session)
+
+    def test_users_post(self):
+        print_title('without_JSON_request')
+        users_path = VER_PATH + '/users'
+        rv = self.app.post(users_path)
+        print_data(rv)
+        self.assertIn(str(HTTP_400_BAD_REQUEST), rv.status)
+
+        print_title('not_JSON_request')
+        usera = User(self.usera_username, self.usera_password,
+                     self.usera_name, self.usera_email, self.usera_currency)
+        rv = self.app.post(users_path, data=dict(usera.to_dict()))
+        print_data(rv)
+        self.assertIn(str(HTTP_400_BAD_REQUEST), rv.status)
+
+        print_title('post_success')
+        rv = self.app.post(users_path, data=json.dumps(usera.to_dict()),
+                           content_type='application/json')
+        print_data(rv)
+        self.assertIn(str(HTTP_201_CREATED), rv.status)
+        db = create_db_session()
+        self.assertEqual(usera.to_dict(), db.query(User).filter(
+            User.userName == usera.userName).first().to_dict())
+
+        print_title('duplicate_user')
+        rv = self.app.post(users_path, data=json.dumps(usera.to_dict()),
+                           content_type='application/json')
+        print_data(rv)
+        self.assertIn(str(HTTP_409_CONFLICT), rv.status)
+
+        print_title('without_homeCurrency')
+        usera_dict = usera.to_dict()
+        usera_dict.pop(User.KEY__CURRENCY)
+        rv = self.app.post(users_path, data=json.dumps(usera_dict),
+                           content_type='application/json')
+        print_data(rv)
+        self.assertIn(str(HTTP_400_BAD_REQUEST), rv.status)
+
+        print_title('without_email')
+        usera_dict.pop(User.KEY__EMAIL)
+        rv = self.app.post(users_path, data=json.dumps(usera_dict),
+                           content_type='application/json')
+        print_data(rv)
+        self.assertIn(str(HTTP_400_BAD_REQUEST), rv.status)
+
+        print_title('without_name')
+        usera_dict.pop(User.KEY__NAME)
+        rv = self.app.post(users_path, data=json.dumps(usera_dict),
+                           content_type='application/json')
+        print_data(rv)
+        self.assertIn(str(HTTP_400_BAD_REQUEST), rv.status)
+
+        print_title('without_password')
+        usera_dict.pop(User.KEY__PASSWORD)
+        rv = self.app.post(users_path, data=json.dumps(usera_dict),
+                           content_type='application/json')
+        print_data(rv)
+        self.assertIn(str(HTTP_400_BAD_REQUEST), rv.status)
+
+        print_title('without_userName')
+        usera_dict.pop(User.KEY__USERNAME)
+        rv = self.app.post(users_path, data=json.dumps(usera_dict),
+                           content_type='application/json')
+        print_data(rv)
+        self.assertIn(str(HTTP_400_BAD_REQUEST), rv.status)
+
+    def test_users_get(self):
+        print_title('without_arguments')
+        users_path = VER_PATH + '/users'
+        rv = self.app.get(users_path)
+        print_data(rv)
+        self.assertIn(str(HTTP_400_BAD_REQUEST), rv.status)
+
+        print_title('empty_request')
+        rv = self.app.get(users_path, query_string={})
+        print_data(rv)
+        self.assertIn(str(HTTP_400_BAD_REQUEST), rv.status)
+
+        print_title('logged_in_without_arugments')
+        rv = login_helper_user1(self.app)
+        self.assertIn(str(HTTP_201_CREATED), rv.status)
+        rv = self.app.get(users_path)
+        print_data(rv)
+        self.assertIn(str(HTTP_200_OK), rv.status)
+        # TODO#1: Compare JSON response... support for JSON not merged yet:
+        #       https://github.com/pallets/flask/pull/1984
+
+        print_title('get_own_user')
+        rv = self.app.get(users_path, query_string={
+            User.KEY__USERNAME: user1_username})
+        print_data(rv)
+        self.assertIn(str(HTTP_200_OK), rv.status)
+        # TODO: see TODO#1
+
+        print_title('get_other_existing_user')
+        usera = User(self.usera_username, self.usera_password,
+                     self.usera_name, self.usera_email, self.usera_currency)
+        self.app.post(users_path, data=json.dumps(usera.to_dict()),
+                      content_type='application/json')
+        self.assertIn(str(HTTP_200_OK), rv.status)
+        rv = self.app.get(users_path, query_string={
+            User.KEY__USERNAME: self.usera_username})
+        print_data(rv)
+        self.assertIn(str(HTTP_200_OK), rv.status)
+        # TODO: see TODO#1
+
+        print_title('get_other_nonexistent_user')
+        rv = self.app.get(users_path, query_string={
+            User.KEY__USERNAME: self.userx_username})
+        print_data(rv)
+        self.assertIn(str(HTTP_404_NOT_FOUND), rv.status)
+
+        print_title('own_user_is_deleted')
+        db = create_db_session()
+        db.delete(db.query(User).filter(
+            User.userName == user1_username).first())
+        db.commit()
+        rv = self.app.get(users_path)
+        print_data(rv)
+        self.assertIn(str(HTTP_404_NOT_FOUND), rv.status)
+
+    def test_users_put(self):
+        print_title('not_logged_in')
+        users_path = VER_PATH + '/users/' + user1_username
+        rv = self.app.put(users_path)
+        print_data(rv)
+        self.assertIn(str(HTTP_401_UNAUTHORIZED), rv.status)
+
+        print_title('nonexistent_user')
+        rv = login_helper_user1(self.app)
+        self.assertIn(str(HTTP_201_CREATED), rv.status)
+        users_path = VER_PATH + '/users/' + self.userx_username
+        rv = self.app.put(users_path)
+        print_data(rv)
+        self.assertIn(str(HTTP_401_UNAUTHORIZED), rv.status)
+
+        print_title('authorized_not_JSON')
+        users_path = VER_PATH + '/users/' + user1_username
+        rv = self.app.put(users_path)
+        print_data(rv)
+        self.assertIn(str(HTTP_400_BAD_REQUEST), rv.status)
+
+        print_title('authorized_without_params')
+        rv = self.app.put(users_path, content_type='application/json')
+        print_data(rv)
+        self.assertIn(str(HTTP_400_BAD_REQUEST), rv.status)
+
+        print_title('authorized_empty_json')
+        rv = self.app.put(users_path, data=json.dumps({}),
+                          content_type='application/json')
+        print_data(rv)
+        self.assertIn(str(HTTP_200_OK), rv.status)
+
+        print_title('change_name')
+        suffix = 'abc'
+        data = {User.KEY__NAME: user1_username + suffix}
+        rv = self.app.put(users_path, data=json.dumps(data),
+                          content_type='application/json')
+        print_data(rv)
+        self.assertIn(str(HTTP_200_OK), rv.status)
+        db = create_db_session()
+        user = db.query(User).filter(
+            User.userName == user1_username).first()
+        self.assertEqual(user.name, user1_username + suffix)
+        db.close()
+
+        print_title('change_password_fail_email')
+        data = {User.KEY__PASSWORD: user1_password + suffix}
+        rv = self.app.put(users_path, data=json.dumps(data),
+                          content_type='application/json')
+        print_data(rv)
+        # Should fail with the invalid email.
+        self.assertIn(str(HTTP_400_BAD_REQUEST), rv.status)
+
+        print_title('change_email')
+        data = {User.KEY__EMAIL: PLANIT_EMAIL}
+        rv = self.app.put(users_path, data=json.dumps(data),
+                          content_type='application/json')
+        print_data(rv)
+        self.assertIn(str(HTTP_200_OK), rv.status)
+        db = create_db_session()
+        user = db.query(User).filter(
+            User.userName == user1_username).first()
+        self.assertEqual(user.email, PLANIT_EMAIL)
+        db.close()
+
+        print_title('change_password')
+        data = {User.KEY__PASSWORD: user1_password + suffix}
+        rv = self.app.put(users_path, data=json.dumps(data),
+                          content_type='application/json')
+        print_data(rv)
+        self.assertIn(str(HTTP_200_OK), rv.status)
+        db = create_db_session()
+        user = db.query(User).filter(
+            User.userName == user1_username).first()
+        self.assertEqual(user.password, user1_password + suffix)
+        db.close()
+
+        print_title('change_currency')
+        data = {User.KEY__CURRENCY: user1_currency + suffix}
+        rv = self.app.put(users_path, data=json.dumps(data),
+                          content_type='application/json')
+        print_data(rv)
+        self.assertIn(str(HTTP_200_OK), rv.status)
+        db = create_db_session()
+        user = db.query(User).filter(
+            User.userName == user1_username).first()
+        self.assertEqual(user.homeCurrency, user1_currency + suffix)
+        db.close()
+
+        print_title('put_self_not_found')
+        rv = self.app.delete(users_path)
+        print_data(rv)
+        self.assertIn(str(HTTP_200_OK), rv.status)
+        rv = self.app.put(users_path, data=json.dumps({}),
+                          content_type='application/json')
+        print_data(rv)
+        self.assertIn(str(HTTP_404_NOT_FOUND), rv.status)
+
+    def test_users_delete(self):
+        print_title('not_logged_in')
+        users_path = VER_PATH + '/users/' + user1_username
+        rv = self.app.delete(users_path)
+        print_data(rv)
+        self.assertIn(str(HTTP_401_UNAUTHORIZED), rv.status)
+
+        print_title('authorized_but_delete_other_user')
+        rv = login_helper_user1(self.app)
+        self.assertIn(str(HTTP_201_CREATED), rv.status)
+        users_path_x = VER_PATH + '/users/' + self.userx_username
+        rv = self.app.delete(users_path_x)
+        print_data(rv)
+        self.assertIn(str(HTTP_401_UNAUTHORIZED), rv.status)
+
+        print_title('delete_success')
+        rv = self.app.delete(users_path)
+        print_data(rv)
+        self.assertIn(str(HTTP_200_OK), rv.status)
+
+        print_title('logged_in_but_user_deleted')
+        rv = self.app.delete(users_path)
+        print_data(rv)
+        self.assertIn(str(HTTP_404_NOT_FOUND), rv.status)
+
+
 
 
 if __name__ == '__main__':
