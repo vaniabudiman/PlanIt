@@ -53,6 +53,10 @@ buck-out/
 android/app/libs
 *.keystore
 
+# Flask Coverage
+#
+FlaskSQLAlchemyServer/.coverage
+
 # fastlane
 #
 # It is recommended to not store the screenshots in the git repo. Instead, use fastlane to re-generate the

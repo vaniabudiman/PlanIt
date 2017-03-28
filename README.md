@@ -35,10 +35,21 @@ npm run jslint
 
 
 ### Realm DB Testing:
-
 You can count the number of objects initialized in the Realm DB. For example:
 ```
 {realm.objects('Dog').length}
+```
+
+
+### FlaskSQLAlchemy server Testing:
+Make sure to have all the required modules first:
+```
+pip install -r FlaskSQLAlchemyServer/requirements.txt
+```
+While in the `FlaskSQLAlchemyServer/` directory, run the following command: 
+```
+coverage run tests.py
+coverage report -m
 ```
 
 
