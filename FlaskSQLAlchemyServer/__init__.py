@@ -392,8 +392,8 @@ def transportation(transportationID=None):
             commit_and_close(db)
 
         if not isinstance(post_transports, list) or len(post_transports) == 0:
-            # There should be at least one Event to work with.
-            return bad_request()
+            # There should be at least one Transportation to work with.
+            return bad_request('Require at least one Transportation.')
 
         db = create_db_session()
         try:
@@ -670,7 +670,6 @@ def transportation(transportationID=None):
             commit_and_close(db)
             return make_response(
                 'Transportation Event deleted successfully', 200)
-    return bad_request()
 
 
 @app.route(VER_PATH + '/events', methods=[POST, GET], strict_slashes=False)

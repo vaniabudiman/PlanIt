@@ -57,6 +57,8 @@ trip1_endDate = datetime.strptime(
     'Tue, 01 Mar 2017 11:11:11 GMT', DT_FORMAT)
 trip1_userName = user1_username
 
+tripx_tripID = trip1_tripID + 1
+
 transport1_transportID = 1
 transport1_type = TransportEnum('car')
 transport1_operator = 'Transportation1Operator'
@@ -92,7 +94,7 @@ def common_setup():
                      user2_email, user2_currency),
                 Trip(trip1_tripID, trip1_tripName, trip1_active,
                      trip1_startDate, trip1_endDate, trip1_userName),
-                Transportation(transport1_transportID,transport1_type,
+                Transportation(transport1_transportID, transport1_type,
                                transport1_operator, transport1_number,
                                transport1_depAddr, transport1_arrAddr,
                                transport1_eventID),
@@ -622,15 +624,15 @@ class Trips(TestCase):
 
     def test_trips_get(self):
         print_title('without_arguments')
-        rv = login_helper_user1(self.app)
-        self.assertIn(str(HTTP_201_CREATED), rv.status)
         trips_path = VER_PATH + '/trips'
         rv = self.app.get(trips_path)
         print(rv.data)
-        self.assertIn(str(HTTP_200_OK), rv.status)
+        self.assertIn(str(HTTP_401_UNAUTHORIZED), rv.status)
         # TODO: see TODO#1
 
         print_title('logged_in_without_arugments')
+        rv = login_helper_user1(self.app)
+        self.assertIn(str(HTTP_201_CREATED), rv.status)
         rv = self.app.get(trips_path)
         print_data(rv)
         self.assertIn(str(HTTP_200_OK), rv.status)
@@ -803,6 +805,450 @@ class Trips(TestCase):
         self.assertIs(db.query(Trip).filter(
             Trip.tripID == trip1_tripID).first(), None)
         db.close()
+
+@unittest.skip('done')
+class Transportations(TestCase):
+    transporta_transportID = 2
+    transporta_type = TransportEnum('bus')
+    transporta_operator = 'Transportation2Operator'
+    transporta_number = '2345'
+    transporta_depAddr = 'Transportation2 Departure Address'
+    transporta_arrAddr = 'Transportation2 Arrival Address'
+    transporta_eventID = 2
+    transporta_depDate = 'Tue, 07 Mar 2017 01:01:01 GMT'
+    transporta_arrDate = 'Tue, 08 Mar 2017 11:11:11 GMT'
+
+    transportx_transportID = 3
+    transportx_type = TransportEnum('sea')
+    transportx_operator = 'Transportation3Operator'
+    transportx_number = '3456'
+    transportx_depAddr = 'Transportation3 Departure Address'
+    transportx_arrAddr = 'Transportation3 Arrival Address'
+    transportx_depDate = 'Tue, 17 Mar 2017 01:01:01 GMT'
+    transportx_arrDate = 'Tue, 18 Mar 2017 11:11:11 GMT'
+
+    def setUp(self):
+        # Create a new test client instance.
+        self.app = app.test_client()
+        common_setup()
+        db = create_db_session()
+        # Add a Trip and remove it so that we know that it won't exist.
+        tx = Transportation(self.transportx_transportID, self.transportx_type,
+                            self.transportx_operator, self.transportx_number,
+                            self.transportx_depAddr, self.transportx_arrAddr,
+                            self.transportx_transportID)
+        db.add(tx)
+        db.commit()
+        db.close()
+        db = create_db_session()
+        db.delete(tx)
+        db.commit()
+        db.close()
+
+    def test_transportation_post(self):
+        print_title('without_JSON_request')
+        transport_path = VER_PATH + '/transportation'
+        rv = self.app.post(transport_path)
+        print_data(rv)
+        self.assertIn(str(HTTP_400_BAD_REQUEST), rv.status)
+
+        print_title('post_not_authorized')
+        ta = Transportation(self.transporta_transportID, self.transporta_type,
+                            self.transporta_operator, self.transporta_number,
+                            self.transporta_depAddr, self.transporta_arrAddr,
+                            self.transporta_eventID)
+        ta_dict = {Trip.KEY__ID: trip1_tripID,
+                   'transportation': [ta.to_dict()]}
+        ta_dict['transportation'][0][Transportation.KEY__DEPARTUREDATE] = \
+            self.transporta_depDate
+        ta_dict['transportation'][0][Transportation.KEY__ARRIVALDATE] = \
+            self.transporta_arrDate
+        rv = self.app.post(transport_path, data=json.dumps(ta_dict),
+                           content_type='application/json')
+        print_data(rv)
+        self.assertIn(str(HTTP_401_UNAUTHORIZED), rv.status)
+
+        print_title('post_success')
+        rv = login_helper_user1(self.app)
+        self.assertIn(str(HTTP_201_CREATED), rv.status)
+        rv = self.app.post(transport_path, data=json.dumps(ta_dict),
+                           content_type='application/json')
+        print_data(rv)
+        self.assertIn(str(HTTP_201_CREATED), rv.status)
+        db = create_db_session()
+        q = db.query(Transportation).filter(
+            Transportation.transportationID == ta.transportationID).first()
+        self.assertEqual(ta.to_dict(), q.to_dict())
+        db.close()
+
+        print_title('trip_not_found')
+        rv = self.app.post(transport_path, data=json.dumps(
+            {Trip.KEY__ID: tripx_tripID,
+             'transportation': [ta.to_dict()]}),
+                           content_type='application/json')
+        print_data(rv)
+        self.assertIn(str(HTTP_404_NOT_FOUND), rv.status)
+
+        print_title('empty_list')
+        rv = self.app.post(transport_path, data=json.dumps(
+            {Trip.KEY__ID: trip1_tripID,
+             'transportation': []}),
+                           content_type='application/json')
+        print_data(rv)
+        self.assertIn(str(HTTP_400_BAD_REQUEST), rv.status)
+
+        print_title('not_a_list')
+        rv = self.app.post(transport_path, data=json.dumps(
+            {Trip.KEY__ID: trip1_tripID,
+             'transportation': ta.to_dict()}),
+                           content_type='application/json')
+        print_data(rv)
+        self.assertIn(str(HTTP_400_BAD_REQUEST), rv.status)
+
+        print_title('not_a_transportation_enum')
+        not_a_transport_enum = 'abc'
+        with self.assertRaises(ValueError):
+            TransportEnum(not_a_transport_enum)
+        orig_ta_dict = ta.to_dict()
+        orig_ta_dict[Transportation.KEY__DEPARTUREDATE] = \
+            self.transporta_depDate
+        orig_ta_dict[Transportation.KEY__ARRIVALDATE] = self.transporta_arrDate
+        ta_dict = orig_ta_dict
+        ta_dict[Transportation.KEY__TYPE] = not_a_transport_enum
+        rv = self.app.post(transport_path, data=json.dumps(
+            {Trip.KEY__ID: trip1_tripID,
+             'transportation': [ta_dict]}),
+                           content_type='application/json')
+        print_data(rv)
+        self.assertIn(str(HTTP_400_BAD_REQUEST), rv.status)
+
+        print_title('not_a_dep_datetime')
+        not_a_datetime = 'abc'
+        with self.assertRaises(ValueError):
+            datetime.strptime(not_a_datetime, DT_FORMAT)
+        ta_dict = orig_ta_dict
+        ta_dict[Transportation.KEY__DEPARTUREDATE] = not_a_datetime
+        rv = self.app.post(transport_path, data=json.dumps(
+            {Trip.KEY__ID: trip1_tripID,
+             'transportation': [ta_dict]}),
+                           content_type='application/json')
+        print_data(rv)
+        self.assertIn(str(HTTP_400_BAD_REQUEST), rv.status)
+
+        print_title('not_a_arr_datetime')
+        ta_dict = orig_ta_dict
+        ta_dict[Transportation.KEY__ARRIVALDATE] = not_a_datetime
+        rv = self.app.post(transport_path, data=json.dumps(
+            {Trip.KEY__ID: trip1_tripID,
+             'transportation': [ta_dict]}),
+                           content_type='application/json')
+        print_data(rv)
+        self.assertIn(str(HTTP_400_BAD_REQUEST), rv.status)
+
+    def test_transportation_get(self):
+        print_title('without_arguments')
+        transport_path = VER_PATH + '/transportation'
+        rv = self.app.get(transport_path)
+        print(rv.data)
+        self.assertIn(str(HTTP_400_BAD_REQUEST), rv.status)
+
+        print_title('trip_not_found')
+        rv = self.app.get(transport_path, query_string={
+            Trip.KEY__ID: tripx_tripID})
+        print_data(rv)
+        self.assertIn(str(HTTP_404_NOT_FOUND), rv.status)
+
+        print_title('trip_found_but_not_authorized')
+        trip1_key_dict = {Trip.KEY__ID: trip1_tripID}
+        rv = self.app.get(transport_path, query_string=trip1_key_dict)
+        print_data(rv)
+        self.assertIn(str(HTTP_401_UNAUTHORIZED), rv.status)
+
+        print_title('found_own')
+        rv = login_helper_user1(self.app)
+        self.assertIn(str(HTTP_201_CREATED), rv.status)
+        rv = self.app.get(transport_path, query_string=trip1_key_dict)
+        print_data(rv)
+        self.assertIn(str(HTTP_200_OK), rv.status)
+        # TODO: see TODO#1
+
+        print_title('no_transportation_found_for_trip')
+        db = create_db_session()
+        db.add(Trip(trip1_tripID + 1, 'a', True,
+                    trip1_startDate, trip1_endDate, trip1_userName))
+        db.commit()
+        db.close()
+        rv = self.app.get(transport_path, query_string={
+            Trip.KEY__ID: trip1_tripID + 1})
+        print_data(rv)
+        self.assertIn(str(HTTP_404_NOT_FOUND), rv.status)
+
+        print_title('transportation_not_found')
+        rv = self.app.get(transport_path, query_string={
+            Transportation.KEY__ID: self.transportx_transportID})
+        print_data(rv)
+        self.assertIn(str(HTTP_404_NOT_FOUND), rv.status)
+
+        print_title('transportation_found')
+        transport1_key_dict = {Transportation.KEY__ID: transport1_transportID}
+        rv = self.app.get(transport_path, query_string=transport1_key_dict)
+        print_data(rv)
+        self.assertIn(str(HTTP_200_OK), rv.status)
+        # TODO: see TODO#1
+
+        print_title('not_authorized_shared_attempt')
+        rv = login_helper_user2(self.app)
+        self.assertIn(str(HTTP_201_CREATED), rv.status)
+        rv = self.app.get(transport_path, query_string=transport1_key_dict)
+        print_data(rv)
+        self.assertIn(str(HTTP_401_UNAUTHORIZED), rv.status)
+
+        print_title('event_not_found')
+        db = create_db_session()
+        db.add(Transportation(transport1_transportID + 1, transport1_type,
+                              transport1_operator, transport1_number,
+                              transport1_depAddr, transport1_arrAddr,
+                              transport1_eventID + 1))
+        db.commit()
+        db.close()
+        rv = self.app.get(transport_path, query_string={
+            Transportation.KEY__ID: transport1_transportID + 1})
+        print_data(rv)
+        self.assertIn(str(HTTP_404_NOT_FOUND), rv.status)
+
+        print_title('trip_not_found')
+        db = create_db_session()
+        db.delete(db.query(Trip).filter(
+            Trip.tripID == trip1_tripID + 1).first())
+        db.add(Event(transport1_eventID + 1, event1_eventName,
+                     event1_startDate, event1_endDate, event1_lat, event1_lon,
+                     event1_remFlag, event1_remTime, event1_addr,
+                     event1_shared, trip1_tripID + 1))
+        db.commit()
+        db.close()
+        rv = self.app.get(transport_path, query_string={
+            Transportation.KEY__ID: transport1_transportID + 1})
+        print_data(rv)
+        self.assertIn(str(HTTP_404_NOT_FOUND), rv.status)
+
+    def test_transportation_put(self):
+        print_title('transportation_not_found')
+        transport_pathx = VER_PATH + '/transportation/' + str(
+            self.transportx_transportID)
+        rv = self.app.put(transport_pathx)
+        print_data(rv)
+        self.assertIn(str(HTTP_404_NOT_FOUND), rv.status)
+
+        print_title('existing_trip_not_authorized')
+        transport_path1 = VER_PATH + '/transportation/' + str(
+            transport1_transportID)
+        rv = self.app.put(transport_path1, content_type='application/json')
+        print_data(rv)
+        self.assertIn(str(HTTP_401_UNAUTHORIZED), rv.status)
+
+        print_title('authorized_no_changes')
+        rv = login_helper_user1(self.app)
+        self.assertIn(str(HTTP_201_CREATED), rv.status)
+        rv = self.app.put(transport_path1, data=json.dumps({}),
+                          content_type='application/json')
+        print_data(rv)
+        self.assertIn(str(HTTP_200_OK), rv.status)
+
+        print_title('existing_trip_not_json')
+        rv = self.app.put(transport_path1, data=json.dumps({}))
+        print_data(rv)
+        self.assertIn(str(HTTP_400_BAD_REQUEST), rv.status)
+
+        print_title('change_type')
+        new_type = 'sea'
+        self.assertNotEqual(transport1_type, new_type)
+        data = {Transportation.KEY__TYPE: new_type}
+        rv = self.app.put(transport_path1, data=json.dumps(data),
+                          content_type='application/json')
+        print_data(rv)
+        self.assertIn(str(HTTP_200_OK), rv.status)
+        db = create_db_session()
+        tr = db.query(Transportation).filter(
+            Transportation.transportationID == transport1_transportID).first()
+        self.assertEqual(tr.type, TransportEnum(new_type))
+        db.close()
+
+        print_title('change_invalid_type')
+        suffix = 'abc'
+        with self.assertRaises(ValueError):
+            TransportEnum(suffix)
+        data = {Transportation.KEY__TYPE: suffix}
+        rv = self.app.put(transport_path1, data=json.dumps(data),
+                          content_type='application/json')
+        print_data(rv)
+        self.assertIn(str(HTTP_400_BAD_REQUEST), rv.status)
+
+        print_title('change_operator')
+        data = {Transportation.KEY__OPERATOR: transport1_operator + suffix}
+        rv = self.app.put(transport_path1, data=json.dumps(data),
+                          content_type='application/json')
+        print_data(rv)
+        self.assertIn(str(HTTP_200_OK), rv.status)
+        db = create_db_session()
+        tr = db.query(Transportation).filter(
+            Transportation.transportationID == transport1_transportID).first()
+        self.assertEqual(tr.operator, transport1_operator + suffix)
+        db.close()
+
+        print_title('change_number')
+        data = {Transportation.KEY__NUMBER: transport1_number + suffix}
+        rv = self.app.put(transport_path1, data=json.dumps(data),
+                          content_type='application/json')
+        print_data(rv)
+        self.assertIn(str(HTTP_200_OK), rv.status)
+        db = create_db_session()
+        tr = db.query(Transportation).filter(
+            Transportation.transportationID == transport1_transportID).first()
+        self.assertEqual(tr.number, transport1_number + suffix)
+        db.close()
+
+        print_title('change_departureDateTime')
+        self.assertNotEqual(event1_startDate, self.transportx_depDate)
+        data = {Transportation.KEY__DEPARTUREDATE: self.transportx_depDate}
+        rv = self.app.put(transport_path1, data=json.dumps(data),
+                          content_type='application/json')
+        print_data(rv)
+        self.assertIn(str(HTTP_200_OK), rv.status)
+        db = create_db_session()
+        tr = db.query(Transportation).filter(
+            Transportation.transportationID == transport1_transportID).first()
+        ev = db.query(Event).filter(Event.eventID == tr.eventID).first()
+        self.assertEqual(ev.startDateTime,
+                         datetime.strptime(self.transportx_depDate, DT_FORMAT))
+        db.close()
+
+        print_title('change_invalid_departureDateTime')
+        with self.assertRaises(ValueError):
+            datetime.strptime(suffix, DT_FORMAT)
+        data = {Transportation.KEY__DEPARTUREDATE: suffix}
+        rv = self.app.put(transport_path1, data=json.dumps(data),
+                          content_type='application/json')
+        print_data(rv)
+        self.assertIn(str(HTTP_400_BAD_REQUEST), rv.status)
+
+        print_title('change_arrivalDateTime')
+        self.assertNotEqual(event1_endDate, self.transportx_arrDate)
+        data = {Transportation.KEY__ARRIVALDATE: self.transportx_arrDate}
+        rv = self.app.put(transport_path1, data=json.dumps(data),
+                          content_type='application/json')
+        print_data(rv)
+        self.assertIn(str(HTTP_200_OK), rv.status)
+        db = create_db_session()
+        tr = db.query(Transportation).filter(
+            Transportation.transportationID == transport1_transportID).first()
+        ev = db.query(Event).filter(Event.eventID == tr.eventID).first()
+        self.assertEqual(ev.endDateTime,
+                         datetime.strptime(self.transportx_arrDate, DT_FORMAT))
+        db.close()
+
+        print_title('change_invalid_arrivalDateTime')
+        data = {Transportation.KEY__ARRIVALDATE: suffix}
+        rv = self.app.put(transport_path1, data=json.dumps(data),
+                          content_type='application/json')
+        print_data(rv)
+        self.assertIn(str(HTTP_400_BAD_REQUEST), rv.status)
+
+        print_title('change_departureAddress')
+        data = {Transportation.KEY__DEPARTUREADDR: transport1_depAddr + suffix}
+        rv = self.app.put(transport_path1, data=json.dumps(data),
+                          content_type='application/json')
+        print_data(rv)
+        self.assertIn(str(HTTP_200_OK), rv.status)
+        db = create_db_session()
+        tr = db.query(Transportation).filter(
+            Transportation.transportationID == transport1_transportID).first()
+        self.assertEqual(tr.departureAddress, transport1_depAddr + suffix)
+        db.close()
+
+        print_title('change_arrivalAddress')
+        data = {Transportation.KEY__ARRIVALADDR: transport1_arrAddr + suffix}
+        rv = self.app.put(transport_path1, data=json.dumps(data),
+                          content_type='application/json')
+        print_data(rv)
+        self.assertIn(str(HTTP_200_OK), rv.status)
+        db = create_db_session()
+        tr = db.query(Transportation).filter(
+            Transportation.transportationID == transport1_transportID).first()
+        self.assertEqual(tr.arrivalAddress, transport1_arrAddr + suffix)
+        db.close()
+
+        print_title('event_not_found')
+        db = create_db_session()
+        db.add(Transportation(self.transportx_transportID,
+                              self.transportx_type,
+                              self.transportx_operator,
+                              self.transportx_number,
+                              self.transportx_depAddr,
+                              self.transportx_arrAddr,
+                              transport1_eventID + 1))
+        db.commit()
+        db.close()
+        transport_pathx = VER_PATH + '/transportation/' + str(
+            self.transportx_transportID)
+        rv = self.app.put(transport_pathx)
+        print_data(rv)
+        self.assertIn(str(HTTP_404_NOT_FOUND), rv.status)
+
+        print_title('trip_not_found')
+        db = create_db_session()
+        db.add(Event(transport1_eventID + 1, event1_eventName,
+                     event1_startDate, event1_endDate, event1_lat, event1_lon,
+                     event1_remFlag, event1_remTime, event1_addr, event1_shared,
+                     tripx_tripID))
+        db.commit()
+        db.close()
+        transport_pathx = VER_PATH + '/transportation/' + str(
+            self.transportx_transportID)
+        rv = self.app.put(transport_pathx)
+        print_data(rv)
+        self.assertIn(str(HTTP_404_NOT_FOUND), rv.status)
+
+    def test_transportation_delete(self):
+        print_title('not_authorized_delete')
+        rv = login_helper_user2(self.app)
+        self.assertIn(str(HTTP_201_CREATED), rv.status)
+        transport_path = VER_PATH + '/transportation/' +\
+                         str(transport1_transportID)
+        rv = self.app.delete(transport_path)
+        print_data(rv)
+        self.assertIn(str(HTTP_401_UNAUTHORIZED), rv.status)
+        db = create_db_session()
+        self.assertIsNot(db.query(Transportation).filter(
+            Transportation.transportationID == transport1_transportID).first(),
+                         None)
+        db.close()
+
+        print_title('delete_permission')
+        db = create_db_session()
+        db.add(Permissions(event1_eventID, PermissionsEnum('event'),
+                           False, user2_username, trip1_tripID))
+        db.commit()
+        db.close()
+        rv = self.app.delete(transport_path)
+        print_data(rv)
+        self.assertIn(str(HTTP_200_OK), rv.status)
+        db = create_db_session()
+        self.assertIs(db.query(Permissions).filter(
+            Permissions.permissionID == event1_eventID).first(), None)
+        db.close()
+
+        print_title('delete_success')
+        rv = login_helper_user1(self.app)
+        self.assertIn(str(HTTP_201_CREATED), rv.status)
+        rv = self.app.delete(transport_path)
+        print_data(rv)
+        self.assertIn(str(HTTP_200_OK), rv.status)
+        db = create_db_session()
+        self.assertIs(db.query(Transportation).filter(
+            Transportation.transportationID == transport1_transportID).first(),
+                      None)
+        db.close()
+
 
 
 
