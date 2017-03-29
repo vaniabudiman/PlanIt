@@ -1206,8 +1206,6 @@ def share(permissionID=None):
                             continue
                         else:
                             ret_dict['bookmarks'].append(b.to_dict())
-                    else:
-                        return bad_request()
                 return make_response(jsonify(ret_dict), 200)
             finally:
                 commit_and_close(db)
@@ -1257,8 +1255,6 @@ def share(permissionID=None):
                         bookmark = db.query(Bookmark).filter(
                             Bookmark.bookmarkID == permissionID).first()
                         bookmark.shared = False
-                    else:
-                        return bad_request()
                 return make_response('Permission deleted successfully', 200)
             finally:
                 commit_and_close(db)
@@ -1319,7 +1315,7 @@ def view_database():
     return return_string
 
 
-if __name__ == '__main__':
+def setup_dummy_data():
     # Remove all entries.
     base.metadata.drop_all(bind=engine)
     # Create tables.
@@ -1385,8 +1381,6 @@ if __name__ == '__main__':
     db_session.add_all([e5, t1, p4])
     db_session.commit()
     print_database()
-
-    # TODO: All of the following should go into a testing file.
     """
     db_session = create_db_session()
 
@@ -1415,6 +1409,8 @@ if __name__ == '__main__':
     print_database()
     """
 
+if __name__ == '__main__':
+    setup_dummy_data()
     if 'liveweb' not in gethostname():
         # Local hosting.
         # Host at 'http://localhost:4000/' and allow reloading on code changes.

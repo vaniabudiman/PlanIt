@@ -429,9 +429,9 @@ class Permissions(base):
     KEY__TOUSER = 'toUser'
     KEY__TOTRIP = 'toTrip'
 
-    def to_dict(self):
-        return {self.KEY__ID: self.permissionID,
-                self.KEY__TYPE: self.type.value,
-                self.KEY__WRITEFLAG: self.writeFlag,
-                self.KEY__TOUSER: self.toUser,
-                self.KEY__TOTRIP: self.toTrip}
+    # def to_dict(self):
+    #     return {self.KEY__ID: self.permissionID,
+    #             self.KEY__TYPE: self.type.value,
+    #             self.KEY__WRITEFLAG: self.writeFlag,
+    #             self.KEY__TOUSER: self.toUser,
+    #             self.KEY__TOTRIP: self.toTrip}

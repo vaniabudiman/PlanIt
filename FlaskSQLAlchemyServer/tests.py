@@ -114,7 +114,7 @@ bookmark1_placeID = '45a27fd8d56c56dc62afc9b49e1d850440d5c403'
 bookmark1_name = 'Bookmark1 Name'
 bookmark1_addr = 'Bookmark1 Address'
 bookmark1_type = 'Bookmark1 Type'
-bookmark1_shared = False
+bookmark1_shared = None
 bookmark1_tripID = 1
 bookmark1_eventID = None
 bookmarkx_bookmarkID = tripx_tripID
@@ -1276,8 +1276,8 @@ class Transportations(TestCase):
         print_title('not_authorized_delete')
         rv = login_helper_user2(self.app)
         self.assertIn(str(HTTP_201_CREATED), rv.status)
-        transport_path = VER_PATH + '/transportation/' +\
-                         str(transport1_transportID)
+        transport_path = VER_PATH + '/transportation/' + str(
+            transport1_transportID)
         rv = self.app.delete(transport_path)
         print_data(rv)
         self.assertIn(str(HTTP_401_UNAUTHORIZED), rv.status)
@@ -1853,6 +1853,22 @@ class Bookmarks(TestCase):
         self.assertEqual(bookmarka_dict, bo.to_dict())
         db.close()
 
+        print_title('test_first_post')
+        db = create_db_session()
+        db.query(Bookmark).delete()
+        db.commit()
+        db.close()
+        rv = self.app.post(bookmarks_paths, data=json.dumps(data),
+                           content_type='application/json')
+        print_data(rv)
+        self.assertIn(str(HTTP_201_CREATED), rv.status)
+        db = create_db_session()
+        bookmarka_dict[Bookmark.KEY__ID] = 1
+        bo = db.query(Bookmark).filter(
+            Bookmark.bookmarkID == 1).first()
+        self.assertEqual(bookmarka_dict, bo.to_dict())
+        db.close()
+
         print_title('without_lat')
         orig_bookmarka_dict = {Bookmark.KEY__ID: self.bookmarka_bookmarkID,
                                Bookmark.KEY__LAT: self.bookmarka_lat,
@@ -1972,7 +1988,8 @@ class Bookmarks(TestCase):
 
     def test_bookmarks_delete(self):
         print_title('bookmark_not_found')
-        bookmark_pathx = VER_PATH + '/bookmarks/' + str(self.bookmarkx_bookmarkID)
+        bookmark_pathx = VER_PATH + '/bookmarks/' + str(
+            self.bookmarkx_bookmarkID)
         rv = self.app.delete(bookmark_pathx)
         print_data(rv)
         self.assertIn(str(HTTP_404_NOT_FOUND), rv.status)
@@ -2018,6 +2035,21 @@ class Bookmarks(TestCase):
         self.assertIs(db.query(Bookmark).filter(
             Bookmark.bookmarkID == bookmark1_bookmarkID).first(), None)
         db.close()
+
+        print_title('trip_not_found')
+        db = create_db_session()
+        db.add(Bookmark(self.bookmarka_bookmarkID, self.bookmarka_lat,
+                        self.bookmarka_lon, self.bookmarka_placeID,
+                        self.bookmarka_name, self.bookmarka_addr,
+                        self.bookmarka_type, self.bookmarka_shared,
+                        tripx_tripID, self.bookmarka_eventID))
+        db.commit()
+        db.close()
+        bookmarks_patha = VER_PATH + '/bookmarks/' + str(
+            self.bookmarka_bookmarkID)
+        rv = self.app.delete(bookmarks_patha)
+        print_data(rv)
+        self.assertIn(str(HTTP_404_NOT_FOUND), rv.status)
 
 
 class Share(TestCase):
@@ -2306,7 +2338,6 @@ class Share(TestCase):
         self.assertIn(str(HTTP_400_BAD_REQUEST), rv.status)
 
         print_title('share_permission_not_found')
-        share_path = VER_PATH + '/share/' + str(perm1b_permissionID)
         rv = self.app.put(share_pathx, data=json.dumps({
             Permissions.KEY__TYPE: PermissionsEnum.EVENT.value}),
                           content_type='application/json')
@@ -2369,4 +2400,7 @@ class Share(TestCase):
 
 
 if __name__ == '__main__':
+    from __init__ import setup_dummy_data, print_database
+    setup_dummy_data()
+    print_database()
     main(verbosity=2)
