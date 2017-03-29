@@ -656,7 +656,7 @@ def transportation(transportationID=None):
                     db.delete(perm)
                     commit_and_close(db)
                     return make_response(
-                        'Shared Transportation Event Permission' +
+                        'Shared Transportation Event Permission ' +
                         'deleted successfully', 200)
 
                 commit_and_close(db)
@@ -1187,7 +1187,7 @@ def share(permissionID=None):
                         'User not authorized to view shared objects.', 401)
                 perms = db.query(Permissions).filter(
                     Permissions.toUser == post_toUser).all()
-                if perms is None:
+                if not perms:
                     return make_response(
                         'No unaccepted permissions found for given user.', 404)
                 ret_dict = {'events': [], 'bookmarks': []}
@@ -1262,7 +1262,6 @@ def share(permissionID=None):
                 return make_response('Permission deleted successfully', 200)
             finally:
                 commit_and_close(db)
-    return bad_request()
 
 
 @app.route(VER_PATH + '/login', methods=[POST], strict_slashes=False)

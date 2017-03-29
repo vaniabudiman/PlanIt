@@ -117,6 +117,14 @@ bookmark1_type = 'Bookmark1 Type'
 bookmark1_shared = False
 bookmark1_tripID = 1
 bookmark1_eventID = None
+bookmarkx_bookmarkID = tripx_tripID
+
+# /share
+perm1b_permissionID = 1  # Referring to bookmark1_bookmarkID.
+perm1b_type = PermissionsEnum.BOOKMARK
+perm1b_writeFlag = False
+perm1b_toUser = user2_username
+perm1b_toTrip = trip2_tripID
 
 
 def common_setup():
@@ -150,7 +158,9 @@ def common_setup():
                          bookmark1_lon, bookmark1_placeID,
                          bookmark1_name, bookmark1_addr,
                          bookmark1_type, bookmark1_shared,
-                         bookmark1_tripID, bookmark1_eventID)])
+                         bookmark1_tripID, bookmark1_eventID),
+                Permissions(perm1b_permissionID, perm1b_type, perm1b_writeFlag,
+                            perm1b_toUser, perm1b_toTrip)])
     db.commit()
     db.close()
 
@@ -2008,6 +2018,354 @@ class Bookmarks(TestCase):
         self.assertIs(db.query(Bookmark).filter(
             Bookmark.bookmarkID == bookmark1_bookmarkID).first(), None)
         db.close()
+
+
+class Share(TestCase):
+    perma_permissionID = 1  # Referring to event1_eventID.
+    perma_type = PermissionsEnum.EVENT
+    perma_writeFlag = False
+    perma_toUser = user2_username
+    perma_toTrip = trip2_tripID
+
+    permx_permissionID = 2  # Referring to event2_eventID.
+    permx_type = PermissionsEnum.EVENT
+    permx_writeFlag = False
+    permx_toUser = user2_username
+    permx_toTrip = trip2_tripID
+
+    def setUp(self):
+        # Create a new test client instance.
+        self.app = app.test_client()
+        common_setup()
+        db = create_db_session()
+        # Add a Bookmark and remove it so that we know that it won't exist.
+        px = Permissions(self.permx_permissionID, self.permx_type,
+                         self.permx_writeFlag, self.permx_toUser,
+                         self.permx_toTrip)
+        db.add(px)
+        db.commit()
+        db.close()
+        db = create_db_session()
+        db.delete(px)
+        db.commit()
+        db.close()
+
+    def test_share_post(self):
+        print_title('without_JSON_request')
+        share_path = VER_PATH + '/share'
+        rv = self.app.post(share_path)
+        print_data(rv)
+        self.assertIn(str(HTTP_400_BAD_REQUEST), rv.status)
+
+        print_title('empty_json')
+        rv = self.app.post(share_path, data=json.dumps({}),
+                           content_type='application/json')
+        print_data(rv)
+        self.assertIn(str(HTTP_400_BAD_REQUEST), rv.status)
+
+        print_title('trip_not_found')
+        orig_data = {User.KEY__USERNAME: [self.perma_toUser],
+                     Trip.KEY__ID: self.perma_toTrip,
+                     Permissions.KEY__WRITEFLAG: self.perma_writeFlag,
+                     Event.KEY__ID: self.perma_permissionID}
+        data = deepcopy(orig_data)
+        data[Trip.KEY__ID] = tripx_tripID
+        rv = self.app.post(share_path, data=json.dumps(data),
+                           content_type='application/json')
+        print_data(rv)
+        self.assertIn(str(HTTP_404_NOT_FOUND), rv.status)
+
+        print_title('user_not_authorized')
+        data = deepcopy(orig_data)
+        rv = self.app.post(share_path, data=json.dumps(data),
+                           content_type='application/json')
+        print_data(rv)
+        self.assertIn(str(HTTP_401_UNAUTHORIZED), rv.status)
+
+        print_title('non_existent_user')
+        rv = login_helper_user2(self.app)
+        self.assertIn(str(HTTP_201_CREATED), rv.status)
+        data = deepcopy(orig_data)
+        not_valid_username = 'userX'
+        db = create_db_session()
+        q = db.query(User).filter(User.userName == not_valid_username).first()
+        self.assertIsNone(q)
+        db.close()
+        data[User.KEY__USERNAME].append(not_valid_username)
+        rv = self.app.post(share_path, data=json.dumps(data),
+                           content_type='application/json')
+        print_data(rv)
+        self.assertIn(str(HTTP_404_NOT_FOUND), rv.status)
+
+        print_title('no_bookmark_or_event')
+        data = deepcopy(orig_data)
+        data.pop(Event.KEY__ID)
+        data_with_no_id = deepcopy(data)
+        rv = self.app.post(share_path, data=json.dumps(data_with_no_id),
+                           content_type='application/json')
+        print_data(rv)
+        self.assertIn(str(HTTP_404_NOT_FOUND), rv.status)
+
+        print_title('bookmark_not_found')
+        db = create_db_session()
+        q = db.query(Bookmark).filter(
+            Bookmark.bookmarkID == bookmarkx_bookmarkID).first()
+        self.assertIsNone(q)
+        data = deepcopy(data_with_no_id)
+        data[Bookmark.KEY__ID] = bookmarkx_bookmarkID
+        rv = self.app.post(share_path, data=json.dumps(data),
+                           content_type='application/json')
+        print_data(rv)
+        self.assertIn(str(HTTP_404_NOT_FOUND), rv.status)
+
+        print_title('tripID_not_matching')
+        data = deepcopy(data_with_no_id)
+        data[Bookmark.KEY__ID] = bookmark1_bookmarkID
+        rv = self.app.post(share_path, data=json.dumps(data),
+                           content_type='application/json')
+        print_data(rv)
+        self.assertIn(str(HTTP_404_NOT_FOUND), rv.status)
+
+        print_title('bookmark_shared_already')
+        rv = login_helper_user1(self.app)
+        self.assertIn(str(HTTP_201_CREATED), rv.status)
+        data = deepcopy(data_with_no_id)
+        data[Trip.KEY__ID] = trip1_tripID
+        data[Bookmark.KEY__ID] = bookmark1_bookmarkID
+        bookmark_share_data = deepcopy(data)
+        rv = self.app.post(share_path, data=json.dumps(data),
+                           content_type='application/json')
+        print_data(rv)
+        self.assertIn(str(HTTP_409_CONFLICT), rv.status)
+
+        print_title('bookmark_share_success')
+        db = create_db_session()
+        new_user = 'newUser'
+        q = db.query(User).filter(User.userName == new_user).first()
+        self.assertIsNone(q)
+        db.add(User(new_user, user1_password, user1_name,
+                    user1_email, user1_currency))
+        new_trip = tripx_tripID + 1
+        q = db.query(Trip).filter(Trip.tripID == new_trip).first()
+        self.assertIsNone(q)
+        db.add(Trip(new_trip, trip1_tripName, trip1_active,
+                    trip1_startDate, trip1_endDate, new_user))
+        db.commit()
+        db.close()
+        data = deepcopy(bookmark_share_data)
+        data[User.KEY__USERNAME] = [new_user]
+        rv = self.app.post(share_path, data=json.dumps(data),
+                           content_type='application/json')
+        print_data(rv)
+        self.assertIn(str(HTTP_201_CREATED), rv.status)
+
+        print_title('event_not_found')
+        rv = login_helper_user2(self.app)
+        self.assertIn(str(HTTP_201_CREATED), rv.status)
+        db = create_db_session()
+        q = db.query(Event).filter(
+            Event.eventID == eventx_eventID).first()
+        self.assertIsNone(q)
+        data = deepcopy(data_with_no_id)
+        data[Event.KEY__ID] = eventx_eventID
+        rv = self.app.post(share_path, data=json.dumps(data),
+                           content_type='application/json')
+        print_data(rv)
+        self.assertIn(str(HTTP_404_NOT_FOUND), rv.status)
+
+        print_title('tripID_not_matching')
+        data = deepcopy(data_with_no_id)
+        data[Event.KEY__ID] = event1_eventID
+        event_share_data = deepcopy(data)
+        rv = self.app.post(share_path, data=json.dumps(data),
+                           content_type='application/json')
+        print_data(rv)
+        self.assertIn(str(HTTP_404_NOT_FOUND), rv.status)
+
+        print_title('event_share_success')
+        rv = login_helper_user1(self.app)
+        self.assertIn(str(HTTP_201_CREATED), rv.status)
+        data = deepcopy(event_share_data)
+        data[Trip.KEY__ID] = trip1_tripID
+        data[Event.KEY__ID] = event2_eventID
+        data[User.KEY__USERNAME] = [new_user]
+        rv = self.app.post(share_path, data=json.dumps(data),
+                           content_type='application/json')
+        print_data(rv)
+        self.assertIn(str(HTTP_201_CREATED), rv.status)
+
+        print_title('event_shared_already')
+        rv = self.app.post(share_path, data=json.dumps(data),
+                           content_type='application/json')
+        print_data(rv)
+        self.assertIn(str(HTTP_409_CONFLICT), rv.status)
+
+        print_title('trip_share_success')
+        data.pop(Event.KEY__ID)
+        data[User.KEY__USERNAME] = [new_user]
+        db = create_db_session()
+        db.query(Permissions).delete()
+        db.commit()
+        q = db.query(Permissions).filter(Permissions.toUser == new_user).all()
+        self.assertFalse(q)
+        rv = self.app.post(share_path, data=json.dumps(data),
+                           content_type='application/json')
+        print_data(rv)
+        self.assertIn(str(HTTP_201_CREATED), rv.status)
+
+        print_title('duplicate_trip_share')
+        rv = self.app.post(share_path, data=json.dumps(data),
+                           content_type='application/json')
+        print_data(rv)
+        self.assertIn(str(HTTP_409_CONFLICT), rv.status)
+
+    def test_share_get(self):
+        print_title('without_arguments')
+        share_path = VER_PATH + '/share'
+        rv = self.app.get(share_path, query_string={})
+        print_data(rv)
+        self.assertIn(str(HTTP_400_BAD_REQUEST), rv.status)
+
+        print_title('empty_arguments')
+        share_path = VER_PATH + '/share'
+        rv = self.app.get(share_path, query_string={})
+        print_data(rv)
+        self.assertIn(str(HTTP_400_BAD_REQUEST), rv.status)
+
+        print_title('not_authorized')
+        share_path = VER_PATH + '/share'
+        rv = self.app.get(share_path, query_string={
+            Permissions.KEY__TOUSER: user2_username})
+        print_data(rv)
+        self.assertIn(str(HTTP_401_UNAUTHORIZED), rv.status)
+
+        print_title('no_shared_permissions')
+        rv = login_helper_user1(self.app)
+        self.assertIn(str(HTTP_201_CREATED), rv.status)
+        db = create_db_session()
+        q = db.query(Permissions).filter(
+            Permissions.toUser == user1_username).all()
+        self.assertFalse(q)
+        rv = self.app.get(share_path, query_string={
+            Permissions.KEY__TOUSER: user1_username})
+        print_data(rv)
+        self.assertIn(str(HTTP_404_NOT_FOUND), rv.status)
+
+        print_title('shared_permissions_found')
+        db = create_db_session()
+        db.add(Permissions(self.perma_permissionID, self.perma_type,
+                           self.perma_writeFlag, self.perma_toUser,
+                           self.perma_toTrip))
+        db.commit()
+        db.close()
+        rv = login_helper_user2(self.app)
+        self.assertIn(str(HTTP_201_CREATED), rv.status)
+        db = create_db_session()
+        q = db.query(Permissions).filter(
+            Permissions.toUser == user2_username).all()
+        self.assertTrue(q)
+        rv = self.app.get(share_path, query_string={
+            Permissions.KEY__TOUSER: user2_username})
+        print_data(rv)
+        self.assertIn(str(HTTP_200_OK), rv.status)
+
+        print_title('shared_permissions_found')
+        db = create_db_session()
+        db.query(Event).filter(
+            Event.eventID == event1_eventID).delete()
+        db.query(Bookmark).filter(
+            Bookmark.bookmarkID == bookmark1_bookmarkID).delete()
+        db.commit()
+        db.close()
+        rv = self.app.get(share_path, query_string={
+            Permissions.KEY__TOUSER: user2_username})
+        print_data(rv)
+        self.assertIn(str(HTTP_200_OK), rv.status)
+
+    def test_share_put(self):
+        print_title('no_type')
+        share_pathx = VER_PATH + '/share/' + str(self.permx_permissionID)
+        rv = self.app.put(share_pathx)
+        print_data(rv)
+        self.assertIn(str(HTTP_400_BAD_REQUEST), rv.status)
+
+        print_title('empty_json')
+        rv = self.app.put(share_pathx, data=json.dumps({}),
+                          content_type='application/json')
+        print_data(rv)
+        self.assertIn(str(HTTP_400_BAD_REQUEST), rv.status)
+
+        print_title('invalid_type')
+        invalid_type = 'abc'
+        with self.assertRaises(ValueError):
+            PermissionsEnum(invalid_type)
+        rv = self.app.put(share_pathx, data=json.dumps({
+            Permissions.KEY__TYPE: invalid_type}),
+                          content_type='application/json')
+        print_data(rv)
+        self.assertIn(str(HTTP_400_BAD_REQUEST), rv.status)
+
+        print_title('share_permission_not_found')
+        share_path = VER_PATH + '/share/' + str(perm1b_permissionID)
+        rv = self.app.put(share_pathx, data=json.dumps({
+            Permissions.KEY__TYPE: PermissionsEnum.EVENT.value}),
+                          content_type='application/json')
+        print_data(rv)
+        self.assertIn(str(HTTP_404_NOT_FOUND), rv.status)
+
+        print_title('share_permission_found_but_no_toTrip')
+        rv = login_helper_user2(self.app)
+        self.assertIn(str(HTTP_201_CREATED), rv.status)
+        share_path = VER_PATH + '/share/' + str(perm1b_permissionID)
+        rv = self.app.put(share_path, data=json.dumps({
+            Permissions.KEY__TYPE: perm1b_type.value}),
+                          content_type='application/json')
+        print_data(rv)
+        self.assertIn(str(HTTP_400_BAD_REQUEST), rv.status)
+
+        print_title('share_permission_success')
+        share_path = VER_PATH + '/share/' + str(perm1b_permissionID)
+        rv = self.app.put(share_path, data=json.dumps({
+            Permissions.KEY__TYPE: perm1b_type.value,
+            Permissions.KEY__TOTRIP: trip1_tripID}),
+                          content_type='application/json')
+        print_data(rv)
+        self.assertIn(str(HTTP_200_OK), rv.status)
+
+    def test_share_delete(self):
+        print_title('delete_success_bookmark_share')
+        rv = login_helper_user2(self.app)
+        self.assertIn(str(HTTP_201_CREATED), rv.status)
+        share_path = VER_PATH + '/share/' + str(perm1b_permissionID)
+        rv = self.app.delete(share_path, data=json.dumps({
+            Permissions.KEY__TYPE: perm1b_type.value}),
+                          content_type='application/json')
+        print_data(rv)
+        self.assertIn(str(HTTP_200_OK), rv.status)
+        db = create_db_session()
+        q = db.query(Permissions).filter(and_(
+            Permissions.permissionID == perm1b_permissionID,
+            Permissions.type == perm1b_type)).first()
+        self.assertIsNone(q)
+
+        print_title('delete_success_event_share')
+        db.add(Permissions(self.perma_permissionID, self.perma_type,
+                           self.perma_writeFlag, self.perma_toUser,
+                           self.perma_toTrip))
+        db.commit()
+        db.close()
+        share_path = VER_PATH + '/share/' + str(self.perma_permissionID)
+        rv = self.app.delete(share_path, data=json.dumps({
+            Permissions.KEY__TYPE: self.perma_type.value}),
+                             content_type='application/json')
+        print_data(rv)
+        self.assertIn(str(HTTP_200_OK), rv.status)
+        db = create_db_session()
+        q = db.query(Permissions).filter(and_(
+            Permissions.permissionID == self.perma_permissionID,
+            Permissions.type == self.perma_type.value)).first()
+        self.assertIsNone(q)
+
 
 
 if __name__ == '__main__':
