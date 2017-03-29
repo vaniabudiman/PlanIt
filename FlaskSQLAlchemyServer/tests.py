@@ -6,7 +6,7 @@ from flask import session
 from flask_api.status import *
 # Json handling.
 import json
-from copy import copy
+from copy import copy, deepcopy
 # Verbose text handling.
 from textwrap import wrap
 
@@ -21,6 +21,7 @@ from datetime import datetime
 from models import DT_FORMAT
 from models import User, Trip, Event, Bookmark
 from models import Permissions, PermissionsEnum, Transportation, TransportEnum
+from sqlalchemy import and_
 
 verbose = True
 app.config['TESTING'] = True
@@ -80,6 +81,7 @@ event1_remTime = None
 event1_addr = None
 event1_shared = False
 event1_tripID = 1
+eventx_eventID = tripx_tripID
 
 # /events
 event2_eventID = 2
@@ -103,6 +105,18 @@ trip2_startDate = datetime.strptime(
 trip2_endDate = datetime.strptime(
     'Tue, 01 Mar 2017 11:11:11 GMT', DT_FORMAT)
 trip2_userName = user2_username
+
+# /bookmarks
+bookmark1_bookmarkID = 1
+bookmark1_lat = 49.2827
+bookmark1_lon = -123.1207
+bookmark1_placeID = '45a27fd8d56c56dc62afc9b49e1d850440d5c403'
+bookmark1_name = 'Bookmark1 Name'
+bookmark1_addr = 'Bookmark1 Address'
+bookmark1_type = 'Bookmark1 Type'
+bookmark1_shared = False
+bookmark1_tripID = 1
+bookmark1_eventID = None
 
 
 def common_setup():
@@ -131,7 +145,12 @@ def common_setup():
                       event2_remTime, event2_addr, event2_shared,
                       event2_tripID),
                 Trip(trip2_tripID, trip2_tripName, trip2_active,
-                     trip2_startDate, trip2_endDate, trip2_userName)])
+                     trip2_startDate, trip2_endDate, trip2_userName),
+                Bookmark(bookmark1_bookmarkID, bookmark1_lat,
+                         bookmark1_lon, bookmark1_placeID,
+                         bookmark1_name, bookmark1_addr,
+                         bookmark1_type, bookmark1_shared,
+                         bookmark1_tripID, bookmark1_eventID)])
     db.commit()
     db.close()
 
@@ -1046,8 +1065,6 @@ class Transportations(TestCase):
                               self.transporta_eventID))
         db.commit()
         db.close()
-        from __init__ import print_database
-        print_database()
         rv = self.app.get(transport_path, query_string={
             Transportation.KEY__ID: transport1_transportID + 1})
         print_data(rv)
@@ -1270,8 +1287,10 @@ class Transportations(TestCase):
         print_data(rv)
         self.assertIn(str(HTTP_200_OK), rv.status)
         db = create_db_session()
-        self.assertIs(db.query(Permissions).filter(
-            Permissions.permissionID == event1_eventID).first(), None)
+        self.assertIs(db.query(Permissions).filter(and_(
+            Permissions.permissionID == event1_eventID,
+            Permissions.toUser == user2_username,
+            Permissions.toTrip == trip1_tripID)).first(), None)
         db.close()
 
         print_title('delete_success')
@@ -1694,8 +1713,10 @@ class Events(TestCase):
         print_data(rv)
         self.assertIn(str(HTTP_200_OK), rv.status)
         db = create_db_session()
-        self.assertIs(db.query(Permissions).filter(
-            Permissions.permissionID == event1_eventID).first(), None)
+        self.assertIs(db.query(Permissions).filter(and_(
+            Permissions.permissionID == event1_eventID,
+            Permissions.toUser == user2_username,
+            Permissions.toTrip == trip1_tripID)).first(), None)
         db.close()
 
         print_title('delete_success')
@@ -1707,6 +1728,285 @@ class Events(TestCase):
         db = create_db_session()
         self.assertIs(db.query(Event).filter(
             Event.eventID == event1_eventID).first(), None)
+        db.close()
+
+
+class Bookmarks(TestCase):
+    bookmarka_bookmarkID = 2
+    bookmarka_lat = 49.2606
+    bookmarka_lon = -123.2460
+    bookmarka_placeID = '30bee58f819b6c47bd24151802f25ecf11df8943'
+    bookmarka_name = 'BookmarkA Name'
+    bookmarka_addr = 'BookmarkA Address'
+    bookmarka_type = 'BookmarkA Type'
+    bookmarka_shared = False
+    bookmarka_tripID = 1
+    bookmarka_eventID = None
+
+    bookmarkx_bookmarkID = 3
+    bookmarkx_lat = 49.2671
+    bookmarkx_lon = -122.9689
+    bookmarkx_placeID = '45a27fd8d56c56dc62afc9b49e1d850440d5c403'
+    bookmarkx_name = 'BookmarkX Name'
+    bookmarkx_addr = 'BookmarkX Address'
+    bookmarkx_type = 'BookmarkX Type'
+    bookmarkx_shared = False
+    bookmarkx_tripID = 1
+    bookmarkx_eventID = None
+
+    def setUp(self):
+        # Create a new test client instance.
+        self.app = app.test_client()
+        common_setup()
+        db = create_db_session()
+        # Permissions are not tested here.
+        db.query(Permissions).delete()
+        db.commit()
+        # Add a Bookmark and remove it so that we know that it won't exist.
+        bx = Bookmark(self.bookmarkx_bookmarkID, self.bookmarkx_lat,
+                      self.bookmarkx_lon, self.bookmarkx_placeID,
+                      self.bookmarkx_name, self.bookmarkx_addr,
+                      self.bookmarkx_type, self.bookmarkx_shared,
+                      self.bookmarkx_tripID, self.bookmarkx_eventID)
+        db.add(bx)
+        db.commit()
+        db.close()
+        db = create_db_session()
+        db.delete(bx)
+        db.commit()
+        db.close()
+
+    def test_bookmarks_post(self):
+        print_title('without_JSON_request')
+        bookmarks_paths = VER_PATH + '/bookmarks'
+        rv = self.app.post(bookmarks_paths)
+        print_data(rv)
+        self.assertIn(str(HTTP_400_BAD_REQUEST), rv.status)
+
+        print_title('without_tripID')
+        rv = self.app.post(bookmarks_paths, data=json.dumps({}),
+                           content_type='application/json')
+        print_data(rv)
+        self.assertIn(str(HTTP_400_BAD_REQUEST), rv.status)
+
+        print_title('without_bookmarks')
+        data = {Bookmark.KEY__TRIPID: self.bookmarka_tripID}
+        rv = self.app.post(bookmarks_paths, data=json.dumps(data),
+                           content_type='application/json')
+        print_data(rv)
+        self.assertIn(str(HTTP_400_BAD_REQUEST), rv.status)
+
+        print_title('non_existent_trip')
+        data = {Event.KEY__TRIPID: tripx_tripID,
+                'bookmarks': ''}
+        rv = self.app.post(bookmarks_paths, data=json.dumps(data),
+                           content_type='application/json')
+        print_data(rv)
+        self.assertIn(str(HTTP_404_NOT_FOUND), rv.status)
+
+        print_title('not_authorized')
+        data = {Bookmark.KEY__TRIPID: self.bookmarka_tripID,
+                'bookmarks': ''}
+        rv = self.app.post(bookmarks_paths, data=json.dumps(data),
+                           content_type='application/json')
+        print_data(rv)
+        self.assertIn(str(HTTP_401_UNAUTHORIZED), rv.status)
+
+        print_title('empty_bookmarks')
+        rv = login_helper_user1(self.app)
+        self.assertIn(str(HTTP_201_CREATED), rv.status)
+        data['bookmarks'] = []
+        rv = self.app.post(bookmarks_paths, data=json.dumps(data),
+                           content_type='application/json')
+        print_data(rv)
+        self.assertIn(str(HTTP_400_BAD_REQUEST), rv.status)
+
+        print_title('post_success')
+        bookmarka_dict = {Bookmark.KEY__ID: self.bookmarka_bookmarkID,
+                          Bookmark.KEY__LAT: self.bookmarka_lat,
+                          Bookmark.KEY__LON: self.bookmarka_lon,
+                          Bookmark.KEY__PLACEID: self.bookmarka_placeID,
+                          Bookmark.KEY__NAME: self.bookmarka_name,
+                          Bookmark.KEY__ADDR: self.bookmarka_addr,
+                          Bookmark.KEY__TYPE: self.bookmarka_type,
+                          Bookmark.KEY__SHARED: self.bookmarka_shared,
+                          Bookmark.KEY__TRIPID: self.bookmarka_tripID,
+                          Bookmark.KEY__EVENTID: self.bookmarka_eventID}
+        data['bookmarks'] = [bookmarka_dict]
+        rv = self.app.post(bookmarks_paths, data=json.dumps(data),
+                           content_type='application/json')
+        print_data(rv)
+        self.assertIn(str(HTTP_201_CREATED), rv.status)
+        db = create_db_session()
+        bo = db.query(Bookmark).filter(
+            Bookmark.bookmarkID == self.bookmarka_bookmarkID).first()
+        self.assertEqual(bookmarka_dict, bo.to_dict())
+        db.close()
+
+        print_title('without_lat')
+        orig_bookmarka_dict = {Bookmark.KEY__ID: self.bookmarka_bookmarkID,
+                               Bookmark.KEY__LAT: self.bookmarka_lat,
+                               Bookmark.KEY__LON: self.bookmarka_lon,
+                               Bookmark.KEY__PLACEID: self.bookmarka_placeID,
+                               Bookmark.KEY__NAME: self.bookmarka_name,
+                               Bookmark.KEY__ADDR: self.bookmarka_addr,
+                               Bookmark.KEY__TYPE: self.bookmarka_type,
+                               Bookmark.KEY__SHARED: self.bookmarka_shared,
+                               Bookmark.KEY__TRIPID: self.bookmarka_tripID,
+                               Bookmark.KEY__EVENTID: self.bookmarka_eventID}
+        bookmarka_dict = copy(orig_bookmarka_dict)
+        bookmarka_dict.pop(Bookmark.KEY__LAT)
+        data['bookmarks'] = [bookmarka_dict]
+        rv = self.app.post(bookmarks_paths, data=json.dumps(data),
+                           content_type='application/json')
+        print_data(rv)
+        self.assertIn(str(HTTP_400_BAD_REQUEST), rv.status)
+
+        print_title('without_lon')
+        bookmarka_dict = copy(orig_bookmarka_dict)
+        bookmarka_dict.pop(Bookmark.KEY__LON)
+        data['bookmarks'] = [bookmarka_dict]
+        rv = self.app.post(bookmarks_paths, data=json.dumps(data),
+                           content_type='application/json')
+        print_data(rv)
+        self.assertIn(str(HTTP_400_BAD_REQUEST), rv.status)
+
+        print_title('without_placeID')
+        bookmarka_dict = copy(orig_bookmarka_dict)
+        bookmarka_dict.pop(Bookmark.KEY__PLACEID)
+        data['bookmarks'] = [bookmarka_dict]
+        rv = self.app.post(bookmarks_paths, data=json.dumps(data),
+                           content_type='application/json')
+        print_data(rv)
+        self.assertIn(str(HTTP_400_BAD_REQUEST), rv.status)
+
+        print_title('without_name')
+        bookmarka_dict = copy(orig_bookmarka_dict)
+        bookmarka_dict.pop(Bookmark.KEY__NAME)
+        data['bookmarks'] = [bookmarka_dict]
+        rv = self.app.post(bookmarks_paths, data=json.dumps(data),
+                           content_type='application/json')
+        print_data(rv)
+        self.assertIn(str(HTTP_400_BAD_REQUEST), rv.status)
+
+    def test_bookmarks_get(self):
+        print_title('without_arguments')
+        bookmarks_path = VER_PATH + '/bookmarks'
+        rv = self.app.get(bookmarks_path)
+        print(rv.data)
+        self.assertIn(str(HTTP_400_BAD_REQUEST), rv.status)
+
+        print_title('trip_not_found')
+        rv = self.app.get(bookmarks_path, query_string={
+            Trip.KEY__ID: tripx_tripID})
+        print_data(rv)
+        self.assertIn(str(HTTP_404_NOT_FOUND), rv.status)
+
+        print_title('trip_found_but_not_authorized')
+        trip1_key_dict = {Trip.KEY__ID: trip1_tripID}
+        rv = self.app.get(bookmarks_path, query_string=trip1_key_dict)
+        print_data(rv)
+        self.assertIn(str(HTTP_401_UNAUTHORIZED), rv.status)
+
+        print_title('found_own')
+        rv = login_helper_user1(self.app)
+        self.assertIn(str(HTTP_201_CREATED), rv.status)
+        rv = self.app.get(bookmarks_path, query_string=trip1_key_dict)
+        print_data(rv)
+        self.assertIn(str(HTTP_200_OK), rv.status)
+        # TODO: see TODO#1
+
+        print_title('found_own_but_no_bookmarks_in_trip')
+        rv = login_helper_user2(self.app)
+        self.assertIn(str(HTTP_201_CREATED), rv.status)
+        trip2_key_dict = {Trip.KEY__ID: trip2_tripID}
+        rv = self.app.get(bookmarks_path, query_string=trip2_key_dict)
+        print_data(rv)
+        self.assertIn(str(HTTP_404_NOT_FOUND), rv.status)
+
+        print_title('bookmark_not_found')
+        rv = self.app.get(bookmarks_path, query_string={
+            Bookmark.KEY__ID: self.bookmarkx_bookmarkID})
+        print_data(rv)
+        self.assertIn(str(HTTP_404_NOT_FOUND), rv.status)
+
+        print_title('bookmark_found_not_authorized')
+        bookmark1_key_dict = {Bookmark.KEY__ID: bookmark1_bookmarkID}
+        rv = self.app.get(bookmarks_path, query_string=bookmark1_key_dict)
+        print_data(rv)
+        self.assertIn(str(HTTP_401_UNAUTHORIZED), rv.status)
+
+        print_title('bookmark_found')
+        rv = login_helper_user1(self.app)
+        self.assertIn(str(HTTP_201_CREATED), rv.status)
+        rv = self.app.get(bookmarks_path, query_string=bookmark1_key_dict)
+        print_data(rv)
+        self.assertIn(str(HTTP_200_OK), rv.status)
+        # TODO: see TODO#1
+
+        print_title('trip_not_found')
+        db = create_db_session()
+        db.add(Bookmark(self.bookmarkx_bookmarkID, self.bookmarkx_lat,
+                        self.bookmarkx_lon, self.bookmarkx_placeID,
+                        self.bookmarkx_name, self.bookmarkx_addr,
+                        self.bookmarkx_type, self.bookmarkx_shared,
+                        tripx_tripID, self.bookmarkx_eventID))
+        db.commit()
+        db.close()
+        rv = login_helper_user1(self.app)
+        self.assertIn(str(HTTP_201_CREATED), rv.status)
+        rv = self.app.get(bookmarks_path, query_string={
+            Bookmark.KEY__ID: self.bookmarkx_bookmarkID})
+        print_data(rv)
+        self.assertIn(str(HTTP_404_NOT_FOUND), rv.status)
+
+    def test_bookmarks_delete(self):
+        print_title('bookmark_not_found')
+        bookmark_pathx = VER_PATH + '/bookmarks/' + str(self.bookmarkx_bookmarkID)
+        rv = self.app.delete(bookmark_pathx)
+        print_data(rv)
+        self.assertIn(str(HTTP_404_NOT_FOUND), rv.status)
+
+        print_title('not_authorized_delete')
+        rv = login_helper_user2(self.app)
+        self.assertIn(str(HTTP_201_CREATED), rv.status)
+        bookmarks_path1 = VER_PATH + '/bookmarks/' + str(bookmark1_bookmarkID)
+        rv = self.app.delete(bookmarks_path1)
+        print_data(rv)
+        self.assertIn(str(HTTP_401_UNAUTHORIZED), rv.status)
+        db = create_db_session()
+        self.assertIsNot(db.query(Bookmark).filter(
+            Bookmark.bookmarkID == bookmark1_bookmarkID).first(), None)
+        db.close()
+
+        print_title('put_bad_request')
+        rv = self.app.put(bookmarks_path1)
+        print_data(rv)
+        self.assertIn(str(HTTP_400_BAD_REQUEST), rv.status)
+
+        print_title('delete_permission')
+        db = create_db_session()
+        db.add(Permissions(bookmark1_bookmarkID, PermissionsEnum('bookmark'),
+                           False, user2_username, trip1_tripID))
+        db.commit()
+        db.close()
+        rv = self.app.delete(bookmarks_path1)
+        print_data(rv)
+        self.assertIn(str(HTTP_200_OK), rv.status)
+        db = create_db_session()
+        self.assertIs(db.query(Permissions).filter(
+            Permissions.permissionID == bookmark1_bookmarkID).first(), None)
+        db.close()
+
+        print_title('delete_success')
+        rv = login_helper_user1(self.app)
+        self.assertIn(str(HTTP_201_CREATED), rv.status)
+        rv = self.app.delete(bookmarks_path1)
+        print_data(rv)
+        self.assertIn(str(HTTP_200_OK), rv.status)
+        db = create_db_session()
+        self.assertIs(db.query(Bookmark).filter(
+            Bookmark.bookmarkID == bookmark1_bookmarkID).first(), None)
         db.close()
 
 
