@@ -17,9 +17,14 @@ from models import DT_FORMAT
 from models import User, Trip, Event, Bookmark
 from models import Permissions, PermissionsEnum, Transportation, TransportEnum
 
+
 # Versioning.
-VERSION = 'v1'
-VER_PATH = '/' + VERSION
+def make_version_path(version):
+    return '/v' + str(version)
+
+
+VERSION = 1
+VER_PATH = make_version_path(VERSION)
 
 # Server email.
 PLANIT_EMAIL = 'planit410@gmail.com'
@@ -51,12 +56,27 @@ KEY__LOGGED_IN = 'logged_in'
 KEY__USERNAME = 'user_name'
 
 
+class ResponseError(Exception):
+    pass
+
+
 # Generic responses. Function instead of a var because requires app context.
 def bad_request(msg=None):
     if msg:
         return make_response('Bad request; %s' % msg, 400)
     else:
         return make_response('Bad request.', 400)
+
+
+def get_request_json(req):
+    """Returns the JSON object from the request.
+    Throws a ResponseError if no JSON is found for the given request.
+    """
+    req_json = req.get_json(silent=True)
+    if req_json is None:
+        raise ResponseError('Expected to find JSON in request but not found.')
+    else:
+        return req_json
 
 
 def create_db_session():
@@ -98,7 +118,7 @@ def notify_user(user_name, user_email):
 
 def print_database():
     """Print out the entire database."""
-    print('VVVVVVVVVVVVV')
+    print('VVVVVVVVVVVVV', end='')
     print(view_database().replace('<br/>', '\n'))
     print('^^^^^^^^^^^^^')
 
@@ -106,7 +126,7 @@ def print_database():
 def get_max_id(db, ID_attribute):
     max_id = db.query(func.max(ID_attribute).label('max')).first().max
     if max_id is None:
-        max_id = 0;  # No entries created yet.
+        max_id = 0  # No entries created yet.
     return max_id
 
 
@@ -115,13 +135,14 @@ def get_max_id(db, ID_attribute):
 def users(userName=None):
     if request.method == POST:
         try:
-            post_userName = str(request.json['userName'])
-            post_password = str(request.json['password'])
-            post_name = str(request.json['name'])
-            post_email = str(request.json['email'])
-            post_homeCurrency = str(request.json['homeCurrency'])
-        except KeyError:
-            return bad_request()
+            req_json = get_request_json(request)
+            post_userName = str(req_json[User.KEY__USERNAME])
+            post_password = str(req_json[User.KEY__PASSWORD])
+            post_name = str(req_json[User.KEY__NAME])
+            post_email = str(req_json[User.KEY__EMAIL])
+            post_homeCurrency = str(req_json[User.KEY__CURRENCY])
+        except (ResponseError, KeyError) as err:
+            return bad_request(err)
 
         db = create_db_session()
         try:
@@ -137,16 +158,21 @@ def users(userName=None):
             commit_and_close(db)
     elif request.method == GET:
         curr_userName = session.get(KEY__USERNAME)
-        get_userName = request.args.get('userName', None)
+        if curr_userName is None:
+            return bad_request()
+        get_userName = request.args.get(User.KEY__USERNAME, None)
         if get_userName is not None:
             db = create_db_session()
             try:
                 user = db.query(User).filter(
                     User.userName == get_userName).first()
+                if user is None:
+                    return make_response('User not found.', 404)
                 if get_userName == curr_userName:
                     return make_response(jsonify({'user': user.to_dict()}), 200)
                 else:
-                    ret_dict = {'userName': user.userName, 'name': user.name}
+                    ret_dict = {User.KEY__USERNAME: user.userName,
+                                User.KEY__NAME: user.name}
                     return make_response(jsonify({'user': ret_dict}), 200)
             finally:
                 commit_and_close(db)
@@ -161,6 +187,8 @@ def users(userName=None):
             return make_response(jsonify(ret_dict), 200)
     elif userName:
         curr_userName = session.get(KEY__USERNAME)
+        if curr_userName is None:
+            return make_response('User not logged in', 401)
         if request.method == PUT:
             if userName != curr_userName:
                 return make_response('User not authorized to edit account.',
@@ -172,9 +200,14 @@ def users(userName=None):
                 return make_response('User not found.', 404)
 
             try:
+                req_json = get_request_json(request)
+            except ResponseError as err:
+                db.close()
+                return bad_request(err)
+
+            try:
                 # Optional password parameter.
-                post_password = str(request.json['password'])
-                query.password = post_password
+                query.password = str(req_json[User.KEY__PASSWORD])
                 try:
                     notify_user(userName, query.email)
                 except SMTPException as se:
@@ -185,22 +218,19 @@ def users(userName=None):
 
             try:
                 # Optional name parameter.
-                post_name = str(request.json['name'])
-                query.name = post_name
+                query.name = str(req_json[User.KEY__NAME])
             except KeyError:
                 pass
 
             try:
                 # Optional email parameter.
-                post_email = str(request.json['email'])
-                query.email = post_email
+                query.email = str(req_json[User.KEY__EMAIL])
             except KeyError:
                 pass
 
             try:
                 # Optional homeCurrency parameter.
-                post_homeCurrency = str(request.json['homeCurrency'])
-                query.homeCurrency = post_homeCurrency
+                query.homeCurrency = str(req_json[User.KEY__CURRENCY])
             except KeyError:
                 pass
 
@@ -219,7 +249,6 @@ def users(userName=None):
             db.delete(query)
             commit_and_close(db)
             return make_response('User deleted successfully', 200)
-    return bad_request()
 
 
 @app.route(VER_PATH + '/trips', methods=[POST, GET], strict_slashes=False)
@@ -231,21 +260,18 @@ def trips(tripID=None):
 
     if request.method == POST:
         try:
-            post_tripName = str(request.json['tripName'])
-            post_active = str(request.json['active'])
-            post_startDate = to_datetime(str(request.json['startDate']))
-            post_endDate = to_datetime(str(request.json['endDate']))
-        except (KeyError, ValueError) as err:
+            req_json = get_request_json(request)
+            post_tripName = str(req_json[Trip.KEY__TRIPNAME])
+            post_active = str(req_json[Trip.KEY__ACTIVE])
+            post_startDate = to_datetime(str(req_json[Trip.KEY__STARTDATE]))
+            post_endDate = to_datetime(str(req_json[Trip.KEY__ENDDATE]))
+        except (KeyError, ValueError, ResponseError) as err:
             return bad_request(err)
 
         db = create_db_session()
-        try:
-            max_id = get_max_id(db, Trip.tripID)
-            trip = Trip(max_id + 1, post_tripName, post_active,
-                        post_startDate, post_endDate, curr_userName)
-        except ValueError as ve:
-            commit_and_close(db)
-            return bad_request(ve)
+        max_id = get_max_id(db, Trip.tripID)
+        trip = Trip(max_id + 1, post_tripName, post_active,
+                    post_startDate, post_endDate, curr_userName)
 
         try:
             db.add(trip)
@@ -259,7 +285,7 @@ def trips(tripID=None):
         finally:
             commit_and_close(db)
     elif request.method == GET:
-        post_tripID = request.args.get('tripID', None)
+        post_tripID = request.args.get(Trip.KEY__ID, None)
 
         db = create_db_session()
         try:
@@ -292,24 +318,28 @@ def trips(tripID=None):
             if userName != curr_userName:
                 commit_and_close(db)
                 return make_response('User not authorized to edit Trip.', 401)
+
+            try:
+                req_json = get_request_json(request)
+            except ResponseError as err:
+                db.close()
+                return bad_request(err)
+
             try:
                 # Optional tripName parameter.
-                post_tripName = str(request.json['tripName'])
-                trip.tripName = post_tripName
+                trip.tripName = str(req_json[Trip.KEY__TRIPNAME])
             except KeyError:
                 pass
 
             try:
                 # Optional active parameter.
-                post_active = request.json['active']
-                trip.active = post_active
+                trip.active = req_json[Trip.KEY__ACTIVE]
             except KeyError:
                 pass
 
             try:
                 # Optional name startDate.
-                post_startDate = str(request.json['startDate'])
-                trip.startDate = to_datetime(post_startDate)
+                trip.startDate = to_datetime(str(req_json[Trip.KEY__STARTDATE]))
             except ValueError as ve:
                 db.close()
                 return bad_request(ve)
@@ -318,8 +348,7 @@ def trips(tripID=None):
 
             try:
                 # Optional endDate parameter.
-                post_endDate = str(request.json['endDate'])
-                trip.endDate = to_datetime(post_endDate)
+                trip.endDate = to_datetime(str(req_json[Trip.KEY__ENDDATE]))
             except ValueError as ve:
                 db.close()
                 return bad_request(ve)
@@ -336,7 +365,6 @@ def trips(tripID=None):
             db.delete(trip)
             commit_and_close(db)
             return make_response('Event deleted successfully', 200)
-    return bad_request()
 
 
 @app.route(VER_PATH + '/transportation',
@@ -346,10 +374,11 @@ def trips(tripID=None):
 def transportation(transportationID=None):
     if request.method == POST:
         try:
-            post_tripID = int(request.json['tripID'])
-            post_transports = request.json['transportation']
-        except KeyError:
-            return bad_request()
+            req_json = get_request_json(request)
+            post_tripID = int(req_json[Trip.KEY__ID])
+            post_transports = req_json['transportation']
+        except (ResponseError, KeyError) as err:
+            return bad_request(err)
 
         db = create_db_session()
         try:
@@ -363,8 +392,8 @@ def transportation(transportationID=None):
             commit_and_close(db)
 
         if not isinstance(post_transports, list) or len(post_transports) == 0:
-            # There should be at least one Event to work with.
-            return bad_request()
+            # There should be at least one Transportation to work with.
+            return bad_request('Require at least one Transportation.')
 
         db = create_db_session()
         try:
@@ -378,18 +407,19 @@ def transportation(transportationID=None):
                 max_transport_id += 1
                 new_event = Event(
                     max_event_id,
-                    'Transportation: ' + transport['type'],
-                    to_datetime(transport['departureDateTime']),
-                    to_datetime(transport['arrivalDateTime']),
-                    None, None, None, None, transport.get('departureAddress'),
+                    'Transportation: ' + transport[Transportation.KEY__TYPE],
+                    to_datetime(transport[Transportation.KEY__DEPARTUREDATE]),
+                    to_datetime(transport[Transportation.KEY__ARRIVALDATE]),
+                    None, None, None, None,
+                    transport.get(Transportation.KEY__DEPARTUREADDR),
                     None, post_tripID)
                 new_transport = Transportation(
                     max_transport_id,
-                    TransportEnum(transport['type']),
-                    transport.get('operator'),
-                    transport.get('number'),
-                    transport.get('departureAddress'),
-                    transport.get('arrivalAddress'),
+                    TransportEnum(transport[Transportation.KEY__TYPE]),
+                    transport.get(Transportation.KEY__OPERATOR),
+                    transport.get(Transportation.KEY__NUMBER),
+                    transport.get(Transportation.KEY__DEPARTUREADDR),
+                    transport.get(Transportation.KEY__ARRIVALADDR),
                     max_event_id)
                 event_list.append(new_event)
                 transport_list.append(new_transport)
@@ -406,8 +436,10 @@ def transportation(transportationID=None):
             for (e, t) in pair_list:
                 t_dict = t.to_dict()
                 e_dict = e.to_dict()
-                t_dict['departureDateTime'] = e_dict['startDateTime']
-                t_dict['arrivalDateTime'] = e_dict['endDateTime']
+                t_dict[Transportation.KEY__DEPARTUREDATE] = e_dict[
+                    Event.KEY__STARTDATE]
+                t_dict[Transportation.KEY__ARRIVALDATE] = e_dict[
+                    Event.KEY__ENDDATE]
                 transport_dict_list += [t_dict]
             ret_dict = {'transportation': transport_dict_list}
             return make_response(jsonify(ret_dict), 201)
@@ -420,7 +452,7 @@ def transportation(transportationID=None):
         finally:
             commit_and_close(db)
     elif request.method == GET:
-        post_tripID = request.args.get('tripID', None)
+        post_tripID = request.args.get(Trip.KEY__ID, None)
         if post_tripID is not None:
             db = create_db_session()
             try:
@@ -453,8 +485,10 @@ def transportation(transportationID=None):
                 for (e, t) in pair_list:
                     t_event = t.to_dict()
                     e_dict = e.to_dict()
-                    t_event['departureDateTime'] = e_dict['startDateTime']
-                    t_event['arrivalDateTime'] = e_dict['endDateTime']
+                    t_event[Transportation.KEY__DEPARTUREDATE] = e_dict[
+                        Event.KEY__STARTDATE]
+                    t_event[Transportation.KEY__ARRIVALDATE] = e_dict[
+                        Event.KEY__ENDDATE]
                     transport_dict_list += [t_event]
 
                 if len(transport_dict_list) == 0:
@@ -465,7 +499,7 @@ def transportation(transportationID=None):
             finally:
                 commit_and_close(db)
 
-        post_transportID = request.args.get('transportationID', None)
+        post_transportID = request.args.get(Transportation.KEY__ID, None)
         if post_transportID is not None:
             db = create_db_session()
             try:
@@ -498,8 +532,10 @@ def transportation(transportationID=None):
                             401)
                 ret_dict = transport.to_dict()
                 event = event.to_dict()
-                ret_dict['departureDateTime'] = event['startDateTime']
-                ret_dict['arrivalDateTime'] = event['endDateTime']
+                ret_dict[Transportation.KEY__DEPARTUREDATE] = event[
+                    Event.KEY__STARTDATE]
+                ret_dict[Transportation.KEY__ARRIVALDATE] = event[
+                    Event.KEY__ENDDATE]
                 return make_response(jsonify({'transportation': ret_dict}), 200)
             finally:
                 commit_and_close(db)
@@ -537,10 +573,17 @@ def transportation(transportationID=None):
                     commit_and_close(db)
                     return make_response(
                         'User not authorized to edit Transportation.', 401)
+
+            try:
+                req_json = get_request_json(request)
+            except ResponseError as err:
+                db.close()
+                return bad_request(err)
+
             try:
                 # Optional type parameter.
-                post_type = str(request.json['type'])
-                transport.type = TransportEnum(post_type)
+                transport.type = TransportEnum(
+                    str(req_json[Transportation.KEY__TYPE]))
             except ValueError as ve:
                 # Does not match a TransportEnum enum.
                 db.close()
@@ -550,22 +593,20 @@ def transportation(transportationID=None):
 
             try:
                 # Optional operator parameter.
-                post_operator = str(request.json['operator'])
-                transport.operator = post_operator
+                transport.operator = str(req_json[Transportation.KEY__OPERATOR])
             except KeyError:
                 pass
 
             try:
                 # Optional number parameter.
-                post_number = str(request.json['number'])
-                transport.number = post_number
+                transport.number = str(req_json[Transportation.KEY__NUMBER])
             except KeyError:
                 pass
 
             try:
                 # Optional name departureDateTime.
-                post_departureDateTime = str(request.json['departureDateTime'])
-                event.startDateTime = to_datetime(post_departureDateTime)
+                event.startDateTime = to_datetime(
+                    str(req_json[Transportation.KEY__DEPARTUREDATE]))
             except ValueError as ve:
                 db.close()
                 return bad_request(ve)
@@ -574,8 +615,8 @@ def transportation(transportationID=None):
 
             try:
                 # Optional arrivalDateTime parameter.
-                post_arrivalDateTime = str(request.json['arrivalDateTime'])
-                event.endDateTime = to_datetime(post_arrivalDateTime)
+                event.endDateTime = to_datetime(
+                    str(req_json[Transportation.KEY__ARRIVALDATE]))
             except ValueError as ve:
                 db.close()
                 return bad_request(ve)
@@ -584,22 +625,24 @@ def transportation(transportationID=None):
 
             try:
                 # Optional departureAddress parameter.
-                post_departureAddress = str(request.json['departureAddress'])
-                transport.departureAddress = post_departureAddress
+                transport.departureAddress = str(
+                    req_json[Transportation.KEY__DEPARTUREADDR])
             except KeyError:
                 pass
 
             try:
                 # Optional arrivalAddress parameter.
-                post_arrivalAddress = str(request.json['arrivalAddress'])
-                transport.arrivalAddress = post_arrivalAddress
+                transport.arrivalAddress = str(
+                    req_json[Transportation.KEY__ARRIVALADDR])
             except KeyError:
                 pass
 
             ret_dict = transport.to_dict()
             event = event.to_dict()
-            ret_dict['departureDateTime'] = event['startDateTime']
-            ret_dict['arrivalDateTime'] = event['endDateTime']
+            ret_dict[Transportation.KEY__DEPARTUREDATE] = event[
+                Event.KEY__STARTDATE]
+            ret_dict[Transportation.KEY__ARRIVALDATE] = event[
+                Event.KEY__ENDDATE]
             commit_and_close(db)
             return make_response(jsonify({'transportation': ret_dict}), 200)
         elif request.method == DELETE:
@@ -613,8 +656,8 @@ def transportation(transportationID=None):
                     db.delete(perm)
                     commit_and_close(db)
                     return make_response(
-                        'Shared Transportation Event Permission deleted successfully',
-                        200)
+                        'Shared Transportation Event Permission ' +
+                        'deleted successfully', 200)
 
                 commit_and_close(db)
                 return make_response(
@@ -627,7 +670,6 @@ def transportation(transportationID=None):
             commit_and_close(db)
             return make_response(
                 'Transportation Event deleted successfully', 200)
-    return bad_request()
 
 
 @app.route(VER_PATH + '/events', methods=[POST, GET], strict_slashes=False)
@@ -635,10 +677,11 @@ def transportation(transportationID=None):
 def events(eventID=None):
     if request.method == POST:
         try:
-            post_tripID = int(request.json['tripID'])
-            post_events = request.json['events']
-        except KeyError:
-            return bad_request()
+            req_json = get_request_json(request)
+            post_tripID = int(req_json[Event.KEY__TRIPID])
+            post_events = req_json['events']
+        except (ResponseError, KeyError) as err:
+            return bad_request(err)
 
         db = create_db_session()
         try:
@@ -661,17 +704,18 @@ def events(eventID=None):
             event_list = []
             for event in post_events:
                 max_id += 1
-                event_list.append(Event(max_id,
-                                        event['eventName'],
-                                        to_datetime(event['startDateTime']),
-                                        to_datetime(event['endDateTime']),
-                                        event.get('lat'),
-                                        event.get('lon'),
-                                        None,
-                                        None,
-                                        event.get('address'),
-                                        event.get('shared'),
-                                        post_tripID))
+                event_list.append(
+                    Event(max_id,
+                          event[Event.KEY__EVENTNAME],
+                          to_datetime(event[Event.KEY__STARTDATE]),
+                          to_datetime(event[Event.KEY__ENDDATE]),
+                          event.get(Event.KEY__LAT),
+                          event.get(Event.KEY__LON),
+                          None,
+                          None,
+                          event.get(Event.KEY__ADDR),
+                          False,
+                          post_tripID))
         except (KeyError, ValueError) as err:
             commit_and_close(db)
             return bad_request(err)
@@ -689,7 +733,7 @@ def events(eventID=None):
         finally:
             commit_and_close(db)
     elif request.method == GET:
-        post_tripID = request.args.get('tripID', None)
+        post_tripID = request.args.get(Event.KEY__TRIPID, None)
         if post_tripID is not None:
             db = create_db_session()
             try:
@@ -727,7 +771,7 @@ def events(eventID=None):
             finally:
                 commit_and_close(db)
 
-        post_eventID = request.args.get('eventID', None)
+        post_eventID = request.args.get(Event.KEY__ID, None)
         if post_eventID is not None:
             db = create_db_session()
             try:
@@ -779,17 +823,23 @@ def events(eventID=None):
                     commit_and_close(db)
                     return make_response('User not authorized to edit Event.',
                                          401)
+
+            try:
+                req_json = get_request_json(request)
+            except ResponseError as err:
+                db.close()
+                return bad_request(err)
+
             try:
                 # Optional eventName parameter.
-                post_eventName = str(request.json['eventName'])
-                event.eventName = post_eventName
+                event.eventName = str(req_json[Event.KEY__EVENTNAME])
             except KeyError:
                 pass
 
             try:
                 # Optional name startDateTime.
-                post_startDateTime = str(request.json['startDateTime'])
-                event.startDateTime = to_datetime(post_startDateTime)
+                event.startDateTime = to_datetime(
+                    str(req_json[Event.KEY__STARTDATE]))
             except ValueError as ve:
                 db.close()
                 return bad_request(ve)
@@ -798,8 +848,8 @@ def events(eventID=None):
 
             try:
                 # Optional endDateTime parameter.
-                post_endDateTime = str(request.json['endDateTime'])
-                event.endDateTime = to_datetime(post_endDateTime)
+                event.endDateTime = to_datetime(
+                    str(req_json[Event.KEY__ENDDATE]))
             except ValueError as ve:
                 db.close()
                 return bad_request(ve)
@@ -808,22 +858,19 @@ def events(eventID=None):
 
             try:
                 # Optional lat parameter.
-                post_lat = request.json['lat']
-                event.lat = post_lat
+                event.lat = req_json[Event.KEY__LAT]
             except KeyError:
                 pass
 
             try:
                 # Optional lon parameter.
-                post_lon = request.json['lon']
-                event.lon = post_lon
+                event.lon = req_json[Event.KEY__LON]
             except KeyError:
                 pass
 
             try:
                 # Optional address parameter.
-                post_address = str(request.json['address'])
-                event.address = post_address
+                event.address = str(req_json[Event.KEY__ADDR])
             except KeyError:
                 pass
 
@@ -853,7 +900,6 @@ def events(eventID=None):
                 Permissions.type == PermissionsEnum.EVENT)).delete()
             commit_and_close(db)
             return make_response('Event deleted successfully', 200)
-    return bad_request()
 
 
 @app.route(VER_PATH + '/bookmarks', methods=[POST, GET], strict_slashes=False)
@@ -861,10 +907,11 @@ def events(eventID=None):
 def bookmarks(bookmarkID=None):
     if request.method == POST:
         try:
-            post_tripID = int(request.json['tripID'])
-            post_bookmarks = request.json['bookmarks']
-        except KeyError:
-            return bad_request()
+            req_json = get_request_json(request)
+            post_tripID = int(req_json[Bookmark.KEY__TRIPID])
+            post_bookmarks = req_json['bookmarks']
+        except (ResponseError, KeyError) as err:
+            return bad_request(err)
 
         db = create_db_session()
         try:
@@ -889,15 +936,15 @@ def bookmarks(bookmarkID=None):
                 max_id += 1
                 bookmark_list.append(
                     Bookmark(max_id,
-                             bookmark['lat'],
-                             bookmark['lon'],
-                             bookmark['placeID'],
-                             bookmark['name'],
-                             bookmark.get('address'),
-                             bookmark.get('type'),
-                             bookmark.get('shared'),
+                             bookmark[Bookmark.KEY__LAT],
+                             bookmark[Bookmark.KEY__LON],
+                             bookmark[Bookmark.KEY__PLACEID],
+                             bookmark[Bookmark.KEY__NAME],
+                             bookmark.get(Bookmark.KEY__ADDR),
+                             bookmark.get(Bookmark.KEY__TYPE),
+                             False,
                              post_tripID,
-                             bookmark.get('eventID')))
+                             bookmark.get(Bookmark.KEY__EVENTID)))
         except KeyError as ke:
             commit_and_close(db)
             return bad_request(ke)
@@ -916,7 +963,7 @@ def bookmarks(bookmarkID=None):
         finally:
             commit_and_close(db)
     elif request.method == GET:
-        post_tripID = request.args.get('tripID', None)
+        post_tripID = request.args.get(Bookmark.KEY__TRIPID, None)
         if post_tripID is not None:
             db = create_db_session()
             try:
@@ -948,7 +995,7 @@ def bookmarks(bookmarkID=None):
             finally:
                 commit_and_close(db)
 
-        post_bookmarkID = request.args.get('bookmarkID', None)
+        post_bookmarkID = request.args.get(Bookmark.KEY__ID, None)
         if post_bookmarkID is not None:
             db = create_db_session()
             try:
@@ -1022,13 +1069,14 @@ def bookmarks(bookmarkID=None):
 def share(permissionID=None):
     if request.method == POST:
         try:
-            post_userNames = request.json['userName']
-            post_tripID = int(request.json['tripID'])
-            post_writeFlag = request.json['writeFlag']
-            post_bookmarkID = request.json.get('bookmarkID', None)
-            post_eventID = request.json.get('eventID', None)
-        except KeyError:
-            return bad_request()
+            req_json = get_request_json(request)
+            post_userNames = req_json[User.KEY__USERNAME]
+            post_tripID = int(req_json[Trip.KEY__ID])
+            post_writeFlag = req_json[Permissions.KEY__WRITEFLAG]
+            post_bookmarkID = req_json.get(Bookmark.KEY__ID, None)
+            post_eventID = req_json.get(Event.KEY__ID, None)
+        except (ResponseError, KeyError) as err:
+            return bad_request(err)
 
         db = create_db_session()
         try:
@@ -1129,7 +1177,7 @@ def share(permissionID=None):
         finally:
             commit_and_close(db)
     elif request.method == GET:
-        post_toUser = request.args.get('toUser', None)
+        post_toUser = request.args.get(Permissions.KEY__TOUSER, None)
         if post_toUser is not None:
             db = create_db_session()
             try:
@@ -1139,7 +1187,7 @@ def share(permissionID=None):
                         'User not authorized to view shared objects.', 401)
                 perms = db.query(Permissions).filter(
                     Permissions.toUser == post_toUser).all()
-                if perms is None:
+                if not perms:
                     return make_response(
                         'No unaccepted permissions found for given user.', 404)
                 ret_dict = {'events': [], 'bookmarks': []}
@@ -1167,8 +1215,9 @@ def share(permissionID=None):
     elif permissionID:
         curr_userName = session.get(KEY__USERNAME)
         try:
-            post_type = PermissionsEnum(str(request.json['type']))
-        except (KeyError, ValueError) as err:
+            req_json = get_request_json(request)
+            post_type = PermissionsEnum(str(req_json[Permissions.KEY__TYPE]))
+        except (ResponseError, KeyError, ValueError) as err:
             return bad_request(err)
 
         db = create_db_session()
@@ -1183,12 +1232,13 @@ def share(permissionID=None):
         if request.method == PUT:
             try:
                 # Required toTrip parameter.
-                post_toTrip = int(request.json['toTrip'])
+                post_toTrip = int(get_request_json(request)[
+                                      Permissions.KEY__TOTRIP])
                 perm.toTrip = post_toTrip
                 db.commit()
                 return make_response('Shared object added to trip.', 200)
-            except KeyError:
-                return bad_request()
+            except (ResponseError, KeyError) as err:
+                return bad_request(err)
             finally:
                 db.close()
         elif request.method == DELETE:
@@ -1212,7 +1262,6 @@ def share(permissionID=None):
                 return make_response('Permission deleted successfully', 200)
             finally:
                 commit_and_close(db)
-    return bad_request()
 
 
 @app.route(VER_PATH + '/login', methods=[POST], strict_slashes=False)
@@ -1221,13 +1270,14 @@ def login():
     Route for login. On success, sets the session KEY__LOGGED_IN flag to True.
     """
     try:
-        post_userName = str(request.json['userName'])
-        post_password = str(request.json['password'])
-    except KeyError:
-        return bad_request()
+        req_json = get_request_json(request)
+        post_userName = str(req_json[User.KEY__USERNAME])
+        post_password = str(req_json[User.KEY__PASSWORD])
+    except (ResponseError, KeyError) as err:
+        return bad_request(err)
 
-    print('Trying login for userName="%s", password="%s"' % (
-        post_userName, post_password))
+    # print('Trying login for userName="%s", password="%s"' % (
+    #     post_userName, post_password))
     db = create_db_session()
     result = db.query(User).filter(
         User.userName == post_userName,
@@ -1265,11 +1315,11 @@ def view_database():
         return_string += '<br/>TABLE: ' + table.name
         for row in database.query(table).all():
             return_string += '<br/>   ' + ' | '.join(str(i) for i in row)
+    database.close()
     return return_string
 
 
-if __name__ == '__main__' or __name__ == '__init__':
-    print(gethostname())
+if __name__ == '__main__':
     # Remove all entries.
     base.metadata.drop_all(bind=engine)
     # Create tables.
@@ -1304,13 +1354,13 @@ if __name__ == '__main__' or __name__ == '__init__':
                    to_datetime('Tue, 12 Aug 2013 17:17:17 GMT'),
                    to_datetime('Tue, 12 Aug 2013 18:18:18 GMT'),
                    49.267132, -122.968941, True, None,
-                   "6511 Sumas Dr Burnaby,BC V5B 2V1", False, 1)
+                   '6511 Sumas Dr Burnaby,BC V5B 2V1', False, 1)
     event3 = Event(3, 'testAustralia',
                    to_datetime('Tue, 12 Aug 2013 17:17:17 GMT'),
                    to_datetime('Tue, 12 Aug 2013 18:18:18 GMT'),
                    -33.870943, 151.190311, True,
                    to_datetime('Tue, 12 Aug 2013 17:00:00 GMT'),
-                   "Western Distributor Pyrmont NSW 2009 Australia", False, 1)
+                   'Western Distributor Pyrmont NSW 2009 Australia', False, 1)
     db_session.add_all([event1, event2, event3])
     # Example locations:
     bookmark1 = Bookmark(1, -33.866891, 151.200814,
