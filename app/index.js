@@ -28,6 +28,7 @@ import EventDetailsView from "./layouts/EventDetailsView.js";
 import TransportationFormView from "./layouts/TransportationFormView.js";
 import TransportationView from "./layouts/TransportationView.js";
 import TransportationDetailsView from "./layouts/TransportationDetailsView.js";
+import RealmView from "./layouts/RealmView.js";
 
 
 // Connect the router to the Redux store
@@ -94,6 +95,9 @@ export default class PlanIt extends Component {
                         <Scene key="transportationDetails" component={TransportationDetailsView}
                             sceneStyle={ NavigationStyles.listViewScene } title="Transportation Details"
                             {...navBarProps} />
+
+                        <Scene key="realm" component={RealmView}
+                            sceneStyle={ NavigationStyles.listViewScene } title="Realm DB" />
 
                         <Scene key="userProfile" component={UserProfileView}
                             sceneStyle={ NavigationStyles.listViewScene } title="User Profile" />
