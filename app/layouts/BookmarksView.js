@@ -6,6 +6,9 @@ import { getBookmarks, deleteBookmark } from "../actions/bookmarksActions.js";
 import { getRegionForCoordinates } from "../utils/utils.js";
 import ListMapTemplate from "../templates/ListMapTemplate.js";
 import { isDevMode } from "../utils/utils.js";
+import { NetInfo } from "react-native";
+import realm from "../../Realm/realm.js";
+import { ScrollView, View, Text, Divider } from "@shoutem/ui";
 
 
 class BookmarksView extends Component {
@@ -25,7 +28,9 @@ class BookmarksView extends Component {
 
         this.state = {
             bookmarks: this.props.bookmarks,
-            searchString: ""
+            searchString: "",
+            isConnected: null,
+            offlineBookmarks: null
         };
 
         this.requestBookmarks(this.props.dispatch, this.props.tripId);
@@ -38,6 +43,9 @@ class BookmarksView extends Component {
         this._handleAdd = this._handleAdd.bind(this);
         this._handleToggleMap = this._handleToggleMap.bind(this);
         this._handleClickItem = this._handleClickItem.bind(this);
+        this._handleConnectivityChange = this._handleConnectivityChange.bind(this);
+        this.renderOnlineView = this.renderOnlineView.bind(this);
+        this.renderOfflineView = this.renderOfflineView.bind(this);
     }
 
     componentWillReceiveProps (nextProps) {
@@ -49,8 +57,46 @@ class BookmarksView extends Component {
         this.setState({ bookmarks: nextProps.bookmarks });
     }
 
+    componentDidMount () {
+        NetInfo.isConnected.addEventListener(
+            "change",
+            this._handleConnectivityChange
+        );
+        NetInfo.isConnected.fetch().done(
+            (isConnected) => { this.setState({ isConnected }); }
+        );
+    }
+
+    componentWillUnmount () {
+        NetInfo.isConnected.removeEventListener(
+            "change",
+            this._handleConnectivityChange
+        );
+    }
+
+    _handleConnectivityChange = (isConnected) => {
+        this.setState({
+            isConnected,
+        });
+    };
+
     requestBookmarks (dispatch, tripId) {
         dispatch(getBookmarks(tripId));
+    }
+
+    renderBookmarks () {
+        return realm.objects("Bookmark").map(function (bookmark) {
+            return (
+                <View style={{ paddingBottom: 5 }}>
+                    <Text style={{ fontWeight: "bold" }}>Bookmark ID: {bookmark.bookmarkID}</Text>
+                    <Text>Location ID: {bookmark.locationID}</Text>
+                    <Text>Name: {bookmark.name}</Text>
+                    <Text>Address: {bookmark.address}</Text>
+                    <Text>Type: {bookmark.type}</Text>
+                    <Divider styleName="line" />
+                </View>
+            );
+        });
     }
 
     formattedBookmarks () {
@@ -164,7 +210,7 @@ class BookmarksView extends Component {
         // TODO: implement in sprint 2
     }
 
-    render () {
+    renderOnlineView () {
         return (
             <ListMapTemplate data={this.formattedBookmarks()}
                 emptyListMessage={
@@ -189,6 +235,25 @@ class BookmarksView extends Component {
                 onShare={this._handleShare}
                 onClickItem={this._handleClickItem} />
         );
+    }
+
+    renderOfflineView () {
+        let bookmarks = this.renderBookmarks();
+        return (
+            <ScrollView>
+                { bookmarks }
+            </ScrollView>
+        );
+    }
+
+    render () {
+        let bookmarksView = null;
+        if (this.state.isConnected) {
+            bookmarksView = this.renderOnlineView();
+        } else {
+            bookmarksView = this.renderOfflineView();
+        }
+        return bookmarksView;
     }
 }
 
