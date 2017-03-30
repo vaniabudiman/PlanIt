@@ -8,7 +8,7 @@ import ListMapTemplate from "../templates/ListMapTemplate.js";
 import { isDevMode } from "../utils/utils.js";
 import { NetInfo } from "react-native";
 import realm from "../../Realm/realm.js";
-import { ScrollView, View, Text, Divider } from "@shoutem/ui";
+import { ScrollView, View, Divider, Title, Subtitle, Caption } from "@shoutem/ui";
 
 
 class BookmarksView extends Component {
@@ -29,8 +29,7 @@ class BookmarksView extends Component {
         this.state = {
             bookmarks: this.props.bookmarks,
             searchString: "",
-            isConnected: null,
-            offlineBookmarks: null
+            isConnected: null
         };
 
         this.requestBookmarks(this.props.dispatch, this.props.tripId);
@@ -51,6 +50,41 @@ class BookmarksView extends Component {
     componentWillReceiveProps (nextProps) {
         if (nextProps.tripId && (this.props.tripId !== nextProps.tripId)) {
             this.requestBookmarks(nextProps.dispatch, nextProps.tripId);
+        }
+
+        // Populate Realm DB with updated bookmarks
+        if (this.props.bookmarksGETStatus === FETCH_STATUS.ATTEMPTING &&
+            nextProps.bookmarksGETStatus === FETCH_STATUS.SUCCESS) {
+            let allBookmarks = realm.objects("Bookmark");
+            realm.write(() => {
+                realm.delete(allBookmarks);
+                nextProps.bookmarks.map((bookmark) => {
+                    realm.create("Bookmark", {
+                        bookmarkID: bookmark.bookmarkID,
+                        locationID: 1,
+                        name: bookmark.name,
+                        address: bookmark.address,
+                        type: bookmark.type
+                    });
+                });
+            });
+        }
+
+        if (this.props.bookmarksDELETEStatus === FETCH_STATUS.ATTEMPTING &&
+            nextProps.bookmarksDELETEStatus === FETCH_STATUS.SUCCESS) {
+            let allBookmarks = realm.objects("Bookmark");
+            realm.write(() => {
+                realm.delete(allBookmarks);
+                nextProps.bookmarks.map((bookmark) => {
+                    realm.create("Bookmark", {
+                        bookmarkID: bookmark.bookmarkID,
+                        locationID: 1,
+                        name: bookmark.name,
+                        address: bookmark.address,
+                        type: bookmark.type
+                    });
+                });
+            });
         }
 
         // Always update state bookmarks w/ latest bookmarks from props
@@ -87,12 +121,10 @@ class BookmarksView extends Component {
     renderBookmarks () {
         return realm.objects("Bookmark").map(function (bookmark) {
             return (
-                <View style={{ paddingBottom: 5 }}>
-                    <Text style={{ fontWeight: "bold" }}>Bookmark ID: {bookmark.bookmarkID}</Text>
-                    <Text>Location ID: {bookmark.locationID}</Text>
-                    <Text>Name: {bookmark.name}</Text>
-                    <Text>Address: {bookmark.address}</Text>
-                    <Text>Type: {bookmark.type}</Text>
+                <View style={{ paddingBottom: 5, paddingTop: 5 }}>
+                    <Title>Name: {bookmark.name}</Title>
+                    <Subtitle>Address: {bookmark.address}</Subtitle>
+                    <Caption>Type: {bookmark.type}</Caption>
                     <Divider styleName="line" />
                 </View>
             );

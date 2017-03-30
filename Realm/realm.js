@@ -145,26 +145,26 @@ realm.write(() => {
     }
 
     // Creating 10 bookmarks (w/ corresponding event)
-    for (let i = 1; i <=10; i+=1) {
-        let bookmark = realm.create("Bookmark", {
-            bookmarkID: i,
-            locationID: 12345,
-            active: false,
-            name: "Bookmark Name " + i,
-            address: "Bookmark Address " + i,
-            type: "Bookmark Type " + i,
-            event: {
-                eventID: i + 10,
-                eventName: "Bookmark Event " + i,
-                startDateTime: new Date(),
-                endDateTime: new Date(),
-                reminderFlag: false,
-            }
-        }, true);
-
-        trips[i-1].bookmarks.push(bookmark);
-        trips[i-1].events.push(bookmark.event);
-    }
+//    for (let i = 1; i <=10; i+=1) {
+//        let bookmark = realm.create("Bookmark", {
+//            bookmarkID: i,
+//            locationID: 12345,
+//            active: false,
+//            name: "Bookmark Name " + i,
+//            address: "Bookmark Address " + i,
+//            type: "Bookmark Type " + i,
+//            event: {
+//                eventID: i + 10,
+//                eventName: "Bookmark Event " + i,
+//                startDateTime: new Date(),
+//                endDateTime: new Date(),
+//                reminderFlag: false,
+//            }
+//        }, true);
+//
+//        trips[i-1].bookmarks.push(bookmark);
+//        trips[i-1].events.push(bookmark.event);
+//    }
 
     // Creating 10 transportation (w/ corresponding event)
     for (let i = 1; i <=10; i+=1) {

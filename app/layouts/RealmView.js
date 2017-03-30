@@ -11,7 +11,7 @@ class RealmView extends Component {
     }
 
     renderEvents () {
-        return realm.objects("Event").map(function (event) {
+        return realm.objects("Event").map((event) => {
             return (
                 <View style={{ paddingBottom: 5 }}>
                     <Text style={{ fontWeight: "bold" }}>Event ID: {event.eventID}</Text>
@@ -26,7 +26,7 @@ class RealmView extends Component {
     }
 
     renderBookmarks () {
-        return realm.objects("Bookmark").map(function (bookmark) {
+        return realm.objects("Bookmark").map((bookmark) => {
             return (
                 <View style={{ paddingBottom: 5 }}>
                     <Text style={{ fontWeight: "bold" }}>Bookmark ID: {bookmark.bookmarkID}</Text>
@@ -41,7 +41,7 @@ class RealmView extends Component {
     }
 
     renderTrips () {
-        return realm.objects("Trip").map(function (trip) {
+        return realm.objects("Trip").map((trip) => {
             return (
                 <View style={{ paddingBottom: 5 }}>
                     <Text style={{ fontWeight: "bold" }}>Trip ID: {trip.tripID}</Text>
@@ -56,7 +56,7 @@ class RealmView extends Component {
     }
 
     renderTransportation () {
-        return realm.objects("Transportation").map(function (transportation) {
+        return realm.objects("Transportation").map((transportation) => {
             return (
                 <View style={{ paddingBottom: 5 }}>
                     <Text style={{ fontWeight: "bold" }}>Transportation ID: {transportation.tripID}</Text>
@@ -69,7 +69,7 @@ class RealmView extends Component {
     }
 
     renderUsers () {
-        return realm.objects("User").map(function (user) {
+        return realm.objects("User").map((user) => {
             return (
                 <View style={{ paddingBottom: 5 }}>
                     <Text>{user.primaryKey ? user.primaryKey : ""}</Text>
