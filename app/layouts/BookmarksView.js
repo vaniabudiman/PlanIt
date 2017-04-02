@@ -74,7 +74,6 @@ class BookmarksView extends Component {
             updatedBookmarkProps.bookmarks.map((bookmark) => {
                 realm.create("Bookmark", {
                     bookmarkID: bookmark.bookmarkID,
-                    locationID: 1,
                     name: bookmark.name,
                     address: bookmark.address,
                     type: bookmark.type

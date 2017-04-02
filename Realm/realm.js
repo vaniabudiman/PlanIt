@@ -1,19 +1,6 @@
 import Realm from "realm";
 
 
-/*
- * TODO:
- *  I'm not entirely sure how Realm works and if separating it out like this is correct.
- *
- *  It seems like the Realm database creation & initialization should exist in one place?
- *
- *  The schemas (as we get more & they become more complex/longer) should probably each live in their own file as well.
- *  Then, we just import them into here for initialization?
- *
- *  Can "new Realm(...)" be called more than once? Or is it the call that just creates the local database?
- *  And is it correct if the database & its schemas are created each time the app starts up?
-*/
-
 const TripSchema = {
     name: "Trip",
     primaryKey: "tripID",
@@ -33,7 +20,6 @@ const BookmarkSchema = {
     primaryKey: "bookmarkID",
     properties: {
         bookmarkID: "int",
-        locationID: "int", // do we want to change this to something that would be more useful for offline use? address?
         sharedWith: { type: "list", objectType: "User" },
         sharedFrom: "User",
         event: "Event",
@@ -51,7 +37,6 @@ const EventSchema = {
         eventName: "string",
         startDateTime: "date",
         endDateTime: "date",
-        locationID: { type: "int", optional: true }, // do we want to change this to something that would be more useful for offline use? address?
         reminderFlag: "bool",
         reminderTime: { type: "date", optional: true },
         sharedWith: { type: "list", objectType: "User" },
@@ -68,7 +53,6 @@ const TransportationSchema = {
         type: "string",
         operator: { type: "string", optional: true },
         number: { type: "string", optional: true },
-        arrivalLocationID: { type: "int", optional: true },
         event: "Event"
     }
 };
@@ -104,7 +88,7 @@ const SessionSchema = {
     }
 };
 
-// Realm.clearTestState() // deletes all existing realm files
+Realm.clearTestState() // deletes all existing realm files
 
 var realm = new Realm({
     schema: [TripSchema, BookmarkSchema, EventSchema, TransportationSchema, UserSchema, CurrencySchema, SessionSchema]
@@ -161,7 +145,6 @@ var realm = new Realm({
 //    for (let i = 1; i <=10; i+=1) {
 //        let bookmark = realm.create("Bookmark", {
 //            bookmarkID: i,
-//            locationID: 12345,
 //            active: false,
 //            name: "Bookmark Name " + i,
 //            address: "Bookmark Address " + i,
@@ -196,12 +179,6 @@ var realm = new Realm({
 //        trips[i-1].events.push(transportation.event);
 //    }
 
-    // printing out tables to console - uncomment for example of organization/structure
-    //console.log(realm.objects("Trip"));
-    //console.log(realm.objects("Bookmark"));
-    //console.log(realm.objects("Event"));
-    //console.log(realm.objects("Transportation"));
-    //console.log(realm.objects("User"));
 //});
 
 

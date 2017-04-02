@@ -30,7 +30,6 @@ class RealmView extends Component {
             return (
                 <View style={{ paddingBottom: 5 }}>
                     <Text style={{ fontWeight: "bold" }}>Bookmark ID: {bookmark.bookmarkID}</Text>
-                    <Text>Location ID: {bookmark.locationID}</Text>
                     <Text>Name: {bookmark.name}</Text>
                     <Text>Address: {bookmark.address}</Text>
                     <Text>Type: {bookmark.type}</Text>
