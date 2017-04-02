@@ -60,7 +60,7 @@ class RealmView extends Component {
                 <View style={{ paddingBottom: 5 }}>
                     <Text style={{ fontWeight: "bold" }}>Transportation ID: {transportation.tripID}</Text>
                     <Text>Type: {transportation.type}</Text>
-                    <Text>Operator: {transportation.operator ? transportation.operator.type : ""}</Text>
+                    <Text>Operator: {transportation.operator ? transportation.operator : "None"}</Text>
                     <Divider styleName="line" />
                 </View>
             );

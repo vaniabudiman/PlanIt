@@ -4,6 +4,10 @@ import ListMapTemplate from "../templates/ListMapTemplate.js";
 import { connect } from "react-redux";
 import FETCH_STATUS from "../constants/fetchStatusConstants.js";
 import { getTransportation, deleteTransportation } from "../actions/transportationActions.js";
+import { NetInfo } from "react-native";
+import realm from "../../Realm/realm.js";
+import { ScrollView, View, Divider, Title, Subtitle, Caption } from "@shoutem/ui";
+
 
 class TransportationView extends Component {
 
@@ -24,7 +28,8 @@ class TransportationView extends Component {
         this.state = {
             transportation: this.props.transportation,
             searchString: "",
-            loadingTransportation: false
+            loadingTransportation: false,
+            isConnected: null
         };
 
         this.requestTransportation(this.props.dispatch, this.props.tripId);
@@ -36,6 +41,10 @@ class TransportationView extends Component {
         this._handleClickItem = this._handleClickItem.bind(this);
         this._handleCreateItem = this._handleCreateItem.bind(this);
         this._handleUpdate = this._handleUpdate.bind(this);
+        this._handleConnectivityChange = this._handleConnectivityChange.bind(this);
+
+        this.renderOnlineView = this.renderOnlineView.bind(this);
+        this.renderOfflineView = this.renderOfflineView.bind(this);
     }
 
     componentWillReceiveProps (nextProps) {
@@ -43,8 +52,14 @@ class TransportationView extends Component {
             this.requestTransportation(nextProps.dispatch, nextProps.tripId);
         }
 
+        if (this.props.transportationGETStatus === FETCH_STATUS.ATTEMPTING &&
+            nextProps.transportationGETStatus === FETCH_STATUS.SUCCESS) {
+            this.updateRealmDB(nextProps);
+        }
+
         if (this.props.transportationDELETEStatus === FETCH_STATUS.ATTEMPTING &&
             nextProps.transportationDELETEStatus === FETCH_STATUS.SUCCESS) {
+            this.updateRealmDB(nextProps);
             alert("Transportation deleted successfully");
         }
 
@@ -52,9 +67,60 @@ class TransportationView extends Component {
         this.setState({ transportation: nextProps.transportation });
     }
 
+    updateRealmDB (updatedTransportationProps) {
+        let allTransportation = realm.objects("Transportation");
+        realm.write(() => {
+            realm.delete(allTransportation);
+            updatedTransportationProps.transportation.map((transportation) => {
+                realm.create("Transportation", {
+                    transportationID: transportation.transportationID,
+                    type: transportation.type,
+                    operator: transportation.operator
+                });
+            });
+        });
+    }
+
+    componentDidMount () {
+        NetInfo.isConnected.addEventListener(
+            "change",
+            this._handleConnectivityChange
+        );
+        NetInfo.isConnected.fetch().done(
+            (isConnected) => { this.setState({ isConnected }); }
+        );
+    }
+
+    componentWillUnmount () {
+        NetInfo.isConnected.removeEventListener(
+            "change",
+            this._handleConnectivityChange
+        );
+    }
+
+    _handleConnectivityChange = (isConnected) => {
+        this.setState({
+            isConnected,
+        });
+    }
+
     requestTransportation (dispatch, tripId) {
         dispatch(getTransportation(tripId));
     }
+
+    renderTransportation () {
+        return realm.objects("Transportation").map(function (transportation) {
+            return (
+                <View style={{ paddingBottom: 5, paddingTop: 5 }}>
+                    <Title>Type: {transportation.type}</Title>
+                    <Subtitle>ID: {transportation.transportationID}</Subtitle>
+                    <Caption>Operator: {transportation.operator ? transportation.operator : "None"}</Caption>
+                    <Divider styleName="line" />
+                </View>
+            );
+        });
+    }
+
 
     formattedTransportation () {
         return this.state.transportation.map((transport) => {
@@ -129,7 +195,7 @@ class TransportationView extends Component {
         });
     }
 
-    render () {
+    renderOnlineView () {
         return (
             <ListMapTemplate data={this.formattedTransportation()}
                 emptyListMessage={"Create transportation to begin!"}
@@ -147,6 +213,25 @@ class TransportationView extends Component {
                 showEdit={true}
                 onEdit={this._handleUpdate} />
         );
+    }
+
+    renderOfflineView () {
+        let transportation = this.renderTransportation();
+        return (
+            <ScrollView>
+                { transportation }
+            </ScrollView>
+        );
+    }
+
+    render () {
+        let transportationView = null;
+        if (this.state.isConnected) {
+            transportationView = this.renderOnlineView();
+        } else {
+            transportationView = this.renderOfflineView();
+        }
+        return transportationView;
     }
 }
 

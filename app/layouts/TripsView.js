@@ -236,15 +236,30 @@ class TripsView extends Component {
         );
     }
 
+    renderTransportation () {
+        return realm.objects("Transportation").map(function (transportation) {
+            return (
+                <View style={{ paddingBottom: 5, paddingTop: 5 }}>
+                    <Title>Type: {transportation.type}</Title>
+                    <Subtitle>ID: {transportation.transportationID}</Subtitle>
+                    <Caption>Operator: {transportation.operator ? transportation.operator : "None"}</Caption>
+                    <Divider styleName="line" />
+                </View>
+            );
+        });
+    }
+
     renderOfflineView () {
         let trips = this.renderTrips();
         let bookmarks = this.renderBookmarks();
         let events = this.renderEvents();
+        let transportation = this.renderTransportation();
         return (
             <ScrollView>
                 { trips }
                 { events }
                 { bookmarks }
+                { transportation }
             </ScrollView>
         );
     }
