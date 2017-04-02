@@ -182,8 +182,8 @@ class TripsView extends Component {
             return (
                 <View style={{ paddingBottom: 5 }} key={trip.tripID}>
                     <Title>Trip: {trip.tripName}</Title>
-                    <Subtitle>Start: {JSON.stringify(trip.startDate)}</Subtitle>
-                    <Caption>End: {JSON.stringify(trip.endDate)}</Caption>
+                    <Subtitle>Start: {trip.startDate.toUTCString()}</Subtitle>
+                    <Caption>End: {trip.endDate.toUTCString()}</Caption>
                     <Divider styleName="line" />
                 </View>
             );
@@ -208,8 +208,8 @@ class TripsView extends Component {
             return (
                 <View style={{ paddingBottom: 5 }}>
                     <Title>Event: {event.eventName}</Title>
-                    <Subtitle>Start: {JSON.stringify(event.startDateTime)}</Subtitle>
-                    <Caption>End: {JSON.stringify(event.endDateTime)}</Caption>
+                    <Subtitle>Start: {event.startDateTime.toUTCString()}</Subtitle>
+                    <Caption>End: {event.endDateTime.toUTCString()}</Caption>
                     <Divider styleName="line" />
                 </View>
             );
@@ -240,9 +240,10 @@ class TripsView extends Component {
         return realm.objects("Transportation").map(function (transportation) {
             return (
                 <View style={{ paddingBottom: 5, paddingTop: 5 }}>
-                    <Title>Type: {transportation.type}</Title>
-                    <Subtitle>ID: {transportation.transportationID}</Subtitle>
-                    <Caption>Operator: {transportation.operator ? transportation.operator : "None"}</Caption>
+                    <Title>{transportation.type}{transportation.operator ?
+                    (": " + transportation.operator) : ""}</Title>
+                    <Subtitle>Departure: {transportation.departureDateTime.toUTCString()}</Subtitle>
+                    <Caption>Arrival: {transportation.arrivalDateTime.toUTCString()}</Caption>
                     <Divider styleName="line" />
                 </View>
             );

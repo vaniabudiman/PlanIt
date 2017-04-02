@@ -53,7 +53,9 @@ const TransportationSchema = {
         type: "string",
         operator: { type: "string", optional: true },
         number: { type: "string", optional: true },
-        event: "Event"
+        event: "Event",
+        departureDateTime: "date",
+        arrivalDateTime: "date"
     }
 };
 

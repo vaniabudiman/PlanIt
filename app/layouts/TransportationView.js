@@ -75,7 +75,9 @@ class TransportationView extends Component {
                 realm.create("Transportation", {
                     transportationID: transportation.transportationID,
                     type: transportation.type,
-                    operator: transportation.operator
+                    operator: transportation.operator,
+                    departureDateTime: new Date(transportation.departureDateTime),
+                    arrivalDateTime: new Date(transportation.arrivalDateTime)
                 });
             });
         });
@@ -112,15 +114,15 @@ class TransportationView extends Component {
         return realm.objects("Transportation").map(function (transportation) {
             return (
                 <View style={{ paddingBottom: 5, paddingTop: 5 }}>
-                    <Title>Type: {transportation.type}</Title>
-                    <Subtitle>ID: {transportation.transportationID}</Subtitle>
-                    <Caption>Operator: {transportation.operator ? transportation.operator : "None"}</Caption>
+                    <Title>{transportation.type}{transportation.operator ?
+                        (": " + transportation.operator) : ""}</Title>
+                    <Subtitle>Departure: {transportation.departureDateTime.toUTCString()}</Subtitle>
+                    <Caption>Arrival: {transportation.arrivalDateTime.toUTCString()}</Caption>
                     <Divider styleName="line" />
                 </View>
             );
         });
     }
-
 
     formattedTransportation () {
         return this.state.transportation.map((transport) => {
