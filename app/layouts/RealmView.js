@@ -80,14 +80,29 @@ class RealmView extends Component {
         });
     }
 
+    renderSessions () {
+        return realm.objects("Session").map((session) => {
+            return (
+                <View style={{ paddingBottom: 5 }}>
+                    <Text style={{ fontWeight: "bold" }}>Username: {session.userName}</Text>
+                    <Text>Password: {session.password}</Text>
+                    <Text>Session: {session.session}</Text>
+                    <Divider styleName="line" />
+                </View>
+            );
+        });
+    }
+
     render () {
         let bookmarks = this.renderBookmarks();
         let events = this.renderEvents();
         let trips = this.renderTrips();
         let transportationList = this.renderTransportation();
         let users = this.renderUsers();
+        let sessions = this.renderSessions();
         return (
             <ScrollView>
+                { sessions }
                 { users }
                 { trips }
                 { events }

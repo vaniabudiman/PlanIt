@@ -43,6 +43,7 @@ class BookmarksView extends Component {
         this._handleToggleMap = this._handleToggleMap.bind(this);
         this._handleClickItem = this._handleClickItem.bind(this);
         this._handleConnectivityChange = this._handleConnectivityChange.bind(this);
+
         this.renderOnlineView = this.renderOnlineView.bind(this);
         this.renderOfflineView = this.renderOfflineView.bind(this);
     }
@@ -112,7 +113,7 @@ class BookmarksView extends Component {
         this.setState({
             isConnected,
         });
-    };
+    }
 
     requestBookmarks (dispatch, tripId) {
         dispatch(getBookmarks(tripId));

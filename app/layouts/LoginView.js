@@ -7,7 +7,8 @@ import {
   View,
   Image,
   TextInput,
-  TouchableOpacity
+  TouchableOpacity,
+  NetInfo
 } from "react-native";
 import { Actions, ActionConst } from "react-native-router-flux";
 import Icon from "react-native-vector-icons/FontAwesome";
@@ -16,6 +17,7 @@ import { login } from "../actions/accountActions.js";
 import FETCH_STATUS from "../constants/fetchStatusConstants.js";
 import FORM from "../constants/formConstants.js";
 import { connect } from "react-redux";
+import realm from "../../Realm/realm.js";
 
 
 class LoginView extends Component {
@@ -31,20 +33,60 @@ class LoginView extends Component {
         this.state = {
             userName: "",
             password: "",
+            connectionInfo: null
         };
 
         this.requireAuthentication(this.props.loginStatus);
 
         // Bind Redux action creators
         this._login = () => this.props.dispatch(login(this.state));
+
+        this._handleConnectionInfoChange = this._handleConnectionInfoChange.bind(this);
     }
 
     componentWillReceiveProps (nextProps) {
         this.requireAuthentication(nextProps.loginStatus);
     }
 
+    componentDidMount () {
+        NetInfo.addEventListener(
+            "change",
+            this._handleConnectionInfoChange
+        );
+        NetInfo.fetch().done(
+            (connectionInfo) => { this.setState({ connectionInfo }); }
+        );
+    }
+
+    componentWillUnmount () {
+        NetInfo.removeEventListener(
+            "change",
+            this._handleConnectionInfoChange
+        );
+    }
+
+    _handleConnectionInfoChange = (connectionInfo) => {
+        this.setState({
+            connectionInfo,
+        });
+        this.requireAuthentication(this.props.loginStatus);
+    };
+
+
     requireAuthentication (loginStatus) {
+        if (this.state.connectionInfo === "NONE" && realm.objects("Session")[0].session) {
+            Actions.trips({ type: ActionConst.RESET });
+        }
         if (loginStatus === FETCH_STATUS.SUCCESS) {
+            let allSessions = realm.objects("Session");
+            realm.write(() => {
+                realm.delete(allSessions);
+                realm.create("Session", {
+                    userName: this.state.userName,
+                    password: this.state.password,
+                    session: true
+                });
+            });
             Actions.trips({ type: ActionConst.RESET });
         }
         // Other statuses as necessary
