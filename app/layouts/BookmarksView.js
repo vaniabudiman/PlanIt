@@ -53,43 +53,34 @@ class BookmarksView extends Component {
             this.requestBookmarks(nextProps.dispatch, nextProps.tripId);
         }
 
-        // Populate Realm DB with updated bookmarks
         if (this.props.bookmarksGETStatus === FETCH_STATUS.ATTEMPTING &&
             nextProps.bookmarksGETStatus === FETCH_STATUS.SUCCESS) {
-            let allBookmarks = realm.objects("Bookmark");
-            realm.write(() => {
-                realm.delete(allBookmarks);
-                nextProps.bookmarks.map((bookmark) => {
-                    realm.create("Bookmark", {
-                        bookmarkID: bookmark.bookmarkID,
-                        locationID: 1,
-                        name: bookmark.name,
-                        address: bookmark.address,
-                        type: bookmark.type
-                    });
-                });
-            });
+            this.updateRealmDB(nextProps);
         }
 
         if (this.props.bookmarksDELETEStatus === FETCH_STATUS.ATTEMPTING &&
             nextProps.bookmarksDELETEStatus === FETCH_STATUS.SUCCESS) {
-            let allBookmarks = realm.objects("Bookmark");
-            realm.write(() => {
-                realm.delete(allBookmarks);
-                nextProps.bookmarks.map((bookmark) => {
-                    realm.create("Bookmark", {
-                        bookmarkID: bookmark.bookmarkID,
-                        locationID: 1,
-                        name: bookmark.name,
-                        address: bookmark.address,
-                        type: bookmark.type
-                    });
-                });
-            });
+            this.updateRealmDB(nextProps);
         }
 
         // Always update state bookmarks w/ latest bookmarks from props
         this.setState({ bookmarks: nextProps.bookmarks });
+    }
+
+    updateRealmDB (updatedBookmarkProps) {
+        let allBookmarks = realm.objects("Bookmark");
+        realm.write(() => {
+            realm.delete(allBookmarks);
+            updatedBookmarkProps.bookmarks.map((bookmark) => {
+                realm.create("Bookmark", {
+                    bookmarkID: bookmark.bookmarkID,
+                    locationID: 1,
+                    name: bookmark.name,
+                    address: bookmark.address,
+                    type: bookmark.type
+                });
+            });
+        });
     }
 
     componentDidMount () {
@@ -122,7 +113,7 @@ class BookmarksView extends Component {
     renderBookmarks () {
         return realm.objects("Bookmark").map(function (bookmark) {
             return (
-                <View style={{ paddingBottom: 5, paddingTop: 5 }}>
+                <View style={{ paddingBottom: 5, paddingTop: 5 }} key={bookmark.bookmarkID}>
                     <Title>Name: {bookmark.name}</Title>
                     <Subtitle>Address: {bookmark.address}</Subtitle>
                     <Caption>Type: {bookmark.type}</Caption>

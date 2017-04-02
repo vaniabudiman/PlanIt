@@ -59,27 +59,31 @@ class TripsView extends Component {
 
         if (this.props.tripsGETStatus === FETCH_STATUS.ATTEMPTING &&
             nextProps.tripsGETStatus === FETCH_STATUS.SUCCESS) {
-            let allTrips = realm.objects("Trip");
-            realm.write(() => {
-                realm.delete(allTrips);
-                nextProps.trips.map((trip) => {
-                    realm.create("Trip", {
-                        tripID: trip.tripID,
-                        tripName: trip.tripName,
-                        active: trip.active,
-                        startDate: new Date(trip.startDate),
-                        endDate: new Date(trip.endDate)
-                    });
-                });
-            });
+            this.updateRealmDB(nextProps);
         }
 
         if (this.props.tripDELETEStatus === FETCH_STATUS.ATTEMPTING &&
             nextProps.tripDELETEStatus === FETCH_STATUS.SUCCESS) {
-            alert("Trip deleted successfully!");
+            this.updateRealmDB(nextProps);
         }
 
         this.setState({ trips: nextProps.trips });
+    }
+
+    updateRealmDB (updatedTripProps) {
+        let allTrips = realm.objects("Trip");
+        realm.write(() => {
+            realm.delete(allTrips);
+            updatedTripProps.trips.map((trip) => {
+                realm.create("Trip", {
+                    tripID: trip.tripID,
+                    tripName: trip.tripName,
+                    active: trip.active,
+                    startDate: new Date(trip.startDate),
+                    endDate: new Date(trip.endDate)
+                });
+            });
+        });
     }
 
     componentDidMount () {
@@ -176,7 +180,7 @@ class TripsView extends Component {
     renderTrips () {
         return realm.objects("Trip").map((trip) => {
             return (
-                <View style={{ paddingBottom: 5 }}>
+                <View style={{ paddingBottom: 5 }} key={trip.tripID}>
                     <Caption>{JSON.stringify(realm.objects("Session"))}</Caption>
                     <Title>{trip.tripName}</Title>
                     <Subtitle>Start Date: {JSON.stringify(trip.startDate)}</Subtitle>
@@ -190,7 +194,7 @@ class TripsView extends Component {
     renderBookmarks () {
         return realm.objects("Bookmark").map(function (bookmark) {
             return (
-                <View style={{ paddingBottom: 5, paddingTop: 5 }}>
+                <View style={{ paddingBottom: 5, paddingTop: 5 }} key={bookmark.bookmarkID}>
                     <Title>Name: {bookmark.name}</Title>
                     <Subtitle>Address: {bookmark.address}</Subtitle>
                     <Caption>Type: {bookmark.type}</Caption>
