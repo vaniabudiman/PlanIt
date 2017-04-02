@@ -37,7 +37,7 @@ const EventSchema = {
         eventName: "string",
         startDateTime: "date",
         endDateTime: "date",
-        reminderFlag: "bool",
+        reminderFlag: { type: "bool", optional: true },
         reminderTime: { type: "date", optional: true },
         sharedWith: { type: "list", objectType: "User" },
         sharedFrom: "User",
@@ -88,7 +88,7 @@ const SessionSchema = {
     }
 };
 
-Realm.clearTestState() // deletes all existing realm files
+//Realm.clearTestState() // deletes all existing realm objects
 
 var realm = new Realm({
     schema: [TripSchema, BookmarkSchema, EventSchema, TransportationSchema, UserSchema, CurrencySchema, SessionSchema]

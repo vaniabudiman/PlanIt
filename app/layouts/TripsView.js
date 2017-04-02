@@ -181,10 +181,9 @@ class TripsView extends Component {
         return realm.objects("Trip").map((trip) => {
             return (
                 <View style={{ paddingBottom: 5 }} key={trip.tripID}>
-                    <Caption>{JSON.stringify(realm.objects("Session"))}</Caption>
-                    <Title>{trip.tripName}</Title>
-                    <Subtitle>Start Date: {JSON.stringify(trip.startDate)}</Subtitle>
-                    <Caption>End Date: {JSON.stringify(trip.endDate)}</Caption>
+                    <Title>Trip: {trip.tripName}</Title>
+                    <Subtitle>Start: {JSON.stringify(trip.startDate)}</Subtitle>
+                    <Caption>End: {JSON.stringify(trip.endDate)}</Caption>
                     <Divider styleName="line" />
                 </View>
             );
@@ -195,9 +194,22 @@ class TripsView extends Component {
         return realm.objects("Bookmark").map(function (bookmark) {
             return (
                 <View style={{ paddingBottom: 5, paddingTop: 5 }} key={bookmark.bookmarkID}>
-                    <Title>Name: {bookmark.name}</Title>
+                    <Title>Bookmark: {bookmark.name}</Title>
                     <Subtitle>Address: {bookmark.address}</Subtitle>
                     <Caption>Type: {bookmark.type}</Caption>
+                    <Divider styleName="line" />
+                </View>
+            );
+        });
+    }
+
+    renderEvents () {
+        return realm.objects("Event").map((event) => {
+            return (
+                <View style={{ paddingBottom: 5 }}>
+                    <Title>Event: {event.eventName}</Title>
+                    <Subtitle>Start: {JSON.stringify(event.startDateTime)}</Subtitle>
+                    <Caption>End: {JSON.stringify(event.endDateTime)}</Caption>
                     <Divider styleName="line" />
                 </View>
             );
@@ -227,9 +239,11 @@ class TripsView extends Component {
     renderOfflineView () {
         let trips = this.renderTrips();
         let bookmarks = this.renderBookmarks();
+        let events = this.renderEvents();
         return (
             <ScrollView>
                 { trips }
+                { events }
                 { bookmarks }
             </ScrollView>
         );
