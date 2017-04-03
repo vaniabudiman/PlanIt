@@ -265,7 +265,7 @@ export default class FormTemplate extends Component {
         for (let i=0; i < items.length; i+=1) {
             let item = items[i];
             content.push(
-                <Picker.Item key={i} label={item} value={item} />
+                <Picker.Item key={i} label={item.label || item} value={item.value || item} />
             );
         }
         return content;

@@ -10,6 +10,7 @@ import _ from "underscore";
 import TripsView from "./layouts/TripsView.js";
 import ShareListView from "./layouts/ShareListView.js";
 import ShareFormView from "./layouts/ShareFormView.js";
+import ShareToFormView from "./layouts/ShareToFormView.js";
 import { NavigationStyles } from "./styles/NavigationStyles.js";
 import UserSettings from "./components/UserSettings.js";
 import Sharing from "./components/Sharing";
@@ -62,6 +63,9 @@ export default class PlanIt extends Component {
                             sceneStyle={ NavigationStyles.listViewScene } />
                         <Scene key="shareForm" component={ShareFormView} title="Share" {...navBarProps}
                             sceneStyle={ NavigationStyles.listViewScene } />
+                        <Scene key="shareToForm" component={ShareToFormView} title="Add Shared Item to a Trip"
+                            {...navBarProps} sceneStyle={ NavigationStyles.listViewScene } />
+
                         <Scene key="trips" component={TripsView}
                             sceneStyle={ NavigationStyles.listViewScene } title="Trips" {...tripsNavBarProps} />
                         <Scene key="tripHome" component={TripHomeView} title="Trip Homepage"
