@@ -139,8 +139,7 @@ class EventsMapView extends Component {
     }
 
     _handleShare (item) {
-        // Make necessary calls to share the item identified by id
-        alert("share: " + item.id);
+        Actions.shareForm({ shareType: "EVENT", id: item.id, tripId: this.props.tripId });
     }
 
     // Take user to event creation form
@@ -179,7 +178,7 @@ class EventsMapView extends Component {
                 mapMarkers={this.formattedEventMarkers()}
                 showDelete={true}
                 onDelete={this._handleDelete}
-                showShare={false}
+                showShare={true}
                 onShare={this._handleShare}
                 onRefresh={this._handleRefresh}
                 onClickItem={this._handleClickItem}
