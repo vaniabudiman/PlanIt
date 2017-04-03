@@ -166,7 +166,6 @@ class ItineraryListView extends Component {
         });
     }
 
-    // TODO: remove/edit... this is just an example on how the callback would work
     _handleToggleCalendar (newCalendarToggleState) {
         // Make necessary calls to do w/e you want based on this new calendar toggled state
         isDevMode() && alert("calendar toggled to: " + newCalendarToggleState); // eslint-disable-line no-unused-expressions
@@ -194,30 +193,20 @@ class ItineraryListView extends Component {
     }
 
     _handleDateSelect (date) {
-        this.filterEventsByDate(date);
+        Actions.eventsMap({
+            title: date.toDateString(),
+            tripId: this.props.tripId,
+            events: this.props.events,
+            tripStartDate: this.props.tripStartDate,
+            tripEndDate: this.props.tripEndDate,
+            date: date.toDateString()
+        });
     }
 
     _handleAvailableCalendarDates () {
         // Available calendar dates will be based on the time range of the trip
         let calendarProps = { startDate: this.props.tripStartDate, endDate: this.props.tripEndDate };
         return calendarProps;
-    }
-
-    filterEventsByDate (date) {
-        let filteredEvents = this.props.events.filter((event) => {
-            return new Date(event.startDateTime + " UTC").toDateString() === date.toDateString();
-        });
-        this.goToSingleEventView(date, filteredEvents);
-    }
-
-    goToSingleEventView (date, events) {
-        Actions.eventsMap({
-            title: date.toDateString(),
-            tripId: this.props.tripId,
-            filteredEvents: events,
-            tripStartDate: this.props.tripStartDate,
-            tripEndDate: this.props.tripEndDate
-        });
     }
 
     _handleShare (item) {
