@@ -5,6 +5,9 @@ import { connect } from "react-redux";
 import FETCH_STATUS from "../constants/fetchStatusConstants.js";
 import { getEvents, deleteEvent } from "../actions/eventsActions.js";
 import { isDevMode } from "../utils/utils.js";
+import { NetInfo } from "react-native";
+import realm from "../../Realm/realm.js";
+import { ScrollView, View, Divider, Title, Subtitle, Caption } from "@shoutem/ui";
 
 
 var enableCalendar = true;
@@ -29,7 +32,8 @@ class ItineraryListView extends Component {
         this.state = {
             events: this.props.events,
             searchString: "",
-            loadingItinerary: false
+            loadingItinerary: false,
+            isConnected: null
         };
 
         this.requestEvents(this.props.dispatch, this.props.tripId);
@@ -44,6 +48,10 @@ class ItineraryListView extends Component {
         this._handleDateSelect = this._handleDateSelect.bind(this);
         this._handleAvailableCalendarDates = this._handleAvailableCalendarDates.bind(this);
         this._handleShare = this._handleShare.bind(this);
+        this._handleConnectivityChange = this._handleConnectivityChange.bind(this);
+
+        this.renderOnlineView = this.renderOnlineView.bind(this);
+        this.renderOfflineView = this.renderOfflineView.bind(this);
     }
 
     componentWillReceiveProps (nextProps) {
@@ -51,13 +59,57 @@ class ItineraryListView extends Component {
             this.requestEvents(nextProps.dispatch, nextProps.tripId);
         }
 
+        if (this.props.eventsGETStatus === FETCH_STATUS.ATTEMPTING &&
+            nextProps.eventsGETStatus === FETCH_STATUS.SUCCESS) {
+            this.updateRealmDB(nextProps);
+        }
+
         if (this.props.eventDELETEStatus === FETCH_STATUS.ATTEMPTING &&
             nextProps.eventDELETEStatus === FETCH_STATUS.SUCCESS) {
+            this.updateRealmDB(nextProps);
             alert("Event deleted successfully");
         }
 
         // Always update state events w/ latest events from props
         this.setState({ events: nextProps.events });
+    }
+
+    updateRealmDB (updatedEventProps) {
+        let allEvents = realm.objects("Event");
+        realm.write(() => {
+            realm.delete(allEvents);
+            updatedEventProps.events.map((event) => {
+                realm.create("Event", {
+                    eventID: event.eventID,
+                    eventName: event.eventName,
+                    startDateTime: new Date(event.startDateTime),
+                    endDateTime: new Date(event.endDateTime)
+                });
+            });
+        });
+    }
+
+    componentDidMount () {
+        NetInfo.isConnected.addEventListener(
+            "change",
+            this._handleConnectivityChange
+        );
+        NetInfo.isConnected.fetch().done(
+            (isConnected) => { this.setState({ isConnected }); }
+        );
+    }
+
+    componentWillUnmount () {
+        NetInfo.isConnected.removeEventListener(
+            "change",
+            this._handleConnectivityChange
+        );
+    }
+
+    _handleConnectivityChange = (isConnected) => {
+        this.setState({
+            isConnected,
+        });
     }
 
     requestEvents (dispatch, tripId) {
@@ -172,7 +224,20 @@ class ItineraryListView extends Component {
         Actions.shareForm({ shareType: "EVENT", id: item.id, tripId: this.props.tripId });
     }
 
-    render () {
+    renderEvents () {
+        return realm.objects("Event").map((event) => {
+            return (
+                <View style={{ paddingBottom: 5 }}>
+                    <Title>Name: {event.eventName}</Title>
+                    <Subtitle>Start: {JSON.stringify(event.startDateTime)}</Subtitle>
+                    <Caption>End: {JSON.stringify(event.endDateTime)}</Caption>
+                    <Divider styleName="line" />
+                </View>
+            );
+        });
+    }
+
+    renderOnlineView () {
         return (
             <ListMapTemplate data={this.formattedEvents()}
                 emptyListMessage={"Create an event to begin!"}
@@ -197,6 +262,25 @@ class ItineraryListView extends Component {
                 showShare={true}
                 onShare={this._handleShare} />
         );
+    }
+
+    renderOfflineView () {
+        let events = this.renderEvents();
+        return (
+            <ScrollView>
+                { events }
+            </ScrollView>
+        );
+    }
+
+    render () {
+        let eventsView = null;
+        if (this.state.isConnected) {
+            eventsView = this.renderOnlineView();
+        } else {
+            eventsView = this.renderOfflineView();
+        }
+        return eventsView;
     }
 }
 

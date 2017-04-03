@@ -1,10 +1,12 @@
 import React, { Component } from "react";
 import { Actions } from "react-native-router-flux";
 import ListMapTemplate from "../templates/ListMapTemplate.js";
-//import realm from "../../Realm/realm.js";
 import { connect } from "react-redux";
 import { getTrips, deleteTrip } from "../actions/tripsActions.js";
 import FETCH_STATUS from "../constants/fetchStatusConstants.js";
+import { NetInfo } from "react-native";
+import realm from "../../Realm/realm.js";
+import { ScrollView, View, Divider, Title, Subtitle, Caption } from "@shoutem/ui";
 
 
 /*
@@ -15,21 +17,6 @@ import FETCH_STATUS from "../constants/fetchStatusConstants.js";
  *       so the "propTypes" list should be the most complete... since we disallow using props not documented in this object
 */
 
-
-// TODO: remove these mocks - leaving as example for how to access realm
-/*
-let trips = realm.objects("Trip");
-let items = [];
-Object.keys(trips).map(function (key, i) {
-    let trip = trips[key];
-
-    items.push({
-        id: i,
-        title: trip.tripName,
-        subtitle: "subtitle: " + trip.tripName
-    });
-});
-*/
 
 class TripsView extends Component {
 
@@ -46,7 +33,8 @@ class TripsView extends Component {
 
         this.state = {
             trips: this.props.trips,
-            searchString: ""
+            searchString: "",
+            isConnected: null
         };
 
         this.requestTrips(this.props.dispatch);
@@ -59,6 +47,9 @@ class TripsView extends Component {
         this._handleShare = this._handleShare.bind(this);
         this._handleClickItem = this._handleClickItem.bind(this);
         this._handleCreateItem = this._handleCreateItem.bind(this);
+
+        this.renderOnlineView = this.renderOnlineView.bind(this);
+        this.renderOfflineView = this.renderOfflineView.bind(this);
     }
 
     componentWillReceiveProps (nextProps) {
@@ -66,12 +57,56 @@ class TripsView extends Component {
             this.requestTrips(nextProps.dispatch);
         }
 
+        if (this.props.tripsGETStatus === FETCH_STATUS.ATTEMPTING &&
+            nextProps.tripsGETStatus === FETCH_STATUS.SUCCESS) {
+            this.updateRealmDB(nextProps);
+        }
+
         if (this.props.tripDELETEStatus === FETCH_STATUS.ATTEMPTING &&
             nextProps.tripDELETEStatus === FETCH_STATUS.SUCCESS) {
-            alert("Trip deleted successfully!");
+            this.updateRealmDB(nextProps);
         }
 
         this.setState({ trips: nextProps.trips });
+    }
+
+    updateRealmDB (updatedTripProps) {
+        let allTrips = realm.objects("Trip");
+        realm.write(() => {
+            realm.delete(allTrips);
+            updatedTripProps.trips.map((trip) => {
+                realm.create("Trip", {
+                    tripID: trip.tripID,
+                    tripName: trip.tripName,
+                    active: trip.active,
+                    startDate: new Date(trip.startDate),
+                    endDate: new Date(trip.endDate)
+                });
+            });
+        });
+    }
+
+    componentDidMount () {
+        NetInfo.isConnected.addEventListener(
+            "change",
+            this._handleConnectivityChange
+        );
+        NetInfo.isConnected.fetch().done(
+            (isConnected) => { this.setState({ isConnected }); }
+        );
+    }
+
+    componentWillUnmount () {
+        NetInfo.isConnected.removeEventListener(
+            "change",
+            this._handleConnectivityChange
+        );
+    }
+
+    _handleConnectivityChange = (isConnected) => {
+        this.setState({
+            isConnected,
+        });
     }
 
     requestTrips (dispatch) {
@@ -142,7 +177,46 @@ class TripsView extends Component {
         Actions.tripForm();
     }
 
-    render () {
+    renderTrips () {
+        return realm.objects("Trip").map((trip) => {
+            return (
+                <View style={{ paddingBottom: 5 }} key={trip.tripID}>
+                    <Title>Trip: {trip.tripName}</Title>
+                    <Subtitle>Start: {trip.startDate.toUTCString()}</Subtitle>
+                    <Caption>End: {trip.endDate.toUTCString()}</Caption>
+                    <Divider styleName="line" />
+                </View>
+            );
+        });
+    }
+
+    renderBookmarks () {
+        return realm.objects("Bookmark").map(function (bookmark) {
+            return (
+                <View style={{ paddingBottom: 5, paddingTop: 5 }} key={bookmark.bookmarkID}>
+                    <Title>Bookmark: {bookmark.name}</Title>
+                    <Subtitle>Address: {bookmark.address}</Subtitle>
+                    <Caption>Type: {bookmark.type}</Caption>
+                    <Divider styleName="line" />
+                </View>
+            );
+        });
+    }
+
+    renderEvents () {
+        return realm.objects("Event").map((event) => {
+            return (
+                <View style={{ paddingBottom: 5 }}>
+                    <Title>Event: {event.eventName}</Title>
+                    <Subtitle>Start: {event.startDateTime.toUTCString()}</Subtitle>
+                    <Caption>End: {event.endDateTime.toUTCString()}</Caption>
+                    <Divider styleName="line" />
+                </View>
+            );
+        });
+    }
+
+    renderOnlineView () {
         return (
             <ListMapTemplate data={this.formattedTrips()}
                 emptyListMessage={this.props.tripsGETStatus === FETCH_STATUS.SUCCESS ? "Create a trip to begin!" : ""}
@@ -160,6 +234,45 @@ class TripsView extends Component {
                 onCreateItem={this._handleCreateItem}
                 searchString={this.state.searchString} />
         );
+    }
+
+    renderTransportation () {
+        return realm.objects("Transportation").map(function (transportation) {
+            return (
+                <View style={{ paddingBottom: 5, paddingTop: 5 }}>
+                    <Title>{transportation.type}{transportation.operator ?
+                    (": " + transportation.operator) : ""}</Title>
+                    <Subtitle>Departure: {transportation.departureDateTime.toUTCString()}</Subtitle>
+                    <Caption>Arrival: {transportation.arrivalDateTime.toUTCString()}</Caption>
+                    <Divider styleName="line" />
+                </View>
+            );
+        });
+    }
+
+    renderOfflineView () {
+        let trips = this.renderTrips();
+        let bookmarks = this.renderBookmarks();
+        let events = this.renderEvents();
+        let transportation = this.renderTransportation();
+        return (
+            <ScrollView>
+                { trips }
+                { events }
+                { bookmarks }
+                { transportation }
+            </ScrollView>
+        );
+    }
+
+    render () {
+        let tripsView = null;
+        if (this.state.isConnected) {
+            tripsView = this.renderOnlineView();
+        } else {
+            tripsView = this.renderOfflineView();
+        }
+        return tripsView;
     }
 }
 

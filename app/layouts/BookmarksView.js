@@ -6,6 +6,9 @@ import { getBookmarks, deleteBookmark } from "../actions/bookmarksActions.js";
 import { getRegionForCoordinates } from "../utils/utils.js";
 import ListMapTemplate from "../templates/ListMapTemplate.js";
 import { isDevMode } from "../utils/utils.js";
+import { NetInfo } from "react-native";
+import realm from "../../Realm/realm.js";
+import { ScrollView, View, Divider, Title, Subtitle, Caption } from "@shoutem/ui";
 
 
 class BookmarksView extends Component {
@@ -25,7 +28,8 @@ class BookmarksView extends Component {
 
         this.state = {
             bookmarks: this.props.bookmarks,
-            searchString: ""
+            searchString: "",
+            isConnected: null
         };
 
         this.requestBookmarks(this.props.dispatch, this.props.tripId);
@@ -38,6 +42,10 @@ class BookmarksView extends Component {
         this._handleAdd = this._handleAdd.bind(this);
         this._handleToggleMap = this._handleToggleMap.bind(this);
         this._handleClickItem = this._handleClickItem.bind(this);
+        this._handleConnectivityChange = this._handleConnectivityChange.bind(this);
+
+        this.renderOnlineView = this.renderOnlineView.bind(this);
+        this.renderOfflineView = this.renderOfflineView.bind(this);
     }
 
     componentWillReceiveProps (nextProps) {
@@ -45,12 +53,73 @@ class BookmarksView extends Component {
             this.requestBookmarks(nextProps.dispatch, nextProps.tripId);
         }
 
+        if (this.props.bookmarksGETStatus === FETCH_STATUS.ATTEMPTING &&
+            nextProps.bookmarksGETStatus === FETCH_STATUS.SUCCESS) {
+            this.updateRealmDB(nextProps);
+        }
+
+        if (this.props.bookmarksDELETEStatus === FETCH_STATUS.ATTEMPTING &&
+            nextProps.bookmarksDELETEStatus === FETCH_STATUS.SUCCESS) {
+            this.updateRealmDB(nextProps);
+        }
+
         // Always update state bookmarks w/ latest bookmarks from props
         this.setState({ bookmarks: nextProps.bookmarks });
     }
 
+    updateRealmDB (updatedBookmarkProps) {
+        let allBookmarks = realm.objects("Bookmark");
+        realm.write(() => {
+            realm.delete(allBookmarks);
+            updatedBookmarkProps.bookmarks.map((bookmark) => {
+                realm.create("Bookmark", {
+                    bookmarkID: bookmark.bookmarkID,
+                    name: bookmark.name,
+                    address: bookmark.address,
+                    type: bookmark.type
+                });
+            });
+        });
+    }
+
+    componentDidMount () {
+        NetInfo.isConnected.addEventListener(
+            "change",
+            this._handleConnectivityChange
+        );
+        NetInfo.isConnected.fetch().done(
+            (isConnected) => { this.setState({ isConnected }); }
+        );
+    }
+
+    componentWillUnmount () {
+        NetInfo.isConnected.removeEventListener(
+            "change",
+            this._handleConnectivityChange
+        );
+    }
+
+    _handleConnectivityChange = (isConnected) => {
+        this.setState({
+            isConnected,
+        });
+    }
+
     requestBookmarks (dispatch, tripId) {
         dispatch(getBookmarks(tripId));
+    }
+
+    renderBookmarks () {
+        return realm.objects("Bookmark").map(function (bookmark) {
+            return (
+                <View style={{ paddingBottom: 5, paddingTop: 5 }} key={bookmark.bookmarkID}>
+                    <Title>Name: {bookmark.name}</Title>
+                    <Subtitle>Address: {bookmark.address}</Subtitle>
+                    <Caption>Type: {bookmark.type}</Caption>
+                    <Divider styleName="line" />
+                </View>
+            );
+        });
     }
 
     formattedBookmarks () {
@@ -161,7 +230,7 @@ class BookmarksView extends Component {
         Actions.shareForm({ shareType: "BOOKMARK", id: item.id, tripId: this.props.tripId });
     }
 
-    render () {
+    renderOnlineView () {
         return (
             <ListMapTemplate data={this.formattedBookmarks()}
                 emptyListMessage={
@@ -186,6 +255,25 @@ class BookmarksView extends Component {
                 onShare={this._handleShare}
                 onClickItem={this._handleClickItem} />
         );
+    }
+
+    renderOfflineView () {
+        let bookmarks = this.renderBookmarks();
+        return (
+            <ScrollView>
+                { bookmarks }
+            </ScrollView>
+        );
+    }
+
+    render () {
+        let bookmarksView = null;
+        if (this.state.isConnected) {
+            bookmarksView = this.renderOnlineView();
+        } else {
+            bookmarksView = this.renderOfflineView();
+        }
+        return bookmarksView;
     }
 }
 

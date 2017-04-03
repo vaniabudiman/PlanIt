@@ -35,7 +35,7 @@ CASCADE_OPTIONS = 'all,delete-orphan'
 #  %H: Hour (24-hour clock) as a zero-padded decimal number. 00, 01, ..., 23
 #  %M: Minute as a zero-padded decimal number. 00, 01, ..., 59
 #  %S: Second as a zero-padded decimal number. 00, 01, ..., 59
-#  %Z: Time zone name (empty string if the object is naive). (empty), UTC, EST, CST
+#  %Z: Time zone name. (empty), UTC, EST, CST
 DT_FORMAT = '%a, %d %b %Y %H:%M:%S %Z'
 
 
@@ -59,12 +59,19 @@ class User(base):
         self.email = email
         self.homeCurrency = homeCurrency
 
+    # User keys.
+    KEY__USERNAME = 'userName'
+    KEY__PASSWORD = 'password'
+    KEY__NAME = 'name'
+    KEY__EMAIL = 'email'
+    KEY__CURRENCY = 'homeCurrency'
+
     def to_dict(self):
-        return {'userName': self.userName,
-                'password': self.password,
-                'name': self.name,
-                'email': self.email,
-                'homeCurrency': self.homeCurrency}
+        return {self.KEY__USERNAME: self.userName,
+                self.KEY__PASSWORD: self.password,
+                self.KEY__NAME: self.name,
+                self.KEY__EMAIL: self.email,
+                self.KEY__CURRENCY: self.homeCurrency}
 
 
 class Trip(base):
@@ -97,13 +104,21 @@ class Trip(base):
         self.endDate = endDate
         self.userName = userName
 
+    # Trip keys.
+    KEY__ID = 'tripID'
+    KEY__TRIPNAME = 'tripName'
+    KEY__ACTIVE = 'active'
+    KEY__STARTDATE = 'startDate'
+    KEY__ENDDATE = 'endDate'
+    KEY__USERNAME = 'userName'
+
     def to_dict(self):
-        return {'tripID': self.tripID,
-                'tripName': self.tripName,
-                'active': self.active,
-                'startDate': self.startDate.strftime(DT_FORMAT),
-                'endDate': self.endDate.strftime(DT_FORMAT),
-                'userName': self.userName}
+        return {self.KEY__ID: self.tripID,
+                self.KEY__TRIPNAME: self.tripName,
+                self.KEY__ACTIVE: self.active,
+                self.KEY__STARTDATE: self.startDate.strftime(DT_FORMAT),
+                self.KEY__ENDDATE: self.endDate.strftime(DT_FORMAT),
+                self.KEY__USERNAME: self.userName}
 
 
 class TransportEnum(enum.Enum):
@@ -129,24 +144,35 @@ class Transportation(base):
                                 onupdate=CASCADE),
                      nullable=False)
 
-    def __init__(self, transportationID, type, operator, number,
+    def __init__(self, transportationID, tType, operator, number,
                  departureAddress, arrivalAddress, eventID):
         self.transportationID = transportationID
-        self.type = type
+        self.type = tType
         self.operator = operator
         self.number = number
         self.departureAddress = departureAddress
         self.arrivalAddress = arrivalAddress
         self.eventID = eventID
 
+    # Trip keys.
+    KEY__ID = 'transportationID'
+    KEY__TYPE = 'type'
+    KEY__OPERATOR = 'operator'
+    KEY__NUMBER = 'number'
+    KEY__DEPARTUREADDR = 'departureAddress'
+    KEY__ARRIVALADDR = 'arrivalAddress'
+    KEY__EVENTID = 'eventID'
+    KEY__DEPARTUREDATE = 'departureDateTime'  # Refers to Event startDateTime.
+    KEY__ARRIVALDATE = 'arrivalDateTime'      # Refers to Event endDateTime.
+
     def to_dict(self):
-        return {'transportationID': self.transportationID,
-                'type': self.type.value,
-                'operator': self.operator,
-                'number': self.number,
-                'departureAddress': self.departureAddress,
-                'arrivalAddress': self.arrivalAddress,
-                'eventID': self.eventID}
+        return {self.KEY__ID: self.transportationID,
+                self.KEY__TYPE: self.type.value,
+                self.KEY__OPERATOR: self.operator,
+                self.KEY__NUMBER: self.number,
+                self.KEY__DEPARTUREADDR: self.departureAddress,
+                self.KEY__ARRIVALADDR: self.arrivalAddress,
+                self.KEY__EVENTID: self.eventID}
 
 
 class Bookmark(base):
@@ -171,18 +197,19 @@ class Bookmark(base):
                                 onupdate=CASCADE))
 
     # Relationships:
-    bookmarkNotes = relationship('BookmarkNote', cascade=CASCADE_OPTIONS,
-                                 backref='bookmark', passive_updates=False)
+    # TODO: uncomment out when implementing.
+    # bookmarkNotes = relationship('BookmarkNote', cascade=CASCADE_OPTIONS,
+    #                              backref='bookmark', passive_updates=False)
 
     def __init__(self, bookmarkID, lat, lon, placeID,
-                 name, address, type, shared, tripID, eventID):
+                 name, address, bType, shared, tripID, eventID):
         self.bookmarkID = bookmarkID
         self.lat = lat
         self.lon = lon
         self.placeID = placeID
         self.name = name
         self.address = address
-        self.type = type
+        self.type = bType
         if shared is None:
             self.shared = False
         else:
@@ -190,17 +217,29 @@ class Bookmark(base):
         self.tripID = tripID
         self.eventID = eventID
 
+    # Bookmark keys.
+    KEY__ID = 'bookmarkID'
+    KEY__LAT = 'lat'
+    KEY__LON = 'lon'
+    KEY__PLACEID = 'placeID'
+    KEY__NAME = 'name'
+    KEY__ADDR = 'address'
+    KEY__TYPE = 'type'
+    KEY__SHARED = 'shared'
+    KEY__TRIPID = 'tripID'
+    KEY__EVENTID = 'eventID'
+
     def to_dict(self):
-        return {'bookmarkID': self.bookmarkID,
-                'lat': self.lat,
-                'lon': self.lon,
-                'placeID': self.placeID,
-                'name': self.name,
-                'address': self.address,
-                'type': self.type,
-                'shared': self.shared,
-                'tripID': self.tripID,
-                'eventID': self.eventID}
+        return {self.KEY__ID: self.bookmarkID,
+                self.KEY__LAT: self.lat,
+                self.KEY__LON: self.lon,
+                self.KEY__PLACEID: self.placeID,
+                self.KEY__NAME: self.name,
+                self.KEY__ADDR: self.address,
+                self.KEY__TYPE: self.type,
+                self.KEY__SHARED: self.shared,
+                self.KEY__TRIPID: self.tripID,
+                self.KEY__EVENTID: self.eventID}
 
 
 class Event(base):
@@ -227,8 +266,9 @@ class Event(base):
                              backref='event', passive_updates=False)
     transportation = relationship('Transportation', cascade=CASCADE_OPTIONS,
                                   backref='event', passive_updates=False)
-    eventNotes = relationship('EventNote', cascade=CASCADE_OPTIONS,
-                              backref='event', passive_updates=False)
+    # TODO: uncomment out when implementing.
+    # eventNotes = relationship('EventNote', cascade=CASCADE_OPTIONS,
+    #                           backref='event', passive_updates=False)
 
     def __init__(self, eventID, eventName, startDateTime, endDateTime,
                  lat, lon, reminderFlag, reminderTime, address, shared, tripID):
@@ -250,20 +290,34 @@ class Event(base):
             self.shared = shared
         self.tripID = tripID
 
+    # Event keys
+    KEY__ID = 'eventID'
+    KEY__EVENTNAME = 'eventName'
+    KEY__STARTDATE = 'startDateTime'
+    KEY__ENDDATE = 'endDateTime'
+    KEY__LAT = 'lat'
+    KEY__LON = 'lon'
+    KEY__REMFLAG = 'reminderFlag'
+    KEY__REMTIME = 'reminderTime'
+    KEY__ADDR = 'address'
+    KEY__SHARED = 'shared'
+    KEY__TRIPID = 'tripID'
+
     def to_dict(self):
-        return {'eventID': self.eventID,
-                'eventName': self.eventName,
-                'startDateTime': self.startDateTime.strftime(DT_FORMAT),
-                'endDateTime': self.endDateTime.strftime(DT_FORMAT),
-                'lat': self.lat,
-                'lon': self.lon,
-                'reminderFlag': self.reminderFlag,
-                'reminderTime': self.reminderTime,
-                'address': self.address,
-                'shared': self.shared,
-                'tripID': self.tripID}
+        return {self.KEY__ID: self.eventID,
+                self.KEY__EVENTNAME: self.eventName,
+                self.KEY__STARTDATE: self.startDateTime.strftime(DT_FORMAT),
+                self.KEY__ENDDATE: self.endDateTime.strftime(DT_FORMAT),
+                self.KEY__LAT: self.lat,
+                self.KEY__LON: self.lon,
+                self.KEY__REMFLAG: self.reminderFlag,
+                self.KEY__REMTIME: self.reminderTime,
+                self.KEY__ADDR: self.address,
+                self.KEY__SHARED: self.shared,
+                self.KEY__TRIPID: self.tripID}
 
 
+"""
 class NoteEnum(enum.Enum):
     TEXT  = 'text'
     PHOTO = 'photo'
@@ -341,6 +395,7 @@ class EventNote(base):
     def to_dict(self):
         return {'noteID': self.noteID,
                 'eventID': self.eventID}
+"""
 
 
 class PermissionsEnum(enum.Enum):
@@ -360,16 +415,23 @@ class Permissions(base):
                                ondelete=CASCADE,
                                onupdate=CASCADE))
 
-    def __init__(self, permissionID, type, writeFlag, toUser, toTrip):
+    def __init__(self, permissionID, pType, writeFlag, toUser, toTrip):
         self.permissionID = permissionID
-        self.type = type
+        self.type = pType
         self.writeFlag = writeFlag
         self.toUser = toUser
         self.toTrip = toTrip
 
-    def to_dict(self):
-        return {'permissionID': self.permissionID,
-                'type': self.type.value,
-                'writeFlag': self.writeFlag,
-                'toUser': self.toUser,
-                'toTrip': self.toTrip}
+    # Permissions keys.
+    KEY__ID = 'permissionID'
+    KEY__TYPE = 'type'
+    KEY__WRITEFLAG = 'writeFlag'
+    KEY__TOUSER = 'toUser'
+    KEY__TOTRIP = 'toTrip'
+
+    # def to_dict(self):
+    #     return {self.KEY__ID: self.permissionID,
+    #             self.KEY__TYPE: self.type.value,
+    #             self.KEY__WRITEFLAG: self.writeFlag,
+    #             self.KEY__TOUSER: self.toUser,
+    #             self.KEY__TOTRIP: self.toTrip}
