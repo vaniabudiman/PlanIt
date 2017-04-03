@@ -43,6 +43,7 @@ class ItineraryListView extends Component {
         this._handleUpdate = this._handleUpdate.bind(this);
         this._handleDateSelect = this._handleDateSelect.bind(this);
         this._handleAvailableCalendarDates = this._handleAvailableCalendarDates.bind(this);
+        this._handleShare = this._handleShare.bind(this);
     }
 
     componentWillReceiveProps (nextProps) {
@@ -167,6 +168,10 @@ class ItineraryListView extends Component {
         });
     }
 
+    _handleShare (item) {
+        Actions.shareForm({ shareType: "EVENT", id: item.id, tripId: this.props.tripId });
+    }
+
     render () {
         return (
             <ListMapTemplate data={this.formattedEvents()}
@@ -188,7 +193,9 @@ class ItineraryListView extends Component {
                 onClickItem={this._handleClickItem}
                 onCreateItem={this._handleCreateItem}
                 showEdit={true}
-                onEdit={this._handleUpdate} />
+                onEdit={this._handleUpdate}
+                showShare={true}
+                onShare={this._handleShare} />
         );
     }
 }
