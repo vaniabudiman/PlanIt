@@ -2314,6 +2314,11 @@ class Share(TestCase):
         print_data(rv)
         self.assertIn(str(HTTP_200_OK), rv.status)
 
+        print_title('shared_permissions_found_without_query')
+        rv = self.app.get(share_path)
+        print_data(rv)
+        self.assertIn(str(HTTP_200_OK), rv.status)
+
     def test_share_put(self):
         print_title('no_type')
         share_pathx = VER_PATH + '/share/' + str(self.permx_permissionID)

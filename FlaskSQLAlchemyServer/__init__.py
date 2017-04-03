@@ -1178,6 +1178,8 @@ def share(permissionID=None):
             commit_and_close(db)
     elif request.method == GET:
         post_toUser = request.args.get(Permissions.KEY__TOUSER, None)
+        if post_toUser is None:
+            post_toUser = session.get(KEY__USERNAME)
         if post_toUser is not None:
             db = create_db_session()
             try:
