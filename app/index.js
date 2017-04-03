@@ -6,9 +6,11 @@ import { Provider, connect } from "react-redux";
 import { Router, Scene } from "react-native-router-flux";
 import { AppRegistry } from "react-native";
 import store from "./core/store.js";
+import _ from "underscore";
 import TripsView from "./layouts/TripsView.js";
 import { NavigationStyles } from "./styles/NavigationStyles.js";
 import UserSettings from "./components/UserSettings.js";
+import Sharing from "./components/Sharing";
 import UserProfileView from "./layouts/UserProfileView.js";
 import ItemDetailsView from "./layouts/ItemDetailsView.js";
 import ContinentsView from "./layouts/ContinentsView.js";
@@ -44,6 +46,8 @@ export default class PlanIt extends Component {
             renderRightButton: UserSettings
         };
 
+        let tripsNavBarProps = _.extend(navBarProps, { renderLeftButton: () => { return <Sharing />; } });
+
         return (
             // Wrap routes with Redux Provider
             <Provider store={store}>
@@ -53,7 +57,7 @@ export default class PlanIt extends Component {
                         <Scene key="signUp" component={SignUpView} title="Sign Up" hideNavBar={true} />
 
                         <Scene key="trips" component={TripsView}
-                            sceneStyle={ NavigationStyles.listViewScene } title="Trips" {...navBarProps} />
+                            sceneStyle={ NavigationStyles.listViewScene } title="Trips" {...tripsNavBarProps} />
                         <Scene key="tripHome" component={TripHomeView} title="Trip Homepage"
                             sceneStyle={NavigationStyles.tripHomeViewScene} {...navBarProps} />
                         <Scene key="newTripHome" component={TripHomeView} title="Trip Homepage"
