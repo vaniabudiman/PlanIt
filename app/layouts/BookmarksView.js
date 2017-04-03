@@ -157,11 +157,8 @@ class BookmarksView extends Component {
         isDevMode() && alert("toggled map: " + showMap); // eslint-disable-line no-unused-expressions
     }
 
-    _handleShare (item) {   // TODO: check ListMapTemplate updated to bind entire item to onShare instead of just id
-        // Make necessary calls to share the item identified by id
-        alert("share: " + item.id);
-
-        // TODO: implement in sprint 2
+    _handleShare (item) {
+        Actions.shareForm({ shareType: "BOOKMARK", id: item.id, tripId: this.props.tripId });
     }
 
     render () {
@@ -185,7 +182,7 @@ class BookmarksView extends Component {
                 onDelete={this._handleDelete}
                 showAdd={true}
                 onAdd={this._handleAdd}
-                showShare={false}
+                showShare={true}
                 onShare={this._handleShare}
                 onClickItem={this._handleClickItem} />
         );
