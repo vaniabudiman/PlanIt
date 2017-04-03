@@ -8,6 +8,7 @@ import { AppRegistry } from "react-native";
 import store from "./core/store.js";
 import _ from "underscore";
 import TripsView from "./layouts/TripsView.js";
+import ShareListView from "./layouts/ShareListView.js";
 import { NavigationStyles } from "./styles/NavigationStyles.js";
 import UserSettings from "./components/UserSettings.js";
 import Sharing from "./components/Sharing";
@@ -56,6 +57,8 @@ export default class PlanIt extends Component {
                         <Scene key="login" component={LoginView} title="Login" hideNavBar={true} initial={true} />
                         <Scene key="signUp" component={SignUpView} title="Sign Up" hideNavBar={true} />
 
+                        <Scene key="shareList" component={ShareListView} title="Sharing" {...navBarProps}
+                            sceneStyle={ NavigationStyles.listViewScene } />
                         <Scene key="trips" component={TripsView}
                             sceneStyle={ NavigationStyles.listViewScene } title="Trips" {...tripsNavBarProps} />
                         <Scene key="tripHome" component={TripHomeView} title="Trip Homepage"
