@@ -9,6 +9,7 @@ import store from "./core/store.js";
 import _ from "underscore";
 import TripsView from "./layouts/TripsView.js";
 import ShareListView from "./layouts/ShareListView.js";
+import ShareFormView from "./layouts/ShareFormView.js";
 import { NavigationStyles } from "./styles/NavigationStyles.js";
 import UserSettings from "./components/UserSettings.js";
 import Sharing from "./components/Sharing";
@@ -58,6 +59,8 @@ export default class PlanIt extends Component {
                         <Scene key="signUp" component={SignUpView} title="Sign Up" hideNavBar={true} />
 
                         <Scene key="shareList" component={ShareListView} title="Sharing" {...navBarProps}
+                            sceneStyle={ NavigationStyles.listViewScene } />
+                        <Scene key="shareForm" component={ShareFormView} title="Share" {...navBarProps}
                             sceneStyle={ NavigationStyles.listViewScene } />
                         <Scene key="trips" component={TripsView}
                             sceneStyle={ NavigationStyles.listViewScene } title="Trips" {...tripsNavBarProps} />
