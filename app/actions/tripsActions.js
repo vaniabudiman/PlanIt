@@ -128,7 +128,10 @@ export function getTrips (tripID = null) {
         .then(response => {
             if (response.status >= 200 && response.status < 300) {
                 return response.json();
-            } else {
+            } else if (response.status === 404) {
+                let notFoundResponse = { trips: [] };
+                return notFoundResponse;
+            }else {
                 const error = new Error();
                 error.response = response;
                 dispatch(getTripsFailed(error));
