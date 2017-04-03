@@ -438,7 +438,7 @@ export default class ListMapTemplate extends Component {
                                 <Subtitle>{item.subtitle}</Subtitle>
                                 <Caption>{item.caption}</Caption>
                             </View>
-                            <View style={{ flex: 1, alignItems: "flex-end" }}>
+                            <View style={{ flex: 2, alignItems: "flex-end" }}>
                                 {this.renderRowIcons(item)}
                             </View>
                         </View>
