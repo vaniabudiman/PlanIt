@@ -16,7 +16,6 @@ import {
      } from "@shoutem/ui";
 import { DatePickerAndroid, TimePickerAndroid, Picker } from "react-native";
 
-
 /**
  * @typedef FormTemplate~InputObject.Types
  * @desc Types that an input field can take. Currently only supports text.
@@ -405,6 +404,7 @@ export default class FormTemplate extends Component {
             <View style={{ flex: 1, flexDirection: "column" }}>
                 {this.renderMapToggle()}
                 {this.renderMap()}
+                <Text style={{textAlign: 'right', paddingRight: 15, paddingTop: 10}}>*Required Inputs</Text>
                 <ListView
                     style={{ flex: 2 }}
                     data={this.props.data}

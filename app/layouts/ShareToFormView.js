@@ -45,7 +45,7 @@ class ShareToFormView extends Component {
 
     formattedInputs () {
         let inputs = [
-            { id: 1, title: "Select a trip to add this shared item to", value: this.props.trips[0].tripID,
+            { id: 1, title: "Select a trip to add this shared item to*", value: this.props.trips[0].tripID,
                 type: Types.PICKER, pickerItems: this.getPickerTrips() }
         ];
 

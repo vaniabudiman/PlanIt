@@ -60,9 +60,9 @@ class TripFormView extends Component {
     // Format input fields
     formattedInputs (trip = null) {
         let inputs = [
-            { id: 1, title: "Trip Name", value: "", type: Types.TEXT },
-            { id: 2, title: "Start Date", value: "", type: Types.DATE },
-            { id: 3, title: "End Date", value: "", type: Types.DATE },
+            { id: 1, title: "Trip Name*", value: "", type: Types.TEXT, required: true },
+            { id: 2, title: "Start Date*", value: "", type: Types.DATE },
+            { id: 3, title: "End Date*", value: "", type: Types.DATE },
         ];
 
         if (trip) {

@@ -57,18 +57,18 @@ class TransportationFormView extends Component {
     // Format input fields
     formattedInputs (transportation = null) {
         let inputs = [
-            { id: 1, title: "Type", value: "flight", type: Types.PICKER,
+            { id: 1, title: "Type*", value: "flight", type: Types.PICKER,
                 pickerItems: ["flight", "bus", "car", "train", "sea"] },
             { id: 2, title: "Operator", value: "", type: Types.TEXT },
             { id: 3, title: "Number", value: "", type: Types.TEXT },
             { id: 4, title: "Departure Address", value: "", type: Types.TEXT },
             { id: 5, title: "Arrival Address", value: "", type: Types.TEXT },
-            { id: 6, title: "Depature Date", value: "", type: Types.DATE,
+            { id: 6, title: "Depature Date*", value: "", type: Types.DATE,
                 min: this.props.tripStartDate, max: this.props.tripEndDate },
-            { id: 7, title: "Departure Time", value: "", type: Types.TIME },
-            { id: 8, title: "Arrival Date", value: "", type: Types.DATE,
+            { id: 7, title: "Departure Time*", value: "", type: Types.TIME },
+            { id: 8, title: "Arrival Date*", value: "", type: Types.DATE,
                 min: this.props.tripStartDate, max: this.props.tripEndDate },
-            { id: 9, title: "Arrival Time", value: "", type: Types.TIME },
+            { id: 9, title: "Arrival Time*", value: "", type: Types.TIME },
             
         ];
 

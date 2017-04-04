@@ -65,7 +65,8 @@ export default StyleSheet.create({
         flex: 1,
         paddingHorizontal: 10,
         fontWeight: "normal",
-        fontSize: 18
+        fontSize: 18,
+        color: "#FFF"
     },
     button: {
         backgroundColor: "#39a7a3",

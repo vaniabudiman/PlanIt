@@ -39,9 +39,9 @@ class ShareFormView extends Component {
 
     formattedInputs () {
         let inputs = [
-            { id: 1, title: "Allow edit", value: "no", type: Types.PICKER,
+            { id: 1, title: "Allow edit*", value: "no", type: Types.PICKER,
                 pickerItems: ["yes", "no"] },
-            { id: 2, title: "Share with (enter a comma separated list of usernames)", value: "", type: Types.TEXT }
+            { id: 2, title: "Share with (enter a comma separated list of usernames)*", value: "", type: Types.TEXT }
         ];
 
         return inputs;
