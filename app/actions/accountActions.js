@@ -111,7 +111,7 @@ export function signup (signupData) {
                 dispatch(signupSuccess());
                 alert("Thanks for signing up, " + signupData.name + "! You can now log in with your new account.");
             } else if (response.status === 409) {
-                alert("Username taken! Please try another.")
+                alert("Username taken! Please try another.");
             } else {
                 const error = new Error();
                 error.response = response;

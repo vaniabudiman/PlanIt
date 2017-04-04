@@ -240,8 +240,8 @@ class TripsView extends Component {
         return realm.objects("Transportation").map(function (transportation) {
             return (
                 <View style={{ paddingBottom: 5, paddingTop: 5 }}>
-                    <Title>{transportation.type}{transportation.operator ?
-                    (": " + transportation.operator) : ""}</Title>
+                    <Title>{transportation.type}{transportation.operator
+                        ? (": " + transportation.operator) : ""}</Title>
                     <Subtitle>Departure: {transportation.departureDateTime.toUTCString()}</Subtitle>
                     <Caption>Arrival: {transportation.arrivalDateTime.toUTCString()}</Caption>
                     <Divider styleName="line" />

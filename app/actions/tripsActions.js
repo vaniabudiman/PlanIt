@@ -131,7 +131,7 @@ export function getTrips (tripID = null) {
             } else if (response.status === 404) {
                 let notFoundResponse = { trips: [] };
                 return notFoundResponse;
-            }else {
+            } else {
                 const error = new Error();
                 error.response = response;
                 dispatch(getTripsFailed(error));
