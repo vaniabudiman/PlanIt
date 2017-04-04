@@ -100,15 +100,22 @@ def to_datetime(datetime_string):
         raise ve
 
 
-def notify_user(user_name, user_email):
+def notify_user(user_name, user_email, user_password=None):
     """Notify the user of changed password.
     @throws SMTPException
     """
-    subject = 'Planit password changed!'
+    if user_password:
+        subject = 'PlanIt requested password details.'
+    else:
+        subject = 'PlanIt password changed!'
     body = 'Hi %s!' % user_name
     body += '\n\n'
-    body += 'Your account password was recently changed. '
-    body += 'Just wanted to let you know!'
+    if user_password:
+        body += 'Here is the requested password details:\n'
+        body += 'password: ' + user_password
+    else:
+        body += 'Your account password was recently changed. '
+        body += 'Just wanted to let you know!'
     msg = Message(subject=subject,
                   body=body,
                   recipients=[user_email])
@@ -1415,6 +1422,33 @@ def login():
     session[KEY__LOGGED_IN] = True
     session[KEY__USERNAME] = post_userName
     return make_response('Login success.', 201)
+
+
+@app.route(VER_PATH + '/forgot', methods=[POST], strict_slashes=False)
+def forgot_password():
+    """ /:{version}/forgot
+    Route for Forgot. Notifies the requested user of their password details.
+    """
+    try:
+        req_json = get_request_json(request)
+        post_userName = str(req_json[User.KEY__USERNAME])
+    except (ResponseError, KeyError) as err:
+        return bad_request(err)
+
+    db = create_db_session()
+    user = db.query(User).filter(User.userName == post_userName).first()
+    if not user:
+        db.close()
+        return make_response('User not found.', 404)
+
+    try:
+        notify_user(user.userName, user.email, user.password)
+    except SMTPException as se:
+        return make_response('Failed to send email to this user.', 409)
+    finally:
+        db.close()
+
+    return make_response('User details have been sent.', 200)
 
 
 @app.route(VER_PATH + '/logout', methods=[POST], strict_slashes=False)

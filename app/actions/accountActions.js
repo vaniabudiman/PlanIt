@@ -6,6 +6,10 @@ export const Types = {
     LOGIN_SUCCESS: "LOGIN_SUCCESS",
     LOGIN_FAILED: "LOGIN_FAILED",
 
+    FORGOT_ATTEMPT: "FORGOT_ATTEMPT",
+    FORGOT_SUCCESS: "FORGOT_SUCCESS",
+    FORGOT_FAILED: "FORGOT_FAILED",
+
     SIGNUP_ATTEMPT: "SIGNUP_ATTEMPT",
     SIGNUP_SUCCESS: "SIGNUP_SUCCESS",
     SIGNUP_FAILED: "SIGNUP_FAILED",
@@ -27,6 +31,11 @@ export const Types = {
 export function loginAttempt () { return { type: Types.LOGIN_ATTEMPT }; }
 export function loginSuccess () { return { type: Types.LOGIN_SUCCESS }; }
 export function loginFailed (error) { return { error, type: Types.LOGIN_FAILED }; }
+
+// /forgot POST
+export function forgotAttempt () { return { type: Types.FORGOT_ATTEMPT }; }
+export function forgotSuccess () { return { type: Types.FORGOT_SUCCESS }; }
+export function forgotFailed (error) { return { error, type: Types.FORGOT_FAILED }; }
 
 // /users POST
 export function signupAttempt () { return { type: Types.SIGNUP_ATTEMPT }; }
@@ -77,6 +86,50 @@ export function login (loginData) {
         .catch(error => {
             alert("Login Failed: " + error.response.status); // TODO: remove this and do something with the fetch error
         });
+    };
+}
+
+export function buildForgotPOSTRequestURL () {
+    return apiURL + "forgot";
+}
+
+export function forgotPassword (userData) {
+    return dispatch => {
+        if (userData.userName === "") { return (alert("Please enter the Username.")); }
+        dispatch(forgotAttempt());
+        console.log("Aaaaaaaaaaaa");
+        console.log(buildForgotPOSTRequestURL());
+        fetch(buildForgotPOSTRequestURL(), {
+            method: "POST",
+            headers: {
+                Accept: "application/json",
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                userName: userData.userName,
+            }),
+        })
+            .then(response => {
+                if (response.status >= 200 && response.status < 300) {
+                    dispatch(forgotSuccess());
+                    alert("Password details sent to email of " + userData.userName + ".");
+                } else {
+                    const error = new Error();
+                    error.response = response;
+                    dispatch(forgotFailed(error));
+                    throw error;
+                }
+            })
+            .catch(error => {
+                isDevMode() && console.log(error);
+                if (error.response.status === 404) {
+                    alert("PlanIt server failed find this User.");
+                } else if (error.response.status === 409) {
+                    alert("PlanIt server failed to send password details to this User's email.");
+                } else {
+                    alert("PlanIt server failed to send password details.");
+                }
+            });
     };
 }
 
