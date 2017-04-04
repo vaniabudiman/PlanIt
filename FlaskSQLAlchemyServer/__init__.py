@@ -1273,14 +1273,66 @@ def share(permissionID=None):
                         if e is None:
                             continue
                         else:
-                            ret_dict['events'].append(e.to_dict())
+                            new_e = e.to_dict()
+                            e_trip = db.query(Trip).filter(
+                                Trip.tripID == e.tripID).first()
+                            new_e['tripOwner'] = e_trip.userName
+
+                            added_to_set = set([])
+                            trip_perms = db.query(Permissions).filter(and_(
+                                Permissions.type == PermissionsEnum.EVENT,
+                                Permissions.toUser == curr_userName,
+                                Permissions.permissionID == e.eventID)).all()
+                            for t in trip_perms:
+                                if t.toTrip is not None:
+                                    p_t = db.query(Trip).filter(
+                                        Trip.tripID == t.toTrip).first()
+                                    added_to_set.add(p_t.tripName)
+                            new_e['tripsAddedTo'] = list(added_to_set)
+
+                            shared_to = db.query(Permissions).filter(and_(
+                                Permissions.type == PermissionsEnum.EVENT,
+                                Permissions.permissionID == e.eventID)).all()
+                            shared_to_set = set([])
+                            for sp in shared_to:
+                                shared_to_set.add(sp.toUser)
+                            new_e['tripUsers'] = list(shared_to_set)
+
+                            new_e['writePermission'] = p.writeFlag
+                            ret_dict['events'].append(new_e)
                     elif p.type == PermissionsEnum.BOOKMARK:
                         b = db.query(Bookmark).filter(
                             Bookmark.bookmarkID == p.permissionID).first()
                         if b is None:
                             continue
                         else:
-                            ret_dict['bookmarks'].append(b.to_dict())
+                            new_b = b.to_dict()
+                            b_trip = db.query(Trip).filter(
+                                Trip.tripID == b.tripID).first()
+                            new_b['tripOwner'] = b_trip.userName
+
+                            added_to_set = set([])
+                            trip_perms = db.query(Permissions).filter(and_(
+                                Permissions.type == PermissionsEnum.BOOKMARK,
+                                Permissions.toUser == curr_userName,
+                                Permissions.permissionID == b.bookmarkID)).all()
+                            for t in trip_perms:
+                                if t.toTrip is not None:
+                                    p_t = db.query(Trip).filter(
+                                        Trip.tripID == t.toTrip).first()
+                                    added_to_set.add(p_t.tripName)
+                            new_b['tripsAddedTo'] = list(added_to_set)
+
+                            shared_to = db.query(Permissions).filter(and_(
+                                Permissions.type == PermissionsEnum.BOOKMARK,
+                                Permissions.permissionID == b.bookmarkID)).all()
+                            shared_to_set = set([])
+                            for sp in shared_to:
+                                shared_to_set.add(sp.toUser)
+                            new_b['tripUsers'] = list(shared_to_set)
+
+                            new_b['writePermission'] = p.writeFlag
+                            ret_dict['bookmarks'].append(new_b)
                 return make_response(jsonify(ret_dict), 200)
             finally:
                 commit_and_close(db)
