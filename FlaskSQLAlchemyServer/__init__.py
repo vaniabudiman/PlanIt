@@ -1266,7 +1266,10 @@ def share(permissionID=None):
                     return make_response(
                         'No unaccepted permissions found for given user.', 404)
                 ret_dict = {'events': [], 'bookmarks': []}
+                pending_only = request.args.get('pending', False)
                 for p in perms:
+                    if pending_only and p.toTrip:
+                        continue
                     if p.type == PermissionsEnum.EVENT:
                         e = db.query(Event).filter(
                             Event.eventID == p.permissionID).first()
