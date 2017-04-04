@@ -104,9 +104,14 @@ class TripsView extends Component {
     }
 
     _handleConnectivityChange = (isConnected) => {
-        this.setState({
-            isConnected,
-        });
+        // Must login again if going from offline -> online to create session for server requests
+        if (!this.state.isConnected && isConnected) {
+            Actions.login();
+        } else {
+            this.setState({
+                isConnected,
+            });
+        }
     }
 
     requestTrips (dispatch) {
