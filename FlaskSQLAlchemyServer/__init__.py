@@ -740,33 +740,70 @@ def events(eventID=None):
                 trip = db.query(Trip).filter(Trip.tripID == post_tripID).first()
                 if trip is None:
                     return make_response('Trip not found.', 404)
-                if trip.userName != session.get(KEY__USERNAME):
+                curr_userName = session.get(KEY__USERNAME)
+                if trip.userName != curr_userName:
                     return make_response(
                         'User not authorized to view these Events.', 401)
-                event_list = db.query(Event).filter(
-                    Event.tripID == post_tripID).all()
+                dict_key = 'events'
+                events_dict = {dict_key: []}
+                for e in db.query(Event).filter(
+                                Event.tripID == post_tripID).all():
+                    new_e = e.to_dict()
+                    new_e['tripOwner'] = None
+                    new_e['tripsAddedTo'] = []
+                    new_e['tripUsers'] = []
+                    new_e['writePermission'] = False
+                    events_dict[dict_key].append(new_e)
 
                 # Get shared events through permissions.
                 perms = db.query(Permissions).filter(and_(
                     Permissions.toTrip == post_tripID,
                     Permissions.type == PermissionsEnum.EVENT,
-                    Permissions.toUser == session.get(KEY__USERNAME))).all()
-                shared_events = [db.query(Event).filter(
-                    Event.eventID == p.permissionID).first() for p in perms]
-                event_list += shared_events
+                    Permissions.toUser == curr_userName)).all()
+                for p in perms:
+                    se = db.query(Event).filter(
+                        Event.eventID == p.permissionID).first().to_dict()
+                    se_tripID = se[Event.KEY__TRIPID]
+                    se_eventID = se[Event.KEY__ID]
+                    trip = db.query(Trip).filter(
+                        Trip.tripID == se_tripID).first()
+                    se['tripOwner'] = trip.userName
+
+                    added_to_set = set([])
+                    trip_perms = db.query(Permissions).filter(and_(
+                        Permissions.type == PermissionsEnum.EVENT,
+                        Permissions.toUser == curr_userName,
+                        Permissions.permissionID == se_eventID)).all()
+                    for t in trip_perms:
+                        if t.toTrip is not None:
+                            p_t = db.query(Trip).filter(
+                                Trip.tripID == t.toTrip).first()
+                            added_to_set.add(p_t.tripName)
+                    if trip.userName == curr_userName:
+                        added_to_set.add(trip.tripName)
+                    se['tripsAddedTo'] = list(added_to_set)
+
+                    shared_to = db.query(Permissions).filter(and_(
+                        Permissions.type == PermissionsEnum.EVENT,
+                        Permissions.permissionID == se_eventID)).all()
+                    shared_to_set = set([])
+                    for sp in shared_to:
+                        shared_to_set.add(sp.toUser)
+                    se['tripUsers'] = list(shared_to_set)
+
+                    se['writePermission'] = p.writeFlag
+                    events_dict[dict_key].append(se)
 
                 # Functional decision to omit Transportation events.
                 transports = db.query(Transportation).all()
                 transports = [t.eventID for t in transports]
-                event_list = list(
-                    filter(lambda a: a.eventID not in transports,
-                           event_list))
+                events_dict[dict_key] = list(
+                    filter(lambda a: a[Event.KEY__ID] not in transports,
+                           events_dict[dict_key]))
 
-                if len(event_list) == 0:
+                if len(events_dict[dict_key]) == 0:
                     return make_response('No Events found for the given Trip.',
                                          404)
-                events_dict = {
-                    'events': [event.to_dict() for event in event_list]}
                 return make_response(jsonify(events_dict), 200)
             finally:
                 commit_and_close(db)
