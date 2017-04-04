@@ -122,6 +122,20 @@ class BookmarksView extends Component {
         });
     }
 
+    getCaptions (bookmark) {
+        // tripOwner set means this was shared to you by someone else
+        if (bookmark.tripOwner) {
+            return [
+                bookmark.type,
+                "Owner: " + bookmark.tripOwner,
+                "Users shared with: " + bookmark.tripUsers.join(", "),
+                "Can edit: " + (bookmark.writePermission ? "Yes" : "No")
+            ];
+        } else {
+            return bookmark.type;
+        }
+    }
+
     formattedBookmarks () {
         return this.state.bookmarks.map((bookmark) => {
             return {
@@ -129,9 +143,11 @@ class BookmarksView extends Component {
                 id: bookmark.bookmarkID,
                 placeId: bookmark.placeID,
                 subtitle: bookmark.address,
-                caption: bookmark.type,
+                caption: this.getCaptions(bookmark),
                 lat: bookmark.lat.toString(),
-                lon: bookmark.lon.toString()
+                lon: bookmark.lon.toString(),
+                hideShare: bookmark.tripOwner,
+                hideEdit: bookmark.tripOwner && !bookmark.writePermission
             };
         });
     }
