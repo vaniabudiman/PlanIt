@@ -13,7 +13,7 @@ import {
 import { Actions, ActionConst } from "react-native-router-flux";
 import Icon from "react-native-vector-icons/FontAwesome";
 import LoginStyles from "../styles/LoginStyles.js";
-import { login } from "../actions/accountActions.js";
+import { login, forgotPassword } from "../actions/accountActions.js";
 import FETCH_STATUS from "../constants/fetchStatusConstants.js";
 import FORM from "../constants/formConstants.js";
 import { connect } from "react-redux";
@@ -40,6 +40,7 @@ class LoginView extends Component {
 
         // Bind Redux action creators
         this._login = () => this.props.dispatch(login(this.state));
+        this._forgotPassword = () => this.props.dispatch(forgotPassword(this.state));
 
         this._handleConnectionInfoChange = this._handleConnectionInfoChange.bind(this);
     }
@@ -138,7 +139,7 @@ class LoginView extends Component {
                         </View>
                         <TouchableOpacity activeOpacity={.5}>
                             <View>
-                                <Text style={LoginStyles.forgotPasswordText}>Forgot Password?</Text>
+                                <Text style={LoginStyles.forgotPasswordText} onPress={this._forgotPassword}>Forgot Password?</Text>
                             </View>
                         </TouchableOpacity>
                         <TouchableOpacity activeOpacity={.5} onPress={this._login}>

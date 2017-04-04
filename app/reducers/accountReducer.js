@@ -3,6 +3,7 @@ import FETCH_STATUS from "../constants/fetchStatusConstants.js";
 
 const initialState = {
     loginStatus: "",
+    forgotStatus: "",
     signupStatus: "",
     getUserStatus: "",
     putUserStatus: "",
@@ -33,6 +34,16 @@ export default function (state = initialState, action) {
             break;
         case Types.LOGIN_FAILED:
             nextState = { ...state, loginStatus: FETCH_STATUS.FAILED };
+            break;
+        // /forgot POST
+        case Types.FORGOT_ATTEMPT:
+            nextState = { ...state, forgotStatus: FETCH_STATUS.ATTEMPTING };
+            break;
+        case Types.FORGOT_SUCCESS:
+            nextState = { ...state, forgotStatus: FETCH_STATUS.SUCCESS };
+            break;
+        case Types.FORGOT_FAILED:
+            nextState = { ...state, forgotStatus: FETCH_STATUS.FAILED };
             break;
         // /users POST
         case Types.SIGNUP_ATTEMPT:
