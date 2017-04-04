@@ -86,7 +86,7 @@ class TripsView extends Component {
         });
     }
 
-    componentDidMount () {
+    componentWillMount () {
         NetInfo.isConnected.addEventListener(
             "change",
             this._handleConnectivityChange
@@ -267,10 +267,12 @@ class TripsView extends Component {
 
     render () {
         let tripsView = null;
-        if (this.state.isConnected) {
-            tripsView = this.renderOnlineView();
-        } else {
-            tripsView = this.renderOfflineView();
+        if (this.state.isConnected !== null) {
+            if (this.state.isConnected) {
+                tripsView = this.renderOnlineView();
+            } else {
+                tripsView = this.renderOfflineView();
+            }
         }
         return tripsView;
     }
