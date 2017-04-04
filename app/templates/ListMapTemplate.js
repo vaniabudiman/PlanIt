@@ -315,7 +315,7 @@ export default class ListMapTemplate extends Component {
                     <View>
                         { /* TODO: fix alignment of label & toggle to match mocks */ }
                         <Text style={{ fontSize: 20, paddingLeft: 15, paddingTop: 5 }}>
-                            Map
+                            Map&nbsp;
                             <Icon name={this.state.showMap ? "toggle-on" : "toggle-off" } size={20} />
                         </Text>
                     </View>
@@ -348,7 +348,7 @@ export default class ListMapTemplate extends Component {
                     <View>
                         { /* TODO: fix alignment of label & toggle to match mocks */ }
                         <Text style={{ fontSize: 20, paddingLeft: 15, paddingTop: 5 }}>
-                            Calendar
+                            Calendar&nbsp;
                             <Icon name={this.state.showCalendar ? "toggle-on" : "toggle-off" } size={20} />
                         </Text>
                         

@@ -90,7 +90,7 @@ export function signup (signupData) {
         if (signupData.userName === "") { return (alert("Please enter a Username!")); }
         if (signupData.email === "") { return (alert("Please enter an Email!")); }
         if (signupData.password === "") { return (alert("Please enter a Password!")); }
-        if (signupData.homeCurrency === "") { return (alert("Please select a Home Currency!")); }
+        //if (signupData.homeCurrency === "") { return (alert("Please select a Home Currency!")); }
         dispatch(signupAttempt());
         fetch(buildSignupPOSTRequestURL(), {
             method: "POST",
@@ -103,13 +103,15 @@ export function signup (signupData) {
                 password: signupData.password,
                 name: signupData.name,
                 email: signupData.email,
-                homeCurrency: signupData.homeCurrency,
+                homeCurrency: "CAD",
             }),
         })
         .then(response => {
             if (response.status >= 200 && response.status < 300) {
                 dispatch(signupSuccess());
-                alert("Signup Success. Try logging in now " + signupData.userName + "!");
+                alert("Thanks for signing up, " + signupData.name + "! You can now log in with your new account.");
+            } else if (response.status === 409) {
+                alert("Username taken! Please try another.")
             } else {
                 const error = new Error();
                 error.response = response;

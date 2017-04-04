@@ -87,7 +87,8 @@ export default StyleSheet.create({
         flex: 1,
         paddingHorizontal: 10,
         fontWeight: "normal",
-        fontSize: 16
+        fontSize: 16,
+        color: "#FFF"
     },
     picker: {
         width,

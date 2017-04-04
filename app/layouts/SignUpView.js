@@ -35,7 +35,7 @@ class SignUpView extends Component {
             password: "",
             name: "",
             email: "",
-            homeCurrency: "",
+            //homeCurrency: "",
         };
 
         this.requireAuthentication(this.props.signupStatus);
@@ -129,7 +129,7 @@ class SignUpView extends Component {
                                     value={this.state.password}
                                     underlineColorAndroid="rgba(250, 250, 250, 0.8)" />
                         </View>
-                        <View style={SignUpStyles.inputContainer}>
+                        {/*<View style={SignUpStyles.inputContainer}>
                             <View style={SignUpStyles.iconContainer}>
                                 <Icon name="dollar" style={SignUpStyles.inputIcon} resizeMode="contain" />
                             </View>
@@ -139,14 +139,13 @@ class SignUpView extends Component {
                                         this.setState({ currency: curr });
                                         this.setState({ homeCurrency: curr });
                                     }}>
-                                    {/* TODO: populate w/ available currencies */}
                                     <Picker.Item label="Select Home Currency" value="" />
                                     <Picker.Item label="USD (United States)" value="usd" />
                                     <Picker.Item label="CAD (Canadian)" value="cad" />
                                     <Picker.Item label="GBP (British Pounds)" value="gpb" />
                                     <Picker.Item label="EUR (Euro)" value="eur" />
                             </Picker>
-                        </View>
+                        </View>*/}
                     </View>
                     <View style={SignUpStyles.footerContainer}>
                         <TouchableOpacity onPress={this._signup}>
