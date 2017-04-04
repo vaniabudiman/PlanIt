@@ -404,7 +404,7 @@ export default class FormTemplate extends Component {
             <View style={{ flex: 1, flexDirection: "column" }}>
                 {this.renderMapToggle()}
                 {this.renderMap()}
-                <Text style={{textAlign: 'right', paddingRight: 15, paddingTop: 10}}>*Required Inputs</Text>
+                <Text style={{ textAlign: "right", paddingRight: 15, paddingTop: 10 }}>*Required Inputs</Text>
                 <ListView
                     style={{ flex: 2 }}
                     data={this.props.data}
