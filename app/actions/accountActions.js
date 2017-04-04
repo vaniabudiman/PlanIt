@@ -97,8 +97,8 @@ export function forgotPassword (userData) {
     return dispatch => {
         if (userData.userName === "") { return (alert("Please enter the Username.")); }
         dispatch(forgotAttempt());
-        console.log("Aaaaaaaaaaaa");
-        console.log(buildForgotPOSTRequestURL());
+        // console.log("Aaaaaaaaaaaa");
+        // console.log(buildForgotPOSTRequestURL());
         fetch(buildForgotPOSTRequestURL(), {
             method: "POST",
             headers: {
@@ -121,7 +121,7 @@ export function forgotPassword (userData) {
                 }
             })
             .catch(error => {
-                isDevMode() && console.log(error);
+                isDevMode() && console.log(error);  // eslint-disable-line
                 if (error.response.status === 404) {
                     alert("PlanIt server failed find this User.");
                 } else if (error.response.status === 409) {
