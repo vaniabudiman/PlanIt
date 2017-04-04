@@ -67,3 +67,8 @@ FlaskSQLAlchemyServer/.coverage
 fastlane/report.xml
 fastlane/Preview.html
 fastlane/screenshots
+
+# Realm
+default.realm
+default.realm.lock
+default.realm.note
