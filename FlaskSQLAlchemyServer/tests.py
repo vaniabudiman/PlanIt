@@ -81,6 +81,7 @@ event1_remTime = None
 event1_addr = None
 event1_shared = False
 event1_tripID = 1
+event1_note = 'this is event1note!'
 eventx_eventID = tripx_tripID
 
 # /events
@@ -97,6 +98,7 @@ event2_remTime = None
 event2_addr = None
 event2_shared = False
 event2_tripID = 1
+event2_note = 'eeee2222vent note2.'
 trip2_tripID = 2
 trip2_tripName = 'Trip1 Name'
 trip2_active = True
@@ -147,11 +149,11 @@ def common_setup():
                 Event(event1_eventID, event1_eventName, event1_startDate,
                       event1_endDate, event1_lat, event1_lon, event1_remFlag,
                       event1_remTime, event1_addr, event1_shared,
-                      event1_tripID),
+                      event1_tripID, event1_note),
                 Event(event2_eventID, event2_eventName, event2_startDate,
                       event2_endDate, event2_lat, event2_lon, event2_remFlag,
                       event2_remTime, event2_addr, event2_shared,
-                      event2_tripID),
+                      event2_tripID, event2_note),
                 Trip(trip2_tripID, trip2_tripName, trip2_active,
                      trip2_startDate, trip2_endDate, trip2_userName),
                 Bookmark(bookmark1_bookmarkID, bookmark1_lat,
@@ -1087,7 +1089,7 @@ class Transportations(TestCase):
         db.add(Event(self.transporta_eventID, event1_eventName,
                      event1_startDate, event1_endDate, event1_lat, event1_lon,
                      event1_remFlag, event1_remTime, event1_addr,
-                     event1_shared, trip1_tripID + 1))
+                     event1_shared, trip1_tripID + 1, event1_note))
         db.commit()
         db.close()
         rv = self.app.get(transport_path, query_string={
@@ -1263,7 +1265,7 @@ class Transportations(TestCase):
         db.add(Event(self.transporta_eventID, event1_eventName,
                      event1_startDate, event1_endDate, event1_lat, event1_lon,
                      event1_remFlag, event1_remTime, event1_addr, event1_shared,
-                     tripx_tripID))
+                     tripx_tripID, event1_note))
         db.commit()
         db.close()
         transport_pathx = VER_PATH + '/transportation/' + str(
@@ -1328,6 +1330,7 @@ class Events(TestCase):
     eventa_addr = None
     eventa_shared = False
     eventa_tripID = 1
+    eventa_note = 'AAAAA eventa note...'
 
     eventx_eventID = 4
     eventx_eventName = 'EventX Name'
@@ -1342,6 +1345,7 @@ class Events(TestCase):
     eventx_addr = None
     eventx_shared = False
     eventx_tripID = 1
+    eventx_note = 'eventX notex.!'
 
     def setUp(self):
         # Create a new test client instance.
@@ -1354,7 +1358,7 @@ class Events(TestCase):
                    self.eventx_lat, self.eventx_lon,
                    self.eventx_remFlag, self.eventx_remTime,
                    self.eventx_addr, self.eventx_shared,
-                   self.eventx_tripID)
+                   self.eventx_tripID, self.eventx_note)
         db.add(ex)
         db.commit()
         db.close()
@@ -1419,7 +1423,8 @@ class Events(TestCase):
                        Event.KEY__REMTIME: self.eventa_remTime,
                        Event.KEY__ADDR: self.eventa_addr,
                        Event.KEY__SHARED: self.eventa_shared,
-                       Event.KEY__TRIPID: self.eventa_tripID}
+                       Event.KEY__TRIPID: self.eventa_tripID,
+                       Event.KEY__NOTE: self.eventa_note}
         data['events'] = [eventa_dict]
         rv = self.app.post(events_path, data=json.dumps(data),
                            content_type='application/json')
@@ -1448,7 +1453,8 @@ class Events(TestCase):
                             Event.KEY__REMTIME: self.eventa_remTime,
                             Event.KEY__ADDR: self.eventa_addr,
                             Event.KEY__SHARED: self.eventa_shared,
-                            Event.KEY__TRIPID: self.eventa_tripID}
+                            Event.KEY__TRIPID: self.eventa_tripID,
+                            Event.KEY__NOTE: self.eventa_note}
         eventa_dict = copy(orig_eventa_dict)
         eventa_dict.pop(Event.KEY__EVENTNAME)
         data['events'] = [eventa_dict]
@@ -1558,7 +1564,7 @@ class Events(TestCase):
                      self.eventx_lat, self.eventx_lon,
                      self.eventx_remFlag, self.eventx_remTime,
                      self.eventx_addr, self.eventx_shared,
-                     tripx_tripID))
+                     tripx_tripID, self.eventx_note))
         db.commit()
         db.close()
         rv = login_helper_user1(self.app)
@@ -1692,7 +1698,7 @@ class Events(TestCase):
                      self.eventx_lat, self.eventx_lon,
                      self.eventx_remFlag, self.eventx_remTime,
                      self.eventx_addr, self.eventx_shared,
-                     tripx_tripID))
+                     tripx_tripID, self.eventx_note))
         db.commit()
         db.close()
         rv = self.app.put(event_pathx, data=json.dumps(data),

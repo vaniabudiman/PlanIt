@@ -419,7 +419,7 @@ def transportation(transportationID=None):
                     to_datetime(transport[Transportation.KEY__ARRIVALDATE]),
                     None, None, None, None,
                     transport.get(Transportation.KEY__DEPARTUREADDR),
-                    None, post_tripID)
+                    None, post_tripID, None)
                 new_transport = Transportation(
                     max_transport_id,
                     TransportEnum(transport[Transportation.KEY__TYPE]),
@@ -722,7 +722,8 @@ def events(eventID=None):
                           None,
                           event.get(Event.KEY__ADDR),
                           False,
-                          post_tripID))
+                          post_tripID,
+                          event.get(Event.KEY__NOTE)))
         except (KeyError, ValueError) as err:
             commit_and_close(db)
             return bad_request(err)
@@ -915,6 +916,12 @@ def events(eventID=None):
             try:
                 # Optional address parameter.
                 event.address = str(req_json[Event.KEY__ADDR])
+            except KeyError:
+                pass
+
+            try:
+                # Optional note parameter.
+                event.note = str(req_json[Event.KEY__NOTE])
             except KeyError:
                 pass
 
@@ -1509,18 +1516,19 @@ def setup_dummy_data():
     event1 = Event(1, 'test',
                    to_datetime('Mon, 11 Aug 2013 15:15:15 GMT'),
                    to_datetime('Mon, 11 Aug 2013 16:16:16 GMT'),
-                   None, None, True, None, None, False, 1)
+                   None, None, True, None, None, False, 1, '!event 1 note.')
     event2 = Event(2, 'testVancouver',
                    to_datetime('Tue, 12 Aug 2013 17:17:17 GMT'),
                    to_datetime('Tue, 12 Aug 2013 18:18:18 GMT'),
                    49.267132, -122.968941, True, None,
-                   '6511 Sumas Dr Burnaby,BC V5B 2V1', False, 1)
+                   '6511 Sumas Dr Burnaby,BC V5B 2V1', False, 1, 'event 2 note')
     event3 = Event(3, 'testAustralia',
                    to_datetime('Tue, 12 Aug 2013 17:17:17 GMT'),
                    to_datetime('Tue, 12 Aug 2013 18:18:18 GMT'),
                    -33.870943, 151.190311, True,
                    to_datetime('Tue, 12 Aug 2013 17:00:00 GMT'),
-                   'Western Distributor Pyrmont NSW 2009 Australia', False, 1)
+                   'Western Distributor Pyrmont NSW 2009 Australia', False, 1,
+                   'event33333 notteeee3...')
     db_session.add_all([event1, event2, event3])
     # Example locations:
     bookmark1 = Bookmark(1, -33.866891, 151.200814,
@@ -1539,7 +1547,7 @@ def setup_dummy_data():
     e5 = Event(5, 'Transportation: bus',
                to_datetime('Mon, 11 Aug 2013 15:15:15 GMT'),
                to_datetime('Mon, 11 Aug 2013 16:16:16 GMT'),
-               None, None, True, None, None, False, 1)
+               None, None, True, None, None, False, 1, '5even5t note555555.')
     t1 = Transportation(1, TransportEnum.BUS, None, None, None, None, 5)
     p4 = Permissions(5, PermissionsEnum.EVENT, True, 'user2', 2)
     db_session.add_all([e5, t1, p4])
