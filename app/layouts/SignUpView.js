@@ -8,7 +8,7 @@ import {
   Image,
   TextInput,
   TouchableOpacity,
-  Picker
+//  Picker
 } from "react-native";
 import { Actions, ActionConst } from "react-native-router-flux";
 import Icon from "react-native-vector-icons/FontAwesome";

@@ -260,7 +260,8 @@ class EventsMapView extends Component {
                 loadingData={
                     (this.props.eventsGETStatus === FETCH_STATUS.ATTEMPTING) ||
                     (this.props.eventDELETEStatus === FETCH_STATUS.ATTEMPTING)
-                }                enableSearch={true}
+                }
+                enableSearch={true}
                 onSearch={this._handleSearch}
                 enableMap={true}
                 onToggleMap={this._handleToggleMap}
