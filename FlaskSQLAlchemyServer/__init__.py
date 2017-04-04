@@ -1007,6 +1007,9 @@ def bookmarks(bookmarkID=None):
                 trip = db.query(Trip).filter(Trip.tripID == post_tripID).first()
                 if trip is None:
                     return make_response('Trip not found.', 404)
+                if trip.userName != session.get(KEY__USERNAME):
+                    return make_response(
+                        'User not authorized to view these Bookmarks.', 401)
                 dict_key = 'bookmarks'
                 bookmarks_dict = {dict_key: []}
                 for bm in db.query(Bookmark).filter(
@@ -1061,9 +1064,6 @@ def bookmarks(bookmarkID=None):
                 if len(bookmarks_dict[dict_key]) == 0:
                     return make_response(
                         'No Bookmarks found for the given Trip.', 404)
-                if trip.userName != session.get(KEY__USERNAME):
-                    return make_response(
-                        'User not authorized to view these Bookmarks.', 401)
                 return make_response(jsonify(bookmarks_dict), 200)
             finally:
                 commit_and_close(db)
