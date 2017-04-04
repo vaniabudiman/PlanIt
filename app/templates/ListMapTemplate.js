@@ -28,8 +28,8 @@ import CalendarPicker from "react-native-calendar-picker";
  *    Title of the list item.
  * @property {string} subtitle
  *    Subtitle for this list item.
- * @property {string} caption
- *    Caption for this list item.
+ * @property {string|array<string>} caption
+ *    Caption(s) for this list item.
  * @property {ListMapTemplate~MapItemObject} [mapDetails]
  *    Optional map item object that holds info for rendering item on the map.
  *          TODO: Currently nothing in the template makes us of this property.
@@ -198,6 +198,10 @@ export default class ListMapTemplate extends Component {
             id: React.PropTypes.oneOfType([React.PropTypes.number, React.PropTypes.string]),
             title: React.PropTypes.string,
             subtitle: React.PropTypes.string,
+            caption: React.PropTypes.oneOfType([
+                React.PropTypes.string,
+                React.PropTypes.arrayOf(React.PropTypes.string)
+            ]),
             lat: React.PropTypes.string,
             lon: React.PropTypes.string
         })).isRequired,
@@ -395,7 +399,7 @@ export default class ListMapTemplate extends Component {
             );
         }
 
-        if (this.props.showEdit) {
+        if (this.props.showEdit && !item.hideEdit) {
             icons.push(
                 <TouchableOpacity key={"icon-edit-" + item.id} onPress={this.props.onEdit.bind(null, item)}>
                     <Icon name="edit" style={ListViewStyles.optionIcons} size={20} />
@@ -416,7 +420,7 @@ export default class ListMapTemplate extends Component {
                 </TouchableOpacity>
             );
         }
-        if (this.props.showShare) {
+        if (this.props.showShare && !item.hideShare) {
             icons.push(
                 <TouchableOpacity key={"icon-share-" + item.id} onPress={this.props.onShare.bind(null, item)}>
                     <Icon name="share-alt" style={ListViewStyles.optionIcons} size={20} />
@@ -425,6 +429,16 @@ export default class ListMapTemplate extends Component {
         }
 
         return <View styleName="horizontal">{icons}</View>;
+    }
+
+    renderCaptions (captions) {
+        if (Array.isArray(captions)) {
+            return captions.map((caption, i) => {
+                return <Caption key={i}>{caption}</Caption>;
+            });
+        } else {
+            return <Caption>{captions}</Caption>;
+        }
     }
 
     renderRow (item) {
@@ -436,7 +450,7 @@ export default class ListMapTemplate extends Component {
                             <View styleName="vertical" style={{ flex: 5 }}>
                                 <Title>{item.title}</Title>
                                 <Subtitle>{item.subtitle}</Subtitle>
-                                <Caption>{item.caption}</Caption>
+                                {this.renderCaptions(item.caption)}
                             </View>
                             <View style={{ flex: 2, alignItems: "flex-end" }}>
                                 {this.renderRowIcons(item)}

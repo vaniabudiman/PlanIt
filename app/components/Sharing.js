@@ -20,7 +20,7 @@ class Sharing extends Component {
     }
 
     requestShared (dispatch) {
-        dispatch(getShared());
+        dispatch(getShared(true));
     }
 
     render () {

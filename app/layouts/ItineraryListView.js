@@ -116,6 +116,20 @@ class ItineraryListView extends Component {
         dispatch(getEvents(tripId));
     }
 
+    getCaptions (event) {
+        // tripOwner set means this was shared to you by someone else
+        if (event.tripOwner) {
+            return [
+                "Ends: " + new Date(event.endDateTime + " UTC"),
+                "Owner: " + event.tripOwner,
+                "Users shared with: " + event.tripUsers.join(", "),
+                "Can edit: " + (event.writePermission ? "Yes" : "No")
+            ];
+        } else {
+            return "Ends: " + new Date(event.endDateTime + " UTC");
+        }
+    }
+
     formattedEvents () {
         return this.state.events.map((event) => {
             return {
@@ -123,8 +137,12 @@ class ItineraryListView extends Component {
                 id: event.eventID,
                 reminderFlag: event.reminderFlag,
                 subtitle: "Begins: " + new Date(event.startDateTime + " UTC"),  // datetimes stored as UTC in DB - need to convert to local
-                caption: "Ends: " + new Date(event.endDateTime + " UTC"),
-                event: event
+                caption: this.getCaptions(event),
+                event: event,
+                tripOwner: event.tripOwner,
+                writePermission: event.writePermission,
+                hideShare: event.tripOwner,
+                hideEdit: event.tripOwner && !event.writePermission
             };
         });
     }
@@ -162,7 +180,8 @@ class ItineraryListView extends Component {
             tripId: this.props.tripId,
             event: item,
             tripStartDate: this.props.tripStartDate,
-            tripEndDate: this.props.tripEndDate
+            tripEndDate: this.props.tripEndDate,
+            allowUpdate: item.tripOwner ? item.writePermission : true
         });
     }
 

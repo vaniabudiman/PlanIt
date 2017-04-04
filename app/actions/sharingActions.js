@@ -94,8 +94,11 @@ export function updateSharedFailed (error) {
     };
 }
 
-export function buildGETRequestURL () {
-    return apiURL + "share";
+export function buildGETRequestURL (isPending) {
+    let rootURL = apiURL + "share";
+    let query = isPending ? "?pending=true" : "";
+
+    return rootURL + query;
 }
 
 export function buildPOSTRequestURL () {
@@ -110,10 +113,10 @@ export function buildDELETERequestURL (permissionId) {
     return apiURL + "share/" + permissionId;
 }
 
-export function getShared () {
+export function getShared (isPending = false) {
     return dispatch => {
         dispatch(getSharedAttempt());
-        fetch(buildGETRequestURL(), {
+        fetch(buildGETRequestURL(isPending), {
             method: "GET",
             headers: {
                 Accept: "application/json",
