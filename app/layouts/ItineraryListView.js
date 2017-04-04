@@ -216,7 +216,7 @@ class ItineraryListView extends Component {
     renderEvents () {
         return realm.objects("Event").map((event) => {
             return (
-                <View style={{ paddingBottom: 5 }}>
+                <View style={{ paddingBottom: 5 }} key={event.eventID}>
                     <Title>Name: {event.eventName}</Title>
                     <Subtitle>Start: {JSON.stringify(event.startDateTime)}</Subtitle>
                     <Caption>End: {JSON.stringify(event.endDateTime)}</Caption>

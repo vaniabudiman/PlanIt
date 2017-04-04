@@ -206,7 +206,7 @@ class TripsView extends Component {
     renderEvents () {
         return realm.objects("Event").map((event) => {
             return (
-                <View style={{ paddingBottom: 5 }}>
+                <View style={{ paddingBottom: 5 }} key={event.eventID}>
                     <Title>Event: {event.eventName}</Title>
                     <Subtitle>Start: {event.startDateTime.toUTCString()}</Subtitle>
                     <Caption>End: {event.endDateTime.toUTCString()}</Caption>
@@ -239,7 +239,7 @@ class TripsView extends Component {
     renderTransportation () {
         return realm.objects("Transportation").map(function (transportation) {
             return (
-                <View style={{ paddingBottom: 5, paddingTop: 5 }}>
+                <View style={{ paddingBottom: 5, paddingTop: 5 }} key={transportation.transportationID}>
                     <Title>{transportation.type}{transportation.operator
                         ? (": " + transportation.operator) : ""}</Title>
                     <Subtitle>Departure: {transportation.departureDateTime.toUTCString()}</Subtitle>

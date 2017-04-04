@@ -113,7 +113,7 @@ class TransportationView extends Component {
     renderTransportation () {
         return realm.objects("Transportation").map(function (transportation) {
             return (
-                <View style={{ paddingBottom: 5, paddingTop: 5 }}>
+                <View style={{ paddingBottom: 5, paddingTop: 5 }} key={transportation.transportationID}>
                     <Title>{transportation.type}{transportation.operator
                         ? (": " + transportation.operator) : ""}</Title>
                     <Subtitle>Departure: {transportation.departureDateTime.toUTCString()}</Subtitle>
