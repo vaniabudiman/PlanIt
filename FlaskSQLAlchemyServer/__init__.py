@@ -1007,27 +1007,63 @@ def bookmarks(bookmarkID=None):
                 trip = db.query(Trip).filter(Trip.tripID == post_tripID).first()
                 if trip is None:
                     return make_response('Trip not found.', 404)
-                bookmark_list = db.query(Bookmark).filter(
-                    Bookmark.tripID == post_tripID).all()
+                dict_key = 'bookmarks'
+                bookmarks_dict = {dict_key: []}
+                for bm in db.query(Bookmark).filter(
+                                Bookmark.tripID == post_tripID).all():
+                    new_bm = bm.to_dict()
+                    new_bm['tripOwner'] = None
+                    new_bm['tripsAddedTo'] = []
+                    new_bm['tripUsers'] = []
+                    new_bm['writePermission'] = False
+                    bookmarks_dict[dict_key].append(new_bm)
 
                 # Get shared bookmarks through permissions.
+                curr_userName = session.get(KEY__USERNAME)
                 perms = db.query(Permissions).filter(and_(
                     Permissions.toTrip == post_tripID,
                     Permissions.type == PermissionsEnum.BOOKMARK,
-                    Permissions.toUser == session.get(KEY__USERNAME))).all()
-                shared_bookmarks = [db.query(Bookmark).filter(
-                    Bookmark.bookmarkID == p.permissionID).first() for p in
-                                    perms]
-                bookmark_list += shared_bookmarks
+                    Permissions.toUser == curr_userName)).all()
+                for p in perms:
+                    sbm = db.query(Bookmark).filter(
+                        Bookmark.bookmarkID == p.permissionID).first().to_dict()
+                    sbm_tripID = sbm[Bookmark.KEY__TRIPID]
+                    sbm_bookmarkID = sbm[Bookmark.KEY__ID]
+                    trip = db.query(Trip).filter(
+                        Trip.tripID == sbm_tripID).first()
+                    sbm['tripOwner'] = trip.userName
 
-                if len(bookmark_list) == 0:
+                    added_to_set = set([])
+                    trip_perms = db.query(Permissions).filter(and_(
+                        Permissions.type == PermissionsEnum.BOOKMARK,
+                        Permissions.toUser == curr_userName,
+                        Permissions.permissionID == sbm_bookmarkID)).all()
+                    for t in trip_perms:
+                        if t.toTrip is not None:
+                            p_t = db.query(Trip).filter(
+                                Trip.tripID == t.toTrip).first()
+                            added_to_set.add(p_t.tripName)
+                    if trip.userName == curr_userName:
+                        added_to_set.add(trip.tripName)
+                    sbm['tripsAddedTo'] = list(added_to_set)
+
+                    shared_to = db.query(Permissions).filter(and_(
+                        Permissions.type == PermissionsEnum.BOOKMARK,
+                        Permissions.permissionID == sbm_bookmarkID)).all()
+                    shared_to_set = set([])
+                    for sp in shared_to:
+                        shared_to_set.add(sp.toUser)
+                    sbm['tripUsers'] = list(shared_to_set)
+
+                    sbm['writePermission'] = p.writeFlag
+                    bookmarks_dict[dict_key].append(sbm)
+
+                if len(bookmarks_dict[dict_key]) == 0:
                     return make_response(
                         'No Bookmarks found for the given Trip.', 404)
                 if trip.userName != session.get(KEY__USERNAME):
                     return make_response(
                         'User not authorized to view these Bookmarks.', 401)
-                bookmarks_dict = {
-                    'bookmarks': [bm.to_dict() for bm in bookmark_list]}
                 return make_response(jsonify(bookmarks_dict), 200)
             finally:
                 commit_and_close(db)
