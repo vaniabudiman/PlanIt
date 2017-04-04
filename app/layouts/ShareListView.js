@@ -52,7 +52,12 @@ class ShareListView extends Component {
                 id: event.eventID,
                 reminderFlag: event.reminderFlag,
                 subtitle: "Begins: " + new Date(event.startDateTime + " UTC"),  // datetimes stored as UTC in DB - need to convert to local
-                caption: "Ends: " + new Date(event.endDateTime + " UTC"),
+                caption: [
+                    "Ends: " + new Date(event.endDateTime + " UTC"),
+                    "Owner: " + event.tripOwner,
+                    "Users shared with: " + event.tripUsers.join(", "),
+                    "Can edit: " + (event.writePermission ? "Yes" : "No")
+                ],
                 event: event,
                 type: "EVENT"
             };
@@ -66,7 +71,12 @@ class ShareListView extends Component {
                 id: bookmark.bookmarkID,
                 placeId: bookmark.placeID,
                 subtitle: bookmark.address,
-                caption: bookmark.type,
+                caption: [
+                    bookmark.type,
+                    "Owner: " + bookmark.tripOwner,
+                    "Users shared with: " + bookmark.tripUsers.join(", "),
+                    "Can edit: " + (bookmark.writePermission ? "Yes" : "No")
+                ],
                 lat: bookmark.lat.toString(),
                 lon: bookmark.lon.toString(),
                 type: "BOOKMARK"
