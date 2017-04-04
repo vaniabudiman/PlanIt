@@ -260,6 +260,7 @@ class Event(base):
                                ondelete=CASCADE,
                                onupdate=CASCADE),
                     nullable=False)
+    note = Column(String(VARCHAR_LEN))
 
     # Relationships:
     bookmarks = relationship('Bookmark', cascade=CASCADE_OPTIONS,
@@ -270,8 +271,8 @@ class Event(base):
     # eventNotes = relationship('EventNote', cascade=CASCADE_OPTIONS,
     #                           backref='event', passive_updates=False)
 
-    def __init__(self, eventID, eventName, startDateTime, endDateTime,
-                 lat, lon, reminderFlag, reminderTime, address, shared, tripID):
+    def __init__(self, eventID, eventName, startDateTime, endDateTime, lat, lon,
+                 reminderFlag, reminderTime, address, shared, tripID, note):
         self.eventID = eventID
         self.eventName = eventName
         self.startDateTime = startDateTime
@@ -289,6 +290,7 @@ class Event(base):
         else:
             self.shared = shared
         self.tripID = tripID
+        self.note = note
 
     # Event keys
     KEY__ID = 'eventID'
@@ -302,6 +304,7 @@ class Event(base):
     KEY__ADDR = 'address'
     KEY__SHARED = 'shared'
     KEY__TRIPID = 'tripID'
+    KEY__NOTE = 'note'
 
     def to_dict(self):
         return {self.KEY__ID: self.eventID,
@@ -314,7 +317,8 @@ class Event(base):
                 self.KEY__REMTIME: self.reminderTime,
                 self.KEY__ADDR: self.address,
                 self.KEY__SHARED: self.shared,
-                self.KEY__TRIPID: self.tripID}
+                self.KEY__TRIPID: self.tripID,
+                self.KEY__NOTE: self.note}
 
 
 """
