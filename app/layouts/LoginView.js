@@ -139,7 +139,9 @@ class LoginView extends Component {
                         </View>
                         <TouchableOpacity activeOpacity={.5}>
                             <View>
-                                <Text style={LoginStyles.forgotPasswordText} onPress={this._forgotPassword}>Forgot Password?</Text>
+                                <Text style={LoginStyles.forgotPasswordText} onPress={this._forgotPassword}>
+                                    Forgot Password?
+                                </Text>
                             </View>
                         </TouchableOpacity>
                         <TouchableOpacity activeOpacity={.5} onPress={this._login}>

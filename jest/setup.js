@@ -12,16 +12,16 @@ jest.mock("NetInfo", () => {
     return {
         isConnected: {
             fetch: () => {
-                return new Promise((accept, resolve) => {
-                accept(true);
-                })
+                return new Promise((accept) => {    // eslint-disable-line no-undef
+                    accept(true);
+                });
             }
         },
         addEventListener: jest.fn(),
         fetch: () => {
             return {
                 done: jest.fn()
-            }
+            };
         }
-    }
+    };
 });
