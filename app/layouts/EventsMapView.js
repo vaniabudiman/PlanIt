@@ -239,9 +239,9 @@ class EventsMapView extends Component {
     }
 
     renderEvents () {
-        return realm.objects("Event").map((event) => {
+        return realm.objects("Event").map((event, i) => {
             return (
-                <View style={{ paddingBottom: 5 }}>
+                <View key={i} style={{ paddingBottom: 5 }}>
                     <Title>Name: {event.eventName}</Title>
                     <Subtitle>Start: {JSON.stringify(event.startDateTime)}</Subtitle>
                     <Caption>End: {JSON.stringify(event.endDateTime)}</Caption>
