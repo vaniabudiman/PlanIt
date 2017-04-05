@@ -188,7 +188,7 @@ class EventFormView extends Component {
             reminderFlag: false,
             lat: this.props.lat,
             lon: this.props.lon,
-            note: this.state.items[2]
+            note: this.state.items[2].value
         };
 
         if (this.props.event) {
