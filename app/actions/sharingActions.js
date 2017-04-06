@@ -127,7 +127,7 @@ export function getShared (isPending = false) {
             if (response.status >= 200 && response.status < 300) {
                 return response.json();
             } else {
-                if (response.status === 404 && response === "No unaccepted permissions found for given user") {
+                if (response.status === 404) {
                     dispatch(getSharedSuccess({ events: [], bookmarks: [] }));
                 } else {
                     const error = new Error();
