@@ -757,10 +757,20 @@ def events(eventID=None):
                 for e in db.query(Event).filter(
                                 Event.tripID == post_tripID).all():
                     new_e = e.to_dict()
-                    new_e['tripOwner'] = None
-                    new_e['tripsAddedTo'] = []
-                    new_e['tripUsers'] = []
-                    new_e['writePermission'] = False
+                    if e.shared:
+                        new_e['tripOwner'] = trip.userName
+                        new_e['tripsAddedTo'] = []  # No use for owner
+                        user_perms = db.query(Permissions).filter(and_(
+                            Permissions.type == PermissionsEnum.EVENT,
+                            Permissions.permissionID == e.eventID)).all()
+                        new_e['tripUsers'] = list(
+                            set([p.toUser for p in user_perms]))
+                        new_e['writePermission'] = True
+                    else:
+                        new_e['tripOwner'] = None
+                        new_e['tripsAddedTo'] = []
+                        new_e['tripUsers'] = []
+                        new_e['writePermission'] = False
                     events_dict[dict_key].append(new_e)
 
                 # Get shared events through permissions.
@@ -1029,10 +1039,20 @@ def bookmarks(bookmarkID=None):
                 for bm in db.query(Bookmark).filter(
                                 Bookmark.tripID == post_tripID).all():
                     new_bm = bm.to_dict()
-                    new_bm['tripOwner'] = None
-                    new_bm['tripsAddedTo'] = []
-                    new_bm['tripUsers'] = []
-                    new_bm['writePermission'] = False
+                    if bm.shared:
+                        new_bm['tripOwner'] = trip.userName
+                        new_bm['tripsAddedTo'] = []  # No use for owner
+                        user_perms = db.query(Permissions).filter(and_(
+                            Permissions.type == PermissionsEnum.BOOKMARK,
+                            Permissions.permissionID == bm.bookmarkID)).all()
+                        new_bm['tripUsers'] = list(
+                            set([p.toUser for p in user_perms]))
+                        new_bm['writePermission'] = True
+                    else:
+                        new_bm['tripOwner'] = None
+                        new_bm['tripsAddedTo'] = []
+                        new_bm['tripUsers'] = []
+                        new_bm['writePermission'] = False
                     bookmarks_dict[dict_key].append(new_bm)
 
                 # Get shared bookmarks through permissions.
