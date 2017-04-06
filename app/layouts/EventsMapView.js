@@ -28,6 +28,7 @@ class EventsMapView extends Component {
 
         this.state = {
             events: this.props.events,
+            filteredEvents: this.props.events,
             searchString: "",
             loadingItinerary: false,
             isConnected: null
@@ -71,7 +72,7 @@ class EventsMapView extends Component {
             return new Date(event.startDateTime + " UTC").toDateString() === this.props.date;
         });
 
-        this.setState({ events: filteredEvents });
+        this.setState({ events: filteredEvents, filteredEvents: filteredEvents });
 
         // Always update state events w/ latest events from props
         
@@ -178,9 +179,9 @@ class EventsMapView extends Component {
 
         if (str === "") {
             // empty search value, so return all current events from props
-            this.setState({ events: this.props.events, searchString: str });
+            this.setState({ events: this.state.filteredEvents, searchString: str });
         } else {
-            let matchedEvents = this.state.events.filter((event) => {
+            let matchedEvents = this.state.filteredEvents.filter((event) => {
                 // Match on event "name", address, & "types"
                 return (event.eventName.toLowerCase().indexOf(str) !== -1);
             });
